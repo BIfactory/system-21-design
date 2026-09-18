@@ -39,7 +39,8 @@ export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> { o
 export declare function Select(p: SelectProps): JSX.Element;
 export interface CheckboxProps extends InputHTMLAttributes<HTMLInputElement> { label: ReactNode; count?: number }
 export declare function Checkbox(p: CheckboxProps): JSX.Element;
-export declare function FilterBar(p: { children: ReactNode }): JSX.Element;
+/** First child (search) stays visible on mobile; the rest collapse behind a filter button. */
+export declare function FilterBar(p: { children: ReactNode; activeCount?: number; defaultOpen?: boolean }): JSX.Element;
 
 export interface Column<R> {
   key: string; label: ReactNode; sortable?: boolean; align?: "left" | "right" | "center";
@@ -50,6 +51,8 @@ export interface DataTableProps<R> {
   sort?: { key: string; dir: "asc" | "desc" }; onSort?: (key: string, dir: "asc" | "desc") => void;
   /** Clicks inside [data-no-row-click] are ignored. */
   onRowClick?: (row: R) => void; empty?: ReactNode; minWidth?: number;
+  /** Mobile (<768px): render rows as cards (usually <ListCard/>) instead of the table. */
+  renderCard?: (row: R) => ReactNode;
 }
 export declare function DataTable<R>(p: DataTableProps<R>): JSX.Element;
 export declare function SortIcon(p: { active: boolean; dir?: "asc" | "desc" }): JSX.Element;
@@ -113,10 +116,22 @@ export interface TopBarProps {
   onLogout?: () => void;
   /** Extra icon buttons before the gear. */
   extra?: ReactNode;
+  /** Mobile dark bar: logo + name (center) and quick action (right). */
+  brand?: { name: string; logo?: ReactNode; href?: string };
+  quickAction?: { label: string; icon?: IconName; onClick?: () => void };
 }
 export declare function TopBar(p: TopBarProps): JSX.Element;
+
+export interface PoweredByProps { logo?: ReactNode; name?: string; href?: string; label?: string; variant?: "dark" | "light" }
+export declare function PoweredBy(p: PoweredByProps): JSX.Element;
+
+export interface ListCardProps { title: ReactNode; flags?: ReactNode; meta?: ReactNode; actions?: ReactNode; stats?: ReactNode; status?: ReactNode; onClick?: (e: unknown) => void; href?: string }
+export declare function ListCard(p: ListCardProps): JSX.Element;
+
+export interface StickyActionBarProps { label?: ReactNode; value?: ReactNode; note?: ReactNode; action?: ReactNode; /** Preview only. */ inline?: boolean }
+export declare function StickyActionBar(p: StickyActionBarProps): JSX.Element;
 export declare function Sidebar(p: SidebarProps): JSX.Element;
 
-export interface AppShellProps { sidebar: ReactNode; /** <TopBar/>; hosts the mobile menu button. */ topbar?: ReactNode; children: ReactNode }
+export interface AppShellProps { sidebar: ReactNode; /** <TopBar/>; hosts the mobile menu button. */ topbar?: ReactNode; children: ReactNode; /** Preview only. */ defaultDrawerOpen?: boolean }
 export declare function AppShell(p: AppShellProps): JSX.Element;
 export declare function PageBody(p: { children: ReactNode }): JSX.Element;

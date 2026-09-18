@@ -169,8 +169,23 @@ function Checkbox({ label, count, className, ...rest }) {
 }
 
 /* ───────────── FilterBar ───────────── */
-function FilterBar({ children }) {
-  return <div className="s21-filterbar">{children}</div>;
+function FilterBar({ children, activeCount = 0, defaultOpen = false }) {
+  const [open, setOpen] = useState(defaultOpen);
+  const list = React.Children.toArray(children);
+  return (
+    <div className={cx("s21-filterbar", open && "is-open")}>
+      <div className="s21-filterbar__first">
+        {list[0]}
+        {list.length > 1 && (
+          <button type="button" className="s21-filterbar__toggle" aria-label="Filtry" title="Filtry" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+            <Icon name="filter" size={18} />
+            {activeCount > 0 && <span className="s21-filterbar__count">{activeCount}</span>}
+          </button>
+        )}
+      </div>
+      {list.slice(1).map((c, i) => <div key={i} className={cx("s21-filterbar__more", c.props && c.props.className && String(c.props.className).includes("s21-check") && "is-auto")}>{c}</div>)}
+    </div>
+  );
 }
 
 /* ───────────── DataTable ───────────── */
@@ -182,9 +197,15 @@ function SortIcon({ active, dir }) {
     </span>
   );
 }
-function DataTable({ columns, rows, rowKey = "id", sort, onSort, onRowClick, empty = "Žádné záznamy", minWidth }) {
+function DataTable({ columns, rows, rowKey = "id", sort, onSort, onRowClick, empty = "Žádné záznamy", minWidth, renderCard }) {
   return (
-    <div className="s21-table-wrap">
+    <>
+    {renderCard && (
+      <div className="s21-cardlist">
+        {rows.length === 0 ? <div className="s21-cardlist__empty">{empty}</div> : rows.map((r, i) => <React.Fragment key={r[rowKey] != null ? r[rowKey] : i}>{renderCard(r)}</React.Fragment>)}
+      </div>
+    )}
+    <div className={cx("s21-table-wrap", renderCard && "has-cards")}>
       <table className="s21-table" style={minWidth ? { minWidth } : undefined}>
         <thead>
           <tr>
@@ -220,6 +241,7 @@ function DataTable({ columns, rows, rowKey = "id", sort, onSort, onRowClick, emp
         </tbody>
       </table>
     </div>
+    </>
   );
 }
 
@@ -427,6 +449,7 @@ function Breadcrumbs({ items, maxVisible = 4, onNavigate, compact = false }) {
           </li>
         ))}
       </ol>
+      {!parent && <span className="s21-crumbs__back s21-crumbs__back--current">{items[last].label}</span>}
       {parent && (
         <a href={parent.href || "#"} className="s21-crumbs__back"
           onClick={(e) => { if (onNavigate) { e.preventDefault(); onNavigate(parent, last - 1); } }}>
@@ -535,84 +558,170 @@ function useDropdown() {
 
 /* ───────────── TopBar (NEW) ───────────── */
 const ShellCtx = createContext(null);
-function TopBar({ breadcrumbs, title, settings, user, onLogout, extra }) {
+function TopBar({ breadcrumbs, title, settings, user, onLogout, extra, brand, quickAction }) {
   const shell = useContext(ShellCtx);
   const set = useDropdown();
   const usr = useDropdown();
   const setAlert = settings && settings.groups && settings.groups.some((g) => g.items.some((i) => i.badge > 0));
   const pick = (item, close) => (e) => { if (settings && settings.onSelect) { e.preventDefault(); settings.onSelect(item); } close(false); };
+  const settingsList = (close) => settings && settings.groups.map((g, gi) => (
+    <div key={gi} className="s21-dd__group">
+      {g.title && <div className="s21-dd__label">{g.title}</div>}
+      {g.items.map((it) => (
+        <a key={it.href} href={it.href} role="menuitem" className={cx("s21-dd__item", settings.activeHref === it.href && "is-active")} onClick={pick(it, close)}>
+          <span>{it.label}</span>
+          {it.badge > 0 && <span className="s21-navitem__badge">{it.badge}</span>}
+        </a>
+      ))}
+    </div>
+  ));
+  const avatar = user && (
+    <div className="s21-dd" ref={usr.ref}>
+      <button type="button" className={cx("s21-iconbtn s21-iconbtn--avatar", usr.open && "is-open")} aria-label={`Profil: ${user.name}`} title={user.name} aria-haspopup="menu" aria-expanded={usr.open} onClick={() => usr.setOpen((o) => !o)}>
+        <span className="s21-avatar s21-avatar--sm">{initials(user.name)}</span>
+        {setAlert && <span className="s21-iconbtn__dot s21-mobile-only" aria-hidden="true" />}
+      </button>
+      {usr.open && (
+        <div className="s21-dd__menu s21-dd__menu--user" role="menu">
+          <div className="s21-dd__user">
+            <span className="s21-avatar">{initials(user.name)}</span>
+            <span className="s21-dd__uinfo"><span className="s21-dd__uname">{user.name}</span>{user.role && <span className="s21-dd__urole">{user.role}</span>}</span>
+          </div>
+          {(user.links || [{ label: "Můj profil", href: user.href || "#", icon: "user" }]).map((l) => (
+            <a key={l.label} href={l.href || "#"} role="menuitem" className="s21-dd__item" onClick={(e) => { if (l.onClick) { e.preventDefault(); l.onClick(); } usr.setOpen(false); }}>
+              <span className="s21-dd__itemmain">{l.icon && <Icon name={l.icon} size={16} />}{l.label}</span>
+            </a>
+          ))}
+          {settings && <div className="s21-mobile-only s21-dd__mobileset">{settingsList(usr.setOpen)}</div>}
+          {onLogout && (
+            <div className="s21-mobile-only s21-dd__group">
+              <button type="button" role="menuitem" className="s21-dd__item s21-dd__item--btn" onClick={() => { usr.setOpen(false); onLogout(); }}>
+                <span className="s21-dd__itemmain"><Icon name="logout" size={16} />Odhlásit se</span>
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
   return (
     <header className="s21-topbar">
-      {shell && (
-        <button type="button" className="s21-topbar__burger s21-iconbtn" aria-label="Otevřít menu" onClick={shell.openDrawer}><Icon name="menu" size={20} /></button>
-      )}
-      <div className="s21-topbar__left">
-        {breadcrumbs || (title ? <span className="s21-topbar__title">{title}</span> : null)}
+      <div className="s21-topbar__mbar">
+        {shell && (
+          <button type="button" className="s21-iconbtn s21-iconbtn--dark" aria-label="Otevřít menu" onClick={shell.openDrawer}><Icon name="menu" size={22} /></button>
+        )}
+        <a href={(brand && brand.href) || "#"} className="s21-topbar__brand">
+          {brand && brand.logo ? <span className="s21-topbar__logo">{brand.logo}</span> : null}
+          <span className="s21-topbar__bname">{brand ? brand.name : title}</span>
+        </a>
+        <div className="s21-topbar__mright">
+          {quickAction && (
+            <button type="button" className="s21-sidebar__quick s21-sidebar__quick--sm" aria-label={quickAction.label} title={quickAction.label} onClick={quickAction.onClick}>
+              <Icon name={quickAction.icon || "plus"} size={20} />
+            </button>
+          )}
+          {avatar}
+        </div>
       </div>
-      <div className="s21-topbar__right">
-        {extra}
-        {settings && (
-          <div className="s21-dd" ref={set.ref}>
-            <button type="button" className={cx("s21-iconbtn", set.open && "is-open")} aria-label="Nastavení" title="Nastavení" aria-haspopup="menu" aria-expanded={set.open} onClick={() => set.setOpen((o) => !o)}>
-              <Icon name="settings" size={20} />
-              {setAlert && <span className="s21-iconbtn__dot" aria-hidden="true" />}
-            </button>
-            {set.open && (
-              <div className="s21-dd__menu s21-dd__menu--wide" role="menu">
-                {settings.groups.map((g, gi) => (
-                  <div key={gi} className="s21-dd__group">
-                    {g.title && <div className="s21-dd__label">{g.title}</div>}
-                    {g.items.map((it) => (
-                      <a key={it.href} href={it.href} role="menuitem" className={cx("s21-dd__item", settings.activeHref === it.href && "is-active")} onClick={pick(it, set.setOpen)}>
-                        <span>{it.label}</span>
-                        {it.badge > 0 && <span className="s21-navitem__badge">{it.badge}</span>}
-                      </a>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-        {user && (
-          <div className="s21-dd" ref={usr.ref}>
-            <button type="button" className={cx("s21-iconbtn s21-iconbtn--avatar", usr.open && "is-open")} aria-label={`Profil: ${user.name}`} title={user.name} aria-haspopup="menu" aria-expanded={usr.open} onClick={() => usr.setOpen((o) => !o)}>
-              <span className="s21-avatar s21-avatar--sm">{initials(user.name)}</span>
-            </button>
-            {usr.open && (
-              <div className="s21-dd__menu" role="menu">
-                <div className="s21-dd__user">
-                  <span className="s21-avatar">{initials(user.name)}</span>
-                  <span className="s21-dd__uinfo"><span className="s21-dd__uname">{user.name}</span>{user.role && <span className="s21-dd__urole">{user.role}</span>}</span>
-                </div>
-                {(user.links || [{ label: "Můj profil", href: user.href || "#" }]).map((l) => (
-                  <a key={l.label} href={l.href || "#"} role="menuitem" className="s21-dd__item" onClick={(e) => { if (l.onClick) { e.preventDefault(); l.onClick(); } usr.setOpen(false); }}>
-                    <span className="s21-dd__itemmain">{l.icon && <Icon name={l.icon} size={16} />}{l.label}</span>
-                  </a>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-        {onLogout && (
-          <button type="button" className="s21-iconbtn" aria-label="Odhlásit se" title="Odhlásit se" onClick={onLogout}><Icon name="logout" size={20} /></button>
-        )}
+      <div className="s21-topbar__bar">
+        <div className="s21-topbar__left">
+          {breadcrumbs || (title ? <span className="s21-topbar__title">{title}</span> : null)}
+        </div>
+        <div className="s21-topbar__right">
+          {extra}
+          {settings && (
+            <div className="s21-dd" ref={set.ref}>
+              <button type="button" className={cx("s21-iconbtn", set.open && "is-open")} aria-label="Nastavení" title="Nastavení" aria-haspopup="menu" aria-expanded={set.open} onClick={() => set.setOpen((o) => !o)}>
+                <Icon name="settings" size={20} />
+                {setAlert && <span className="s21-iconbtn__dot" aria-hidden="true" />}
+              </button>
+              {set.open && <div className="s21-dd__menu s21-dd__menu--wide" role="menu">{settingsList(set.setOpen)}</div>}
+            </div>
+          )}
+          {avatar}
+          {onLogout && (
+            <button type="button" className="s21-iconbtn" aria-label="Odhlásit se" title="Odhlásit se" onClick={onLogout}><Icon name="logout" size={20} /></button>
+          )}
+        </div>
       </div>
     </header>
   );
 }
 
 /* ───────────── AppShell ───────────── */
-function AppShell({ sidebar, topbar, children }) {
-  const [open, setOpen] = useState(false);
+function AppShell({ sidebar, topbar, children, defaultDrawerOpen = false }) {
+  const [open, setOpen] = useState(defaultDrawerOpen);
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => { if (e.key === "Escape") setOpen(false); };
+    window.addEventListener("keydown", onKey);
+    const mobile = window.matchMedia && window.matchMedia("(max-width: 767px)").matches;
+    if (mobile) document.body.style.overflow = "hidden";
+    return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+  }, [open]);
   return (
-    <ShellCtx.Provider value={{ openDrawer: () => setOpen(true) }}>
+    <ShellCtx.Provider value={{ openDrawer: () => setOpen(true), closeDrawer: () => setOpen(false) }}>
       <div className={cx("s21-shell", open && "is-drawer-open")}>
-        <div className="s21-shell__side">{sidebar}</div>
+        <div className="s21-shell__side" aria-hidden={undefined}>{sidebar}</div>
         <div className="s21-shell__scrim" onClick={() => setOpen(false)} />
         <main className="s21-shell__main">{topbar}{children}</main>
       </div>
     </ShellCtx.Provider>
+  );
+}
+
+/* ───────────── PoweredBy (NEW) ───────────── */
+function PoweredBy({ logo, name = "BIfactory", href = "https://bifactory.cz", label = "Powered by", variant = "dark" }) {
+  return (
+    <a href={href} target="_blank" rel="noreferrer noopener" className={cx("s21-powered", `s21-powered--${variant}`)}>
+      <span className="s21-powered__label">{label}</span>
+      <span className="s21-powered__brand">
+        {logo && <span className="s21-powered__logo">{logo}</span>}
+        <span className="s21-powered__name">{name}</span>
+      </span>
+    </a>
+  );
+}
+
+/* ───────────── ListCard (mobile row) ───────────── */
+function ListCard({ title, flags, meta, actions, stats, status, onClick, href }) {
+  const go = (e) => {
+    if (e.target.closest("a, button, [data-no-row-click]")) return;
+    if (onClick) onClick(e); else if (href) window.location.href = href;
+  };
+  return (
+    <div role="link" tabIndex={0} className="s21-lcard" onClick={go} onKeyDown={(e) => { if (e.key === "Enter") go(e); }}>
+      <div className="s21-lcard__head">
+        <div className="s21-lcard__titles">
+          <div className="s21-lcard__title"><span>{title}</span>{flags}</div>
+          {meta && <div className="s21-lcard__meta">{meta}</div>}
+        </div>
+        {actions && <div className="s21-lcard__actions" data-no-row-click>{actions}</div>}
+      </div>
+      {(stats || status) && (
+        <div className="s21-lcard__foot">
+          <div className="s21-lcard__stats">{stats}</div>
+          {status && <div className="s21-lcard__status">{status}</div>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ───────────── StickyActionBar (mobile) ───────────── */
+function StickyActionBar({ label, value, note, action, inline = false }) {
+  return (
+    <>
+      <div className={cx("s21-actionbar", inline && "s21-actionbar--inline")}>
+        <div className="s21-actionbar__text">
+          {label && <div className="s21-actionbar__label">{label}</div>}
+          {value && <div className="s21-actionbar__value">{value}</div>}
+        </div>
+        {note && <span className="s21-actionbar__note" aria-live="polite">{note}</span>}
+        {action}
+      </div>
+      {!inline && <div className="s21-actionbar__spacer" aria-hidden="true" />}
+    </>
   );
 }
 
@@ -626,7 +735,7 @@ export {
   Field, Input, SearchInput, Select, Checkbox, FilterBar,
   DataTable, SortIcon, Pagination, StatTile, Section, EmptyState, Stepper,
   Modal, Toast, ToastProvider, useToast,
-  Breadcrumbs, PageHeader, Sidebar, TopBar, AppShell, PageBody,
+  Breadcrumbs, PageHeader, Sidebar, TopBar, AppShell, PageBody, PoweredBy, ListCard, StickyActionBar,
 };
 
 if (typeof window !== "undefined") {
@@ -635,6 +744,6 @@ if (typeof window !== "undefined") {
   Field, Input, SearchInput, Select, Checkbox, FilterBar,
   DataTable, SortIcon, Pagination, StatTile, Section, EmptyState, Stepper,
   Modal, Toast, ToastProvider, useToast,
-  Breadcrumbs, PageHeader, Sidebar, TopBar, AppShell, PageBody,
+  Breadcrumbs, PageHeader, Sidebar, TopBar, AppShell, PageBody, PoweredBy, ListCard, StickyActionBar,
 };
 }

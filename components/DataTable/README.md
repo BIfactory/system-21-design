@@ -7,7 +7,7 @@ Tabulka v kartě s mono záhlavím, řazením, klikacími řádky a akcemi.
 **Dodáváš:**
 
 - `columns [{key, label, sortable?, align?, numeric?, width?, render?(row)}]`, `rows`, `rowKey`.
-- `sort {key, dir}` + `onSort(key, dir)`, `onRowClick(row)`, `empty` (text prázdného stavu), `minWidth` (od něj se tabulka vodorovně scrolluje).
+- `sort {key, dir}` + `onSort(key, dir)`, `onRowClick(row)`, `empty` (text prázdného stavu), `minWidth` (od něj se tabulka vodorovně scrolluje), `renderCard` (mobilní karta řádku).
 
 **Pravidla:**
 
@@ -17,5 +17,6 @@ Tabulka v kartě s mono záhlavím, řazením, klikacími řádky a akcemi.
 - Akce jsou v posledním sloupci jako ikonová tlačítka `sm` v obalu s `data-no-row-click`.
 - Záhlaví je `paper` + `label` verzálkami, řádky oddělené `border`, hover `primary-soft`.
 - Pod tabulkou vždy `Pagination`.
+- Na mobil předej `renderCard={(row) => <ListCard …/>}`: pod 768 px se místo tabulky zobrazí karty pod sebou.
 
 _Ručně přepsáno ze zdroje: app/(app)/zakazky/page.tsx, app/(app)/zakazky/row.tsx, components/ui/sortable-th.tsx (hulinl/polepim-manager@19de5c8), přebarveno na System 21._

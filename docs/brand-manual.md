@@ -39,9 +39,10 @@ Poměr ploch podle brand manuálu **60 / 30 / 10**: bílá a `canvas` jako zákl
 ## Rozvržení
 
 - **Desktop (≥ 768 px):** `Sidebar` 256 px (`sidebar-width`) je přilepený vlevo na plnou výšku. Nad obsahem je přilepená bílá `TopBar` 56 px (`topbar-h`). Obsah má okraje `space-8` (32 px) a bloky pod sebou mají mezeru `space-4`.
-- **Mobil (< 768 px):** menu se schová do draweru a hamburger se objeví vlevo v `TopBar`. Okraje jsou `space-4`, titulek 16 px, akce hlavičky se zalomí pod titulek, KPI dlaždice jdou pod sebe. Drobečková navigace se zúží na „‹ rodič“. Tabulky se nahrazují kartami (jedna karta na řádek, stejná data pod sebou). Inputy mají 16 px, aby iOS nezoomoval.
+- **Mobil (< 768 px):** vlastní pravidla v sekci Mobil níže.
+- Tmavý sloupec `Sidebar` vede vždy přes celou výšku okna, od horního po spodní okraj. Obsah menu je přilepený, při scrollu zůstává na místě.
 - `PageHeader` je přilepený hned pod `TopBar` (`shadow-sm`) a drží titulek, akce vpravo a záložky. Při scrollu zůstává na místě.
-- Typická stránka seznamu: `TopBar` → `PageHeader` → řada `StatTile` v mřížce `s21-stat-grid` → `ChipGroup` → `FilterBar` → `DataTable` → `Pagination`.
+- Typická stránka seznamu: `TopBar` → `PageHeader` → řada `StatTile` v mřížce `s21-stat-grid` → `ChipGroup` → `FilterBar` → `DataTable` (s `renderCard` pro mobil) → `Pagination`.
 - Typická stránka detailu: `TopBar` s `Breadcrumbs` → `PageHeader` s `Tabs` → obsah záložky v kartách `Section`.
 
 ## Navigace
@@ -54,6 +55,21 @@ Navigace má dvě osy a každá dělá jednu věc.
    - Vpravo jsou tři ikony: **ozubené kolo** otevře menu Nastavení (skupiny Uživatelé a role, Ceníky, Číselníky, Provoz; červená tečka, když něco v nastavení vyžaduje pozornost), **avatar s iniciálami** otevře profil (jméno, role, Můj profil) a **ikona odhlášení** uživatele odhlásí.
 3. **Záložky (`Tabs`)** přepínají pohledy na **stejný** záznam (Realizace, Plán, Výkazy…) a do drobečků se nepropisují jako další úroveň. Výjimkou je případ, kdy z obsahu záložky proklikneš na podřízený záznam: pak se záložka stane úrovní drobečků.
 4. **Filtrovací čipy (`ChipGroup`)** přepínají skupiny seznamu, **segmenty (`SegmentedControl`)** přepínají období. Stav obou patří do URL.
+
+## Mobil
+
+Mobilní verze vychází z Polepim Manageru, kde je vyladěná na denní práci v terénu a v dílně. Platí pod 768 px (`breakpoint-md`).
+
+- **Horní lišta:** tmavá lišta 48 px (`topbar-h-mobile`, `sidebar-bg`). Vlevo je hamburger, uprostřed logo a název aplikace, vpravo zelená rychlá akce (40 px) a avatar. Pod ní je bílý řádek drobečků 36 px (`crumbbar-h`) jen s „‹ rodič“. Obě lišty i hlavička stránky zůstávají při scrollu nahoře.
+- **Menu:** vysouvá se zleva jako panel `drawer-width` (288 px, max. 85 % šířky) přes rozmazané ztmavení. Zavírá se klepnutím vedle, klávesou Esc a přechodem na jinou stránku. Stránka pod ním nescrolluje.
+- **Nastavení, profil a odhlášení** jsou na mobilu v menu avatara. Ozubené kolo a ikona odhlášení se neukazují.
+- **Seznamy:** místo tabulky jsou karty `ListCard` pod sebou. Nahoře je název (klidně na dva řádky), příznaky a 1 až 2 malé akce, pod nimi meta řádek s kódem a klientem. Pod linkou je jeden řádek čísel (datum, marže, **cena**) a stav vpravo. Celá karta je klikací.
+- **Filtry:** viditelné je jen vyhledávání a vedle něj tlačítko filtru se zeleným počtem aktivních filtrů. Ostatní filtry se rozbalí pod sebe.
+- **Hlavička stránky:** titulek 16 px na celou šířku, akce pod ním vlevo a popis se skrývá. Záložky vodorovně scrollují.
+- **KPI dlaždice** jsou pod sebou přes celou šířku.
+- **Spodní lišta:** v detailu a formulářích s rozpracovanými změnami je dole `StickyActionBar` se souhrnem (například cena) a stavem ukládání nebo jednou akcí.
+- **Stránkování:** jen Předchozí, aktuální stránka a Další.
+- **Dotyk a iPhone:** tlačítka mají min. 40 px, inputy a selecty 16 px (iOS jinak zoomuje). Lišty respektují výřez a zaoblené rohy (`safe-area-inset-*`). Dole je vždy volné místo, aby obsah nezajel pod spodní lištu nebo home indicator.
 
 ## KPI dlaždice
 
@@ -95,7 +111,7 @@ Navigace má dvě osy a každá dělá jednu věc.
 
 - V hlavičce menu je symbol databáze (`assets/Logos/bifactory-mark.png`) vedle názvu „BIfactory“ a podtitulku aplikace. Celý logotyp (`bifactory-logo.png`) je černý, patří tedy jen na světlé plochy (přihlášení, PDF výstupy).
 - Logo nedeformuj, nepřebarvuj ani mu nepřidávej efekty. Kolem nech ochrannou zónu o velikosti výšky symbolu.
-- Patička menu nese „Powered by BIfactory“ v mono verzálkách, i u zákaznických implementací.
+- Patička menu nese `PoweredBy`: „Powered by“ v mono verzálkách a vedle symbol databáze s názvem **BIfactory** (Manrope 800, bílá) v jemně zeleném rámečku. Je u všech implementací, i zákaznických, a odkazuje na bifactory.cz.
 - Název systému „System 21“ se píše vždy s mezerou a na jednom řádku (nezalamuje se).
 
 ## Nezahrnuto
@@ -103,5 +119,4 @@ Navigace má dvě osy a každá dělá jednu věc.
 Tyto části zdrojové aplikace se do systému nepřenášely:
 
 - Doménově specifické komponenty: plánovací tabule, časové osy výkazů, podpisové pole, výběr poškození vozu, QR skener, grafy.
-- Mobilní karty zakázek: pravidlo je popsané v sekci Rozvržení, samostatná komponenta není.
 - Tmavý režim obsahu: zdrojová aplikace ho nemá.

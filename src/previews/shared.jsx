@@ -36,7 +36,7 @@ export function DemoSidebar({ active = "/zakazky" }) {
       sections={SECTIONS}
       activeHref={a}
       onNavigate={(it) => setA(it.href)}
-      footer="Powered by BIfactory"
+      footer={<S.PoweredBy logo={<img src={MARK} alt="" />} />}
     />
   );
 }
@@ -86,9 +86,14 @@ export const SETTINGS = { groups: [
 ] };
 export const USER = { name: "lubomir.hulin@bifactory.cz", role: "CEO / Vedoucí" };
 
+export const BRAND = { name: "BIfactory", logo: <img src={MARK} alt="" /> };
+export const QUICK = { label: "Nový záznam", icon: "plus" };
+
 export function DemoTopBar({ crumbs = CRUMBS, onNavigate }) {
   return (
     <S.TopBar
+      brand={BRAND}
+      quickAction={QUICK}
       breadcrumbs={<S.Breadcrumbs items={crumbs} onNavigate={onNavigate || (() => {})} />}
       settings={{ ...SETTINGS, onSelect: () => {} }}
       user={USER}
@@ -96,3 +101,16 @@ export function DemoTopBar({ crumbs = CRUMBS, onNavigate }) {
     />
   );
 }
+
+export const orderCard = (o) => (
+  <S.ListCard
+    key={o.id}
+    onClick={() => {}}
+    title={o.name}
+    flags={o.late ? <S.Tag tone="warning">Po termínu</S.Tag> : null}
+    meta={<><span className="s21-cell-code">{o.code}</span> · {o.client}</>}
+    actions={<><S.Button size="sm" icon="clock">Vykázat</S.Button><S.Button size="sm" variant="secondary" iconOnly icon="check" aria-label="Označit hotovo" title="Označit hotovo" /></>}
+    stats={<><span>{o.created}</span><span className={o.pos ? "s21-pos" : "s21-neg"}>{o.margin}</span><strong>{o.price}</strong></>}
+    status={<S.Badge color={o.color}>{o.status}</S.Badge>}
+  />
+);
