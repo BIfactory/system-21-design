@@ -1,0 +1,13 @@
+{
+  "name": "system-21-design",
+  "version": "1.0.0",
+  "private": true,
+  "description": "System 21 — design system pro aplikace BIfactory (tokeny, komponenty, brand manuál).",
+  "scripts": {
+    "build": "bash scripts/build.sh",
+    "tokens": "python3 scripts/tokens-to-css.py",
+    "demo": "npx serve ."
+  },
+  "devDependencies": { "esbuild": "^0.24.0" },
+  "peerDependencies": { "react": "^18 || ^19", "react-dom": "^18 || ^19" }
+}

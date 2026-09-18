@@ -1,0 +1,39 @@
+<!-- @dsCard height=288 -->
+<div class="cv">
+  <svg class="cv-art" viewBox="0 0 960 288" width="960" height="288" aria-hidden="true">
+    <!--
+      blocks: paper 160x288, primary 240x224 (radius-xl), black 160x288 bleeding top/right, accent 96x48 (radius-lg)
+      arrangement: strip of unequal bands from x=480, green slab overlapping paper and black like a stacked layer
+      pattern: db.stack motif from the logo (three stacked layers) as pills radius-full, since the brand manual names the stack as its primary motif
+      scales: pill height 40 = space-10, gap 16 = space-4, inset 32 = space-8, radii radius-xl, radius-lg, radius-full
+    -->
+    <rect class="paper" x="480" y="0" width="160" height="288"/>
+    <rect class="black" x="800" y="0" width="160" height="288"/>
+    <rect class="green r-xl" x="560" y="32" width="240" height="224"/>
+    <rect class="ink pill" x="592" y="72" width="176" height="40"/>
+    <rect class="ink pill" x="592" y="128" width="176" height="40"/>
+    <rect class="ink pill" x="592" y="184" width="176" height="40"/>
+    <rect class="yellow r-lg" x="832" y="208" width="96" height="48"/>
+  </svg>
+  <div class="cv-text">
+    <div class="cv-name">System 21</div>
+    <div class="cv-tag">Struktura aplikací BIfactory: navigace, tabulky, formuláře.</div>
+  </div>
+</div>
+<style>
+  html, body { margin: 0; }
+  .cv { position: relative; width: 960px; height: 288px; background: var(--surface); overflow: hidden; }
+  .cv-art { position: absolute; inset: 0; }
+  .paper { fill: var(--paper); }
+  .black { fill: var(--black); }
+  .green { fill: var(--primary); }
+  .ink { fill: var(--black); }
+  .yellow { fill: var(--accent); }
+  .r-xl { rx: var(--radius-xl); }
+  .r-lg { rx: var(--radius-lg); }
+  .pill { rx: 20px; }
+  .cv-text { position: absolute; left: 40px; bottom: 40px; max-width: 440px; }
+  .cv-name { font: 800 72px/0.95 var(--font-display); letter-spacing: -0.03em; color: var(--ink); white-space: nowrap; }
+  .cv-tag { margin-top: 16px; font: 400 13px/18px var(--font-body); color: var(--ink-muted); }
+</style>
+<script>void 0;</script>

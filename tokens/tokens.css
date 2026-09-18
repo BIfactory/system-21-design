@@ -1,0 +1,86 @@
+/* System 21 — design tokens (generated from tokens/tokens.json by scripts/tokens-to-css.py) */
+:root {
+  --primary: #43c466;
+  --primary-hover: #40ba61;
+  --primary-active: #3cb05c;
+  --on-primary: #0a0a0a;
+  --primary-text: #1f7a3c;
+  --primary-soft: rgba(67,196,102,0.12);
+  --focus-ring: #2b8f4a;
+  --accent: #ffc719;
+  --on-accent: #0a0a0a;
+  --ink: #333333;
+  --ink-muted: #666666;
+  --ink-subtle: rgba(51,51,51,0.4);
+  --black: #0a0a0a;
+  --white: #ffffff;
+  --paper: #eceff1;
+  --canvas: #fafafa;
+  --surface: #ffffff;
+  --surface-muted: #f5f5f5;
+  --border: #e5e5e5;
+  --border-strong: rgba(64,64,64,0.4);
+  --overlay: rgba(0,0,0,0.5);
+  --sidebar-bg: var(--black);
+  --sidebar-hover: #1a1a1a;
+  --sidebar-border: #404040;
+  --sidebar-text: rgba(245,245,245,0.8);
+  --sidebar-text-muted: rgba(245,245,245,0.6);
+  --sidebar-active-bg: var(--primary);
+  --sidebar-active-text: var(--on-primary);
+  --success-bg: oklch(98.2% 0.018 155.826);
+  --success-border: oklch(92.5% 0.084 155.995);
+  --success-text: oklch(44.8% 0.119 151.328);
+  --success-solid: oklch(62.7% 0.194 149.214);
+  --danger-bg: oklch(97.1% 0.013 17.38);
+  --danger-border: oklch(88.5% 0.062 18.334);
+  --danger-text: oklch(50.5% 0.213 27.518);
+  --danger-solid: oklch(63.7% 0.237 25.331);
+  --warning-bg: oklch(96.2% 0.059 95.617);
+  --warning-text: oklch(47.3% 0.137 46.201);
+  --neutral-status: #9ca3af;
+  --space-0-5: 2px;
+  --space-1: 4px;
+  --space-1-5: 6px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --radius-sm: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+  --sidebar-width: 256px;
+  --topbar-h: 56px;
+  --control-h: 36px;
+  --control-h-sm: 28px;
+  --control-h-lg: 40px;
+  --avatar: 36px;
+  --modal-sm: 384px;
+  --modal-md: 448px;
+  --modal-lg: 672px;
+  --breakpoint-md: 768px;
+  --font-display: "Manrope", system-ui, sans-serif;
+  --font-body: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+.page-title { font-family: var(--font-display); font-size: 24px; line-height: 1.25; font-weight: 700; letter-spacing: -0.025em; }
+.page-title-mobile { font-family: var(--font-display); font-size: 16px; line-height: 1.25; font-weight: 700; letter-spacing: -0.025em; }
+.section-title { font-family: var(--font-display); font-size: 16px; line-height: 24px; font-weight: 600; }
+.kpi-lg { font-family: var(--font-display); font-size: 30px; line-height: 36px; font-weight: 800; }
+.kpi { font-family: var(--font-display); font-size: 24px; line-height: 32px; font-weight: 800; }
+.body { font-family: var(--font-body); font-size: 14px; line-height: 20px; font-weight: 400; }
+.body-strong { font-family: var(--font-body); font-size: 14px; line-height: 20px; font-weight: 600; }
+.small { font-family: var(--font-body); font-size: 12px; line-height: 16px; font-weight: 400; }
+.caption { font-family: var(--font-body); font-size: 11px; line-height: 16px; font-weight: 400; }
+.micro { font-family: var(--font-body); font-size: 10px; line-height: 14px; font-weight: 600; }
+.label { font-family: var(--font-mono); font-size: 11px; line-height: 16px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; }
+.code { font-family: var(--font-mono); font-size: 12px; line-height: 16px; font-weight: 400; }
