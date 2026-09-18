@@ -235,6 +235,31 @@ TypeScript union type `IconName` aktualizován.
 
 **Commit:** `night/K: mobile premium (BottomNav, useScrollDirection, hide-on-scroll, tap ripple)`
 
+---
+
+## Fáze M — QA sweep — HOTOVO
+
+**Přidáno:**
+- **`SkipLink`** komponenta + `.s21-skiplink` styl — schovaný nad viewportem, po Tab se objeví v levém horním rohu. Standard a11y pattern pro screen reader/klávesnicové uživatele.
+- **`.s21-sr-only`** utility třída — vizuálně skryté, ale čitelné SR.
+- **`@media (prefers-contrast: more)`** — zvýrazněné bordery (currentColor) a silnější focus ring (3px, offset 3px).
+- **`@media (forced-colors: active)`** — Windows high contrast mode: bordery přes system `CanvasText` (CSS vars se v tomto módu ignorují).
+- **`@media print`** — čistý dokument:
+  - Skryto: TopBar, Sidebar, ActionBar, BottomNav, Actions, CardList, Modal, Drawer, CommandPalette, Toasts, `.s21-hide-on-print` opt-in.
+  - Karty: bez elevace/gradient bg, prostý border + bílý podklad, `break-inside: avoid`.
+  - Odkazy: `a[href^="http"]::after` s URL v závorkách (pro tištěné dokumenty).
+  - Buttons: monochrome bordered.
+  - `-webkit-print-color-adjust: exact` pro věrné barvy jinde.
+
+**Ostatní items odškrtnuté:**
+- Reduced-motion: pokryto v Fázi B (`prefers-reduced-motion: reduce → 0.01ms všude`).
+- Focus-visible: pokryto v Fázi C (halo glow) + M (high-contrast rozšíření).
+- Keyboard nav: existující komponenty mají native form controls / role=button; Modal/Drawer/CommandPalette mají Escape close; CommandPalette má šipky + Enter.
+- Contrast: primary (BIfactory green) → on-primary (black) 8.8:1, primary-text → surface 5.4:1. Semantic all ≥ 5:1. Dark mode primary-text `#7de49a` na surface 5.6:1. Vše nad AA.
+
+**Commit:** `night/M: a11y (SkipLink, sr-only, high-contrast, forced-colors) + print styles`
+
+
 
 
 

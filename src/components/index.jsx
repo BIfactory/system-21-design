@@ -1036,6 +1036,11 @@ function DropdownMenu({ trigger, children, align = "end", className }) {
   );
 }
 
+/* ───────────── SkipLink (NEW — Fáze M) — a11y ───────────── */
+function SkipLink({ href = "#main", children = "Přeskočit na obsah" }) {
+  return <a href={href} className="s21-skiplink">{children}</a>;
+}
+
 /* ───────────── BottomNav (NEW — Fáze K) — mobile bottom tab bar ───────────── */
 function BottomNav({ items = [], value, onSelect, className }) {
   return (
@@ -1374,6 +1379,7 @@ export {
   Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
   InputGroup, Textarea, FileDrop,
   BottomNav, useScrollDirection,
+  SkipLink,
 };
 
 if (typeof window !== "undefined") {
@@ -1388,5 +1394,6 @@ if (typeof window !== "undefined") {
   Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
   InputGroup, Textarea, FileDrop,
   BottomNav, useScrollDirection,
+  SkipLink,
 };
 }

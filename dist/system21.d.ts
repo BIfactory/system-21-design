@@ -251,3 +251,6 @@ export interface BottomNavItem { value: string; label: string; icon?: IconName; 
 export interface BottomNavProps { items: BottomNavItem[]; value?: string; onSelect?: (v: string, item: BottomNavItem) => void; className?: string }
 export declare function BottomNav(p: BottomNavProps): JSX.Element;
 export declare function useScrollDirection(opts?: { threshold?: number }): "up" | "down";
+
+/* — Fáze M a11y — */
+export declare function SkipLink(p: { href?: string; children?: ReactNode }): JSX.Element;
