@@ -207,6 +207,21 @@ TypeScript union type `IconName` aktualizován.
 
 **Commit:** `night/I: DataTable — selection, density, sticky first, expandable, loading skeletons, bulk toolbar`
 
+---
+
+## Fáze J — Form polish — HOTOVO
+
+**Přidáno:**
+- **`InputGroup`** — wrapper pro Input s prefix/suffix adornmenty (např. `€`, `%`, jednotka). Focus-within stav propaguje ring i glow do celé skupiny.
+- **`Textarea`** — autosize (line-height × minRows/maxRows), volitelný character counter `0 / 500` s barvou (default → warning nad 90% → error na 100%).
+- **`FileDrop`** — drag & drop zóna se stavovou animací (`is-over` scale + primary bg), accept + multiple + maxSizeMB s error hláškou. Klikatelná i klávesnicí (`Enter`/`Space`).
+- **Validation shake**: `.s21-input[aria-invalid=true]` teď dostává jemnou horizontální shake animaci (280ms) při zobrazení chyby.
+
+**Přeskočeno:** floating label a field-group (bordered fieldset) — visual polish, kterou lze udělat na aplikační úrovni bez rozšíření DS.
+
+**Commit:** `night/J: form polish (InputGroup, Textarea autosize+count, FileDrop, invalid shake)`
+
+
 
 
 

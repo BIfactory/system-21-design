@@ -230,3 +230,18 @@ export interface CommandItem { id?: string; label: string; hint?: string; icon?:
 export interface CommandSection { title?: string; items: CommandItem[] }
 export interface CommandPaletteProps { open: boolean; onClose?: () => void; items: CommandSection[]; placeholder?: string; emptyLabel?: string; shortcut?: string }
 export declare function CommandPalette(p: CommandPaletteProps): JSX.Element | null;
+
+/* — Fáze J form components — */
+export interface InputGroupProps { prefix?: ReactNode; suffix?: ReactNode; children: ReactNode; className?: string; disabled?: boolean }
+export declare function InputGroup(p: InputGroupProps): JSX.Element;
+
+export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  autosize?: boolean;
+  showCount?: boolean;
+  minRows?: number;
+  maxRows?: number;
+}
+export declare function Textarea(p: TextareaProps): JSX.Element;
+
+export interface FileDropProps { accept?: string; multiple?: boolean; maxSizeMB?: number; onFiles?: (files: File[]) => void; hint?: ReactNode; className?: string }
+export declare function FileDrop(p: FileDropProps): JSX.Element;

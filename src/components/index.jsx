@@ -1036,6 +1036,78 @@ function DropdownMenu({ trigger, children, align = "end", className }) {
   );
 }
 
+/* ───────────── InputGroup (NEW — Fáze J) — Input s prefix/suffix adornment ───────────── */
+function InputGroup({ prefix, suffix, children, className, disabled }) {
+  return (
+    <div className={cx("s21-igroup", disabled && "is-disabled", className)}>
+      {prefix != null && <span className="s21-igroup__addon s21-igroup__addon--prefix">{prefix}</span>}
+      <span className="s21-igroup__control">{children}</span>
+      {suffix != null && <span className="s21-igroup__addon s21-igroup__addon--suffix">{suffix}</span>}
+    </div>
+  );
+}
+
+/* ───────────── Textarea (NEW — Fáze J) — autosize + char counter ───────────── */
+function Textarea({ value, defaultValue, onChange, autosize = true, maxLength, showCount = false, minRows = 3, maxRows = 12, className, style, ...rest }) {
+  const [inner, setInner] = useState(defaultValue != null ? String(defaultValue) : "");
+  const isControlled = value != null;
+  const v = isControlled ? String(value) : inner;
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!autosize || !ref.current) return;
+    const el = ref.current;
+    el.style.height = "auto";
+    const line = parseFloat(getComputedStyle(el).lineHeight) || 20;
+    const minH = line * minRows + 12;
+    const maxH = line * maxRows + 12;
+    el.style.height = Math.max(minH, Math.min(maxH, el.scrollHeight)) + "px";
+  }, [v, autosize, minRows, maxRows]);
+  const handle = (e) => { if (!isControlled) setInner(e.target.value); onChange && onChange(e); };
+  return (
+    <div className={cx("s21-ta", className)}>
+      <textarea ref={ref} value={v} onChange={handle} maxLength={maxLength} rows={minRows}
+        className="s21-input s21-ta__input" style={style} {...rest} />
+      {showCount && maxLength != null && (
+        <span className={cx("s21-ta__count", v.length > maxLength * 0.9 && "is-warning", v.length >= maxLength && "is-error")}>
+          {v.length} / {maxLength}
+        </span>
+      )}
+    </div>
+  );
+}
+
+/* ───────────── FileDrop (NEW — Fáze J) ───────────── */
+function FileDrop({ accept, multiple = false, maxSizeMB, onFiles, hint, className }) {
+  const [over, setOver] = useState(false);
+  const [error, setError] = useState(null);
+  const inputRef = useRef(null);
+  const handle = (list) => {
+    setError(null);
+    const files = Array.from(list || []);
+    if (!files.length) return;
+    if (maxSizeMB != null) {
+      const tooBig = files.find((f) => f.size > maxSizeMB * 1024 * 1024);
+      if (tooBig) { setError(`Soubor „${tooBig.name}“ přesahuje ${maxSizeMB} MB.`); return; }
+    }
+    onFiles && onFiles(multiple ? files : files.slice(0, 1));
+  };
+  return (
+    <div className={cx("s21-filedrop", over && "is-over", error && "is-error", className)}
+      onDragOver={(e) => { e.preventDefault(); setOver(true); }}
+      onDragLeave={() => setOver(false)}
+      onDrop={(e) => { e.preventDefault(); setOver(false); handle(e.dataTransfer.files); }}
+      onClick={() => inputRef.current && inputRef.current.click()}
+      role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); inputRef.current && inputRef.current.click(); } }}
+    >
+      <input ref={inputRef} type="file" accept={accept} multiple={multiple} onChange={(e) => handle(e.target.files)} style={{ display: "none" }} />
+      <Icon name="upload" size={28} className="s21-filedrop__icon" />
+      <div className="s21-filedrop__title">{over ? "Pusťte soubor sem" : "Přetáhněte soubor nebo klikněte"}</div>
+      {hint && <div className="s21-filedrop__hint">{hint}</div>}
+      {error && <div className="s21-filedrop__err" role="alert">{error}</div>}
+    </div>
+  );
+}
+
 /* ───────────── Drawer (NEW — Fáze H) ───────────── */
 function Drawer({ open, onClose, side = "right", size = 400, title, description, footer, children, className }) {
   useEffect(() => {
@@ -1255,6 +1327,7 @@ export {
   Tooltip, Skeleton, Progress, Callout, Switch, Avatar, AvatarGroup, Kbd, RadioGroup, Popover, DropdownMenu,
   ThemeToggle, useTheme,
   Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
+  InputGroup, Textarea, FileDrop,
 };
 
 if (typeof window !== "undefined") {
@@ -1267,5 +1340,6 @@ if (typeof window !== "undefined") {
   Tooltip, Skeleton, Progress, Callout, Switch, Avatar, AvatarGroup, Kbd, RadioGroup, Popover, DropdownMenu,
   ThemeToggle, useTheme,
   Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
+  InputGroup, Textarea, FileDrop,
 };
 }
