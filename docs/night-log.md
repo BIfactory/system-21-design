@@ -60,5 +60,24 @@ Průběh práce podle `NIGHT_PLAN.md`. Zapisuju čas začátku fáze, hotovo/př
 
 **Commit:** `night/C: motion transitions, focus glow, row indicator, button loading`
 
+---
+
+## Fáze D — Typografie — HOTOVO
+
+**Přidáno:**
+- **display-xl** (48/1.1 Manrope 800, -.03em) — hero titulek pro landing/onboarding.
+- **display-lg** (32/1.15 Manrope 800, -.025em) — sekundární hero.
+- **overline** (10/14 mono 600, .12em uppercase) — mikro-labely nad názvem karty.
+- **Font features globálně**: `kern`, `liga`, `calt` na `body`; `ss01 + kern` na mono labels (JetBrains stylistic set 1 = pěknější 0/`).
+- **tabular-nums**: přidáno na `.s21-stat__value`, `.s21-table td.is-num`, `.s21-pager`, `.s21-actionbar__value`, `.s21-cell-code`, `.s21-lcard__stats`, `.s21-badge`, `.s21-navitem__badge` — všechna čísla zarovnaná.
+- **Optical fix**: `section-title` a `modal-title` (16px Manrope 600) dostaly `letter-spacing: -.01em` — v malé velikosti čte líp.
+- **Generátor** rozšířen: `overline` dostává také `text-transform: uppercase` automaticky.
+- **Font smoothing**: `-webkit-font-smoothing: antialiased`, `-moz-osx-font-smoothing: grayscale`, `text-rendering: optimizeLegibility` na root.
+
+**Findings:** vypadá dobře; číslo v Pagination bylo do teď proporcionální — tabular-nums to sjednotil.
+
+**Commit:** `night/D: typography (font-features, tabular-nums, display-xl/lg, overline)`
+
+
 
 

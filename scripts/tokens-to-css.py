@@ -19,7 +19,7 @@ for g in t["type"]["groups"]:
         r = [f"font-family: var(--font-{st.get('family', g['family'])})", f"font-size: {st['fontSize']}",
              f"line-height: {st['lineHeight']}", f"font-weight: {st['fontWeight']}"]
         if "letterSpacing" in st: r.append(f"letter-spacing: {st['letterSpacing']}")
-        if g["name"] == "Mono" and st["name"] in ("label", "eyebrow"): r.append("text-transform: uppercase")
+        if g["name"] == "Mono" and st["name"] in ("label", "eyebrow", "overline"): r.append("text-transform: uppercase")
         L.append(f".{st['name']} {{ " + "; ".join(r) + "; }")
 (root / "tokens/tokens.css").write_text("\n".join(L) + "\n")
 print("tokens/tokens.css written")
