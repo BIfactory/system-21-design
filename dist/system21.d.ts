@@ -67,6 +67,24 @@ export interface DataTableProps<R> {
   onRowClick?: (row: R) => void; empty?: ReactNode; minWidth?: number;
   /** Mobile (<768px): render rows as cards (usually <ListCard/>) instead of the table. */
   renderCard?: (row: R) => ReactNode;
+  /* — Fáze I — */
+  /** Show checkbox column + bulk selection. */
+  selectable?: boolean;
+  /** Array of selected row IDs. */
+  selected?: (string | number)[];
+  onSelectedChange?: (ids: (string | number)[]) => void;
+  /** Rendered above the table when any row is selected. */
+  bulkActions?: ReactNode | ((selected: (string | number)[]) => ReactNode);
+  /** Compact ("sm") / default ("md") / spacious ("lg") row height. */
+  density?: "sm" | "md" | "lg";
+  /** Freeze first column on horizontal scroll. */
+  stickyFirst?: boolean;
+  /** Render skeleton rows in place of the tbody. */
+  loading?: boolean;
+  loadingRows?: number;
+  /** Expandable rows: chevron column + custom sub-row content. */
+  expandRow?: { render: (row: R) => ReactNode; onToggle?: (row: R) => void };
+  isRowExpanded?: (row: R) => boolean;
 }
 export declare function DataTable<R>(p: DataTableProps<R>): JSX.Element;
 export declare function SortIcon(p: { active: boolean; dir?: "asc" | "desc" }): JSX.Element;

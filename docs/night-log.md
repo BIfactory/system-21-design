@@ -189,6 +189,25 @@ TypeScript union type `IconName` aktualizován.
 
 **Commit:** `night/L: showcase.html + tokens gallery + README links`
 
+---
+
+## Fáze I — DataTable polish — HOTOVO
+
+**Přidáno (props na `<DataTable>`):**
+- `selectable` + `selected` + `onSelectedChange` — checkbox sloupec s tri-state header ("indeterminate" když jen některé vybrané). Řádek dostane `.is-selected` (primary-soft podklad).
+- `bulkActions` — inline toolbar nad tabulkou se aktivuje jakmile je vybraný ≥1 řádek: „Vybráno **N** z M“ + akce + X pro clear. Fade+scale entrance.
+- `density` — `sm` (kompaktní 13px/tighter padding), `md` (default), `lg` (spacious).
+- `stickyFirst` — první sloupec sticky při horizontálním scrollu (např. long tabulky s hodně sloupci). Použije `background: --surface-raised` + box-shadow separator.
+- `loading` + `loadingRows` — místo tbody se rendruje N skeleton řádků (shimmer, respektuje selection/expand sloupce).
+- `expandRow` + `isRowExpanded` — chevron sloupec vlevo, po kliku se pod řádek vloží `<tr>` s vlastním obsahem (`--surface-sunken` bg).
+
+**Vše aditivní** — existující DataTable volání fungují dál bez změny (nové props default `false`/`undefined`).
+
+**Přeskočeno:** column resize (drag handles, komplexní) a column visibility menu (potřebuje DropdownMenu + local state, hodí se do budoucí iterace).
+
+**Commit:** `night/I: DataTable — selection, density, sticky first, expandable, loading skeletons, bulk toolbar`
+
+
 
 
 

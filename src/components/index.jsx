@@ -265,18 +265,55 @@ function SortIcon({ active, dir }) {
     </span>
   );
 }
-function DataTable({ columns, rows, rowKey = "id", sort, onSort, onRowClick, empty = "Žádné záznamy", minWidth, renderCard }) {
+function DataTable({
+  columns, rows, rowKey = "id", sort, onSort, onRowClick, empty = "Žádné záznamy", minWidth, renderCard,
+  /* — Fáze I additions — */
+  selectable = false, selected = [], onSelectedChange, bulkActions,
+  density = "md", stickyFirst = false, loading = false, loadingRows = 5,
+  expandRow, isRowExpanded,
+}) {
+  const rowId = (r, i) => (r[rowKey] != null ? r[rowKey] : i);
+  const allIds = rows.map(rowId);
+  const selSet = new Set(selected);
+  const allChecked = allIds.length > 0 && allIds.every((id) => selSet.has(id));
+  const someChecked = allIds.some((id) => selSet.has(id));
+  const toggleAll = () => {
+    if (!onSelectedChange) return;
+    onSelectedChange(allChecked ? [] : allIds);
+  };
+  const toggleOne = (id) => {
+    if (!onSelectedChange) return;
+    const next = selSet.has(id) ? selected.filter((x) => x !== id) : [...selected, id];
+    onSelectedChange(next);
+  };
+  const totalCols = columns.length + (selectable ? 1 : 0) + (expandRow ? 1 : 0);
+
   return (
     <>
-    {renderCard && (
-      <div className="s21-cardlist">
-        {rows.length === 0 ? <div className="s21-cardlist__empty">{empty}</div> : rows.map((r, i) => <React.Fragment key={r[rowKey] != null ? r[rowKey] : i}>{renderCard(r)}</React.Fragment>)}
+    {selectable && selected.length > 0 && bulkActions && (
+      <div className="s21-table-bulk">
+        <span className="s21-table-bulk__count">Vybráno <strong>{selected.length}</strong> z {rows.length}</span>
+        <div className="s21-table-bulk__actions">{typeof bulkActions === "function" ? bulkActions(selected) : bulkActions}</div>
+        <button type="button" className="s21-table-bulk__clear" onClick={() => onSelectedChange && onSelectedChange([])} aria-label="Zrušit výběr"><Icon name="x" size={16} /></button>
       </div>
     )}
-    <div className={cx("s21-table-wrap", renderCard && "has-cards")}>
+    {renderCard && (
+      <div className="s21-cardlist">
+        {rows.length === 0 ? <div className="s21-cardlist__empty">{empty}</div> : rows.map((r, i) => <React.Fragment key={rowId(r, i)}>{renderCard(r)}</React.Fragment>)}
+      </div>
+    )}
+    <div className={cx("s21-table-wrap", renderCard && "has-cards", `s21-table-wrap--${density}`, stickyFirst && "s21-table-wrap--sticky-first")}>
       <table className="s21-table" style={minWidth ? { minWidth } : undefined}>
         <thead>
           <tr>
+            {selectable && (
+              <th className="s21-table__selcol">
+                <label className="s21-table__selall" title={allChecked ? "Zrušit výběr" : "Vybrat vše"}>
+                  <input type="checkbox" checked={allChecked} ref={(el) => { if (el) el.indeterminate = !allChecked && someChecked; }} onChange={toggleAll} aria-label="Vybrat vše" />
+                </label>
+              </th>
+            )}
+            {expandRow && <th className="s21-table__expcol" aria-hidden="true" />}
             {columns.map((c) => {
               const al = c.align || "left";
               const sortable = c.sortable && onSort;
@@ -294,18 +331,50 @@ function DataTable({ columns, rows, rowKey = "id", sort, onSort, onRowClick, emp
           </tr>
         </thead>
         <tbody>
-          {rows.length === 0 ? (
-            <tr><td className="s21-table__empty" colSpan={columns.length}>{empty}</td></tr>
-          ) : rows.map((r, i) => (
-            <tr key={r[rowKey] != null ? r[rowKey] : i} className={onRowClick ? "is-clickable" : undefined}
-              onClick={onRowClick ? (e) => { if (!e.target.closest("[data-no-row-click]")) onRowClick(r); } : undefined}>
-              {columns.map((c) => (
-                <td key={c.key} style={{ textAlign: c.align || "left" }} className={c.numeric ? "is-num" : undefined}>
-                  {c.render ? c.render(r) : r[c.key]}
-                </td>
-              ))}
-            </tr>
-          ))}
+          {loading ? (
+            Array.from({ length: loadingRows }).map((_, i) => (
+              <tr key={`sk-${i}`}>
+                {selectable && <td className="s21-table__selcol"><span className="s21-sk" style={{ width: 14, height: 14, borderRadius: 3, display: "inline-block" }} /></td>}
+                {expandRow && <td className="s21-table__expcol" />}
+                {columns.map((c) => (<td key={c.key}><span className="s21-sk" style={{ height: 12, width: c.numeric ? 64 : "70%", borderRadius: 3, display: "inline-block" }} /></td>))}
+              </tr>
+            ))
+          ) : rows.length === 0 ? (
+            <tr><td className="s21-table__empty" colSpan={totalCols}>{empty}</td></tr>
+          ) : rows.map((r, i) => {
+            const id = rowId(r, i);
+            const isSel = selSet.has(id);
+            const expanded = expandRow && isRowExpanded && isRowExpanded(r);
+            return (
+              <React.Fragment key={id}>
+                <tr className={cx(onRowClick && "is-clickable", isSel && "is-selected")}
+                  onClick={onRowClick ? (e) => { if (!e.target.closest("[data-no-row-click]")) onRowClick(r); } : undefined}>
+                  {selectable && (
+                    <td className="s21-table__selcol" data-no-row-click>
+                      <input type="checkbox" checked={isSel} onChange={() => toggleOne(id)} aria-label="Vybrat řádek" />
+                    </td>
+                  )}
+                  {expandRow && (
+                    <td className="s21-table__expcol" data-no-row-click>
+                      <button type="button" className="s21-iconbtn s21-btn--sm s21-btn--icon" style={{ width: 24, height: 24 }} onClick={() => expandRow.onToggle && expandRow.onToggle(r)} aria-expanded={!!expanded} aria-label={expanded ? "Skrýt" : "Zobrazit"}>
+                        <Icon name={expanded ? "chevron-down" : "chevron-right"} size={14} />
+                      </button>
+                    </td>
+                  )}
+                  {columns.map((c) => (
+                    <td key={c.key} style={{ textAlign: c.align || "left" }} className={c.numeric ? "is-num" : undefined}>
+                      {c.render ? c.render(r) : r[c.key]}
+                    </td>
+                  ))}
+                </tr>
+                {expanded && (
+                  <tr className="s21-table__exprow">
+                    <td colSpan={totalCols}>{expandRow.render(r)}</td>
+                  </tr>
+                )}
+              </React.Fragment>
+            );
+          })}
         </tbody>
       </table>
     </div>
