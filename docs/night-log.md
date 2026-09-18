@@ -125,6 +125,36 @@ TypeScript union type `IconName` aktualizován.
 
 **Commit:** `night/G: 10 base components (Tooltip, Skeleton, Progress, Callout, Switch, Avatar, Kbd, RadioGroup, Popover, DropdownMenu)`
 
+---
+
+## Fáze E — Dark mode — HOTOVO
+
+**Přidáno:**
+- **`[data-theme="dark"]` layer** v `bundle.css` — override barevných tokenů:
+  - Surfaces: teplý základ `#0b0c0e → #22262b` (canvas → sunken → surface → raised → muted), ne pure black.
+  - Text: `#ececed` primary, `#a1a1aa` muted.
+  - Borders: `rgba(255,255,255,0.04..0.18)` — jemnější v dark.
+  - Primary green stays, ale `--primary-text` se zesvětlí na `#7de49a` (5.6:1 na dark surface), `--primary-glow` z 0.28 na 0.4 (víc vidět).
+  - Sidebar `#050506` (tmavší než tělo pro kontrast s obsahem).
+  - Semantic (success/danger/warning): oklch tón/luminance přepočtený pro dark bg (~65% L, snížené chroma).
+  - Elevace: víc opacity na stínech (rgba 0,0,0 z 0.06 na 0.4-0.8), aby byly vidět na dark.
+  - `color-scheme: dark` — nativní scrollbar/kalendář v dark.
+  - `--shine: rgba(255,255,255,0.08)` — inset highlight jemnější.
+- **Overrides v konkrétních komponentách:**
+  - TopBar/PageHeader/StickyActionBar glass přepočet (opacity 82/88/90%).
+  - Table thead → `--surface-sunken`.
+  - Chip.is-active a Pagination.is-current → z `--black` na `--primary` (v dark nejsou visible černé prvky nad tmavým bg).
+  - Tooltip pop → `#2a2d31` (světlejší než default `#1f2124`, aby byl vidět nad kartami).
+- **`ThemeToggle`** komponenta (sun/moon ikona, iconbtn stylem).
+- **`useTheme` hook** — čte prefers-color-scheme, persistuje do `localStorage['system21-theme']`.
+
+**Findings:**
+- Použití oklch pro semantic barvy v dark bylo přímočaré — jen zvedneme L a snížíme C.
+- `color-scheme` je důležité, jinak Chrome vykresluje form controls a scrollbary bíle na dark bg.
+
+**Commit:** `night/E: dark mode (data-theme=dark) + ThemeToggle + useTheme`
+
+
 
 
 

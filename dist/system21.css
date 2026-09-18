@@ -547,3 +547,93 @@ body { font-family: var(--font-body); color: var(--ink); margin: 0; font-feature
 
 /* DropdownMenu — reuses existing .s21-dd. Add start alignment variant */
 .s21-dd__menu--start { left: 0; right: auto; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   Dark theme — Fáze E
+   Aktivace: <html data-theme="dark"> nebo <body data-theme="dark">.
+   Overriduje jen barevné tokeny; layout, motion, radius, elevace zůstávají.
+   ═══════════════════════════════════════════════════════════════════ */
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  /* Base surfaces — teplý tmavý základ, méně cool než čisté #000 */
+  --canvas: #0b0c0e;
+  --surface: #17191c;
+  --surface-raised: #1c1f23;
+  --surface-sunken: #131518;
+  --surface-muted: #22262b;
+  --paper: #1c1f23;
+  --overlay: rgba(0,0,0,0.6);
+
+  /* Text */
+  --ink: #ececed;
+  --ink-muted: #a1a1aa;
+  --ink-subtle: rgba(236,236,237,0.4);
+
+  /* Borders — jemnější v dark */
+  --border: rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.18);
+  --border-subtle: rgba(255,255,255,0.04);
+
+  /* Primary — BIfactory green má dobrý kontrast na dark; on-primary stays black */
+  --primary-soft: rgba(67,196,102,0.16);
+  --primary-glow: rgba(67,196,102,0.4);
+  --primary-glow-strong: rgba(67,196,102,0.55);
+  --primary-text: #7de49a;
+
+  /* Sidebar — ještě tmavší než tělo (kontrast s obsahem) */
+  --sidebar-bg: #050506;
+  --sidebar-hover: #14161a;
+  --sidebar-border: rgba(255,255,255,0.08);
+  --sidebar-text: rgba(245,245,245,0.85);
+  --sidebar-text-muted: rgba(245,245,245,0.55);
+
+  /* Semantic — jemnější v dark, aby nezářily */
+  --success-bg: oklch(24% 0.04 155);
+  --success-border: oklch(38% 0.08 155);
+  --success-text: oklch(78% 0.14 149);
+  --success-solid: oklch(64% 0.18 149);
+
+  --danger-bg: oklch(24% 0.05 22);
+  --danger-border: oklch(38% 0.1 22);
+  --danger-text: oklch(75% 0.18 22);
+  --danger-solid: oklch(65% 0.22 25);
+
+  --warning-bg: oklch(24% 0.05 90);
+  --warning-text: oklch(80% 0.15 90);
+
+  --neutral-status: #71717a;
+
+  --shine: rgba(255,255,255,0.08);
+
+  /* Elevation — v dark potřebuje víc opacity na stín, aby byl vidět */
+  --elev-1: 0 1px 2px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3);
+  --elev-2: 0 2px 4px rgba(0,0,0,0.4), 0 4px 8px -2px rgba(0,0,0,0.35);
+  --elev-3: 0 4px 6px -2px rgba(0,0,0,0.4), 0 8px 16px -4px rgba(0,0,0,0.5);
+  --elev-4: 0 8px 10px -3px rgba(0,0,0,0.45), 0 16px 24px -8px rgba(0,0,0,0.6);
+  --elev-5: 0 12px 20px -6px rgba(0,0,0,0.55), 0 28px 48px -12px rgba(0,0,0,0.7);
+  --elev-6: 0 20px 30px -8px rgba(0,0,0,0.6), 0 40px 80px -16px rgba(0,0,0,0.8);
+}
+
+[data-theme="dark"] body { background: var(--canvas); color: var(--ink); }
+[data-theme="dark"] .s21-shell { background: var(--canvas); }
+
+/* TopBar & sticky PageHeader glass — recompute for dark */
+[data-theme="dark"] .s21-topbar { background: color-mix(in srgb, var(--surface) 82%, transparent); }
+[data-theme="dark"] .s21-pagehead.is-sticky { background: color-mix(in srgb, var(--surface) 88%, transparent); }
+[data-theme="dark"] .s21-actionbar { background: color-mix(in srgb, var(--surface) 90%, transparent); }
+
+/* Table thead z paper na tmavší (aby se odlišovalo) */
+[data-theme="dark"] .s21-table thead { background: var(--surface-sunken); }
+
+/* Chip active — v dark místo black použij --primary (kontrast se čtou)*/
+[data-theme="dark"] .s21-chip.is-active { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+[data-theme="dark"] .s21-pg.is-current { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+
+/* Tooltip — v dark potřebuje světlejší podklad než jinak (ne #1f2124 ale #2a2d31) aby byl vidět nad kartami */
+[data-theme="dark"] .s21-tt__pop { background: #2a2d31; }
+[data-theme="dark"] .s21-tt__pop::after { background: #2a2d31; }
+
+/* Sidebar background už je var(--sidebar-bg) — už řešeno tokeny */
+
+/* Segmented control aktiv v dark — --primary funguje, ale on-primary černá málo kontrastní na plné zelené. Nechme být, WCAG 8:1 stále. */

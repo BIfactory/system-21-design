@@ -188,3 +188,7 @@ export declare function Popover(p: PopoverProps): JSX.Element | null;
 
 export interface DropdownMenuProps { trigger: ReactNode | ((s: { open: boolean }) => ReactNode); children: ReactNode | ((s: { close: () => void }) => ReactNode); align?: "start" | "end"; className?: string }
 export declare function DropdownMenu(p: DropdownMenuProps): JSX.Element;
+
+/* — Theme (Fáze E) — */
+export declare function useTheme(): { theme: "light" | "dark"; toggle(): void; set(t: "light" | "dark"): void };
+export declare function ThemeToggle(p: { className?: string }): JSX.Element;

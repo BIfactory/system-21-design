@@ -967,6 +967,42 @@ function DropdownMenu({ trigger, children, align = "end", className }) {
   );
 }
 
+/* ───────────── Theme (NEW — Fáze E) ───────────── */
+function getInitialTheme() {
+  if (typeof window === "undefined") return "light";
+  try {
+    const stored = window.localStorage.getItem("system21-theme");
+    if (stored === "light" || stored === "dark") return stored;
+  } catch {}
+  return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+function applyTheme(t) {
+  if (typeof document === "undefined") return;
+  document.documentElement.setAttribute("data-theme", t);
+  try { window.localStorage.setItem("system21-theme", t); } catch {}
+}
+function useTheme() {
+  const [theme, setTheme] = useState("light");
+  useEffect(() => {
+    const t = getInitialTheme();
+    setTheme(t);
+    applyTheme(t);
+  }, []);
+  const toggle = useCallback(() => {
+    setTheme((prev) => { const next = prev === "dark" ? "light" : "dark"; applyTheme(next); return next; });
+  }, []);
+  const set = useCallback((t) => { setTheme(t); applyTheme(t); }, []);
+  return { theme, toggle, set };
+}
+function ThemeToggle({ className }) {
+  const { theme, toggle } = useTheme();
+  return (
+    <button type="button" onClick={toggle} className={cx("s21-iconbtn", className)} aria-label={theme === "dark" ? "Přepnout na světlý režim" : "Přepnout na tmavý režim"} title={theme === "dark" ? "Světlý režim" : "Tmavý režim"}>
+      <Icon name={theme === "dark" ? "sun" : "moon"} size={18} />
+    </button>
+  );
+}
+
 /* ───────────── Page ───────────── */
 function PageBody({ children }) {
   return <div className="s21-pagebody">{children}</div>;
@@ -979,6 +1015,7 @@ export {
   Modal, Toast, ToastProvider, useToast,
   Breadcrumbs, PageHeader, Sidebar, TopBar, AppShell, PageBody, PoweredBy, ListCard, StickyActionBar,
   Tooltip, Skeleton, Progress, Callout, Switch, Avatar, AvatarGroup, Kbd, RadioGroup, Popover, DropdownMenu,
+  ThemeToggle, useTheme,
 };
 
 if (typeof window !== "undefined") {
@@ -989,5 +1026,6 @@ if (typeof window !== "undefined") {
   Modal, Toast, ToastProvider, useToast,
   Breadcrumbs, PageHeader, Sidebar, TopBar, AppShell, PageBody, PoweredBy, ListCard, StickyActionBar,
   Tooltip, Skeleton, Progress, Callout, Switch, Avatar, AvatarGroup, Kbd, RadioGroup, Popover, DropdownMenu,
+  ThemeToggle, useTheme,
 };
 }
