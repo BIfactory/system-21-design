@@ -43,11 +43,14 @@ function Icon({ name, size = 18, strokeWidth = 2, className, title }) {
 Icon.names = Object.keys(PATHS);
 
 /* ───────────── Button ───────────── */
-function Button({ variant = "primary", size = "md", icon, iconOnly = false, className, children, type = "button", ...rest }) {
+function Button({ variant = "primary", size = "md", icon, iconOnly = false, loading = false, className, children, type = "button", disabled, ...rest }) {
+  const iconSize = size === "sm" ? 14 : 16;
   return (
-    <button type={type} {...rest}
-      className={cx("s21-btn", `s21-btn--${variant}`, `s21-btn--${size}`, iconOnly && "s21-btn--icon", className)}>
-      {icon && <Icon name={icon} size={size === "sm" ? 14 : 16} />}
+    <button type={type} disabled={disabled || loading} aria-busy={loading || undefined} {...rest}
+      className={cx("s21-btn", `s21-btn--${variant}`, `s21-btn--${size}`, iconOnly && "s21-btn--icon", loading && "s21-btn--loading", className)}>
+      {loading
+        ? <span className="s21-spinner" aria-hidden="true" style={{ width: iconSize, height: iconSize }} />
+        : (icon && <Icon name={icon} size={iconSize} />)}
       {iconOnly ? null : children}
     </button>
   );

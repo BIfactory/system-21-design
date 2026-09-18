@@ -12,6 +12,8 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   icon?: IconName;
   /** Icon-only square button; pass aria-label and title. */
   iconOnly?: boolean;
+  /** Show spinner and set aria-busy; also disables the button. */
+  loading?: boolean;
 }
 export declare function Button(p: ButtonProps): JSX.Element;
 

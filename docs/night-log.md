@@ -42,4 +42,23 @@ Průběh práce podle `NIGHT_PLAN.md`. Zapisuju čas začátku fáze, hotovo/př
 
 **Commit:** `night/B: elevations, glass surfaces, backdrop blur, motion keyframes`
 
+---
+
+## Fáze C — Motion & mikrointerakce — HOTOVO
+
+**Přidáno:**
+- **Focus glow**: `.s21-input` a všechny fokusovatelné prvky mají tvrdý ring + soft halo `--elev-focus-glow` (4px `--primary-glow`). Prémiový moderní focus.
+- **Button transitions**: rozšířeno na motion tokeny (fast + ease-out), přidáno `transform: translateY(1px)` na `:active` (fyzický "press" feel).
+- **Row indicator v tabulce**: hover řádku vysune 3px zelený indikátor zleva (přes `inset box-shadow` na první buňce, protože `<tr>` neakceptuje `::before` reliably).
+- **Universal transitions**: chip, seg, tab, input, navitem přejeté na motion tokeny (150ms `--motion-ease-out`).
+- **Button loading state**: nový `loading` prop → spinner místo ikony, `aria-busy`, `disabled`, kurzor `wait`. TypeScript def aktualizován.
+- **Spinner keyframe**: `s21-spin` (0.7s linear infinite, currentColor border).
+
+**Findings:**
+- Použití `::before` na `<tr>` je nespolehlivé; `inset box-shadow` na první buňce je čistší cesta pro row indicator.
+- `translate` na `:active` vypadá výrazněji s dvouvrstvým stínem (elev-1) než by bez něj — dobrá synergie s Fází B.
+
+**Commit:** `night/C: motion transitions, focus glow, row indicator, button loading`
+
+
 
