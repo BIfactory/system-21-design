@@ -8,7 +8,7 @@ for c in t["color"]["tokens"]:
     v = c["value"] if isinstance(c["value"], str) else c["value"]["light"]
     v = re.sub(r"^\{(.+)\}$", r"var(--\1)", v)
     L.append(f"  --{c['name']}: {v};")
-for fam in ["spacing", "radius", "shadow", "size"]:
+for fam in ["spacing", "radius", "shadow", "size", "motion", "blur"]:
     for x in t.get(fam, {}).get("tokens", []):
         L.append(f"  --{x['name']}: {x['value']};")
 for k, s in t["type"]["families"].items():
