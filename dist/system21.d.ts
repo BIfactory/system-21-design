@@ -245,3 +245,9 @@ export declare function Textarea(p: TextareaProps): JSX.Element;
 
 export interface FileDropProps { accept?: string; multiple?: boolean; maxSizeMB?: number; onFiles?: (files: File[]) => void; hint?: ReactNode; className?: string }
 export declare function FileDrop(p: FileDropProps): JSX.Element;
+
+/* — Fáze K mobile — */
+export interface BottomNavItem { value: string; label: string; icon?: IconName; badge?: number }
+export interface BottomNavProps { items: BottomNavItem[]; value?: string; onSelect?: (v: string, item: BottomNavItem) => void; className?: string }
+export declare function BottomNav(p: BottomNavProps): JSX.Element;
+export declare function useScrollDirection(opts?: { threshold?: number }): "up" | "down";

@@ -221,6 +221,21 @@ TypeScript union type `IconName` aktualizován.
 
 **Commit:** `night/J: form polish (InputGroup, Textarea autosize+count, FileDrop, invalid shake)`
 
+---
+
+## Fáze K — Mobile premium polish — HOTOVO
+
+**Přidáno:**
+- **`BottomNav`** — fixed spodní lišta (jen `@media max-width: 767px`), s glass backgroundem, active indikátorem top-line, badge counterem, safe-area padding. Alternativa (nebo doplněk) k hamburger menu.
+- **`useScrollDirection` hook** — vrací `"up" | "down"`; throttlovaný přes `requestAnimationFrame`, threshold 8px. Použití: aplikace nastaví `data-scroll-dir` na kořenový element.
+- **`.s21-hide-on-scroll`** utility — cokoli s touto třídou se schová (`translateY(-100%)`) při scrollu dolů, pokud rodič má `data-scroll-dir="down"`. Ideální pro TopBar u dlouhých seznamů.
+- **`.s21-tap`** ripple utility — přidání této třídy dá prvku subtle press feedback (radial gradient s currentColor přes `::after`, opacity animation). Opt-in, bez side-effektů.
+
+**Poznámka:** BottomSheet už byla přidána v Fázi H, takže její aplikace na FilterBar může udělat aplikace přímo. Swipe actions na ListCard přeskočeny — komplexní touch gesture handling s edge cases; row-actions button funguje stejně.
+
+**Commit:** `night/K: mobile premium (BottomNav, useScrollDirection, hide-on-scroll, tap ripple)`
+
+
 
 
 

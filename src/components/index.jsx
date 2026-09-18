@@ -1036,6 +1036,51 @@ function DropdownMenu({ trigger, children, align = "end", className }) {
   );
 }
 
+/* ───────────── BottomNav (NEW — Fáze K) — mobile bottom tab bar ───────────── */
+function BottomNav({ items = [], value, onSelect, className }) {
+  return (
+    <nav className={cx("s21-bnav", className)} aria-label="Hlavní navigace">
+      {items.map((it) => {
+        const active = value === it.value;
+        return (
+          <button key={it.value} type="button" className={cx("s21-bnav__item", active && "is-active")} aria-current={active ? "page" : undefined}
+            onClick={() => onSelect && onSelect(it.value, it)}>
+            <span className="s21-bnav__icon">
+              {it.icon && <Icon name={it.icon} size={20} />}
+              {it.badge != null && it.badge > 0 && <span className="s21-bnav__badge">{it.badge > 99 ? "99+" : it.badge}</span>}
+            </span>
+            <span className="s21-bnav__label">{it.label}</span>
+          </button>
+        );
+      })}
+    </nav>
+  );
+}
+
+/* ───────────── useScrollDirection (NEW — Fáze K) ───────────── */
+function useScrollDirection({ threshold = 8 } = {}) {
+  const [dir, setDir] = useState("up");
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    let last = window.scrollY, ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      window.requestAnimationFrame(() => {
+        const y = window.scrollY;
+        if (Math.abs(y - last) > threshold) {
+          setDir(y > last && y > 40 ? "down" : "up");
+          last = y;
+        }
+        ticking = false;
+      });
+      ticking = true;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [threshold]);
+  return dir;
+}
+
 /* ───────────── InputGroup (NEW — Fáze J) — Input s prefix/suffix adornment ───────────── */
 function InputGroup({ prefix, suffix, children, className, disabled }) {
   return (
@@ -1328,6 +1373,7 @@ export {
   ThemeToggle, useTheme,
   Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
   InputGroup, Textarea, FileDrop,
+  BottomNav, useScrollDirection,
 };
 
 if (typeof window !== "undefined") {
@@ -1341,5 +1387,6 @@ if (typeof window !== "undefined") {
   ThemeToggle, useTheme,
   Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
   InputGroup, Textarea, FileDrop,
+  BottomNav, useScrollDirection,
 };
 }
