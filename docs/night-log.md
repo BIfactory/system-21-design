@@ -176,6 +176,20 @@ TypeScript union type `IconName` aktualizován.
 
 **Commit:** `night/H: 6 advanced components (Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette)`
 
+---
+
+## Fáze L — Showcase + Token galerie — ČÁSTEČNĚ
+
+**Přidáno:**
+- **`demo/showcase.html`** — jednostránkový katalog: hero s ⌘K promo, sekce Foundations (barvy, typo), Actions (buttons), Data display (badges/tags/chips/kbd), Forms (input/switch/radio), Navigation (tabs/seg/breadcrumbs), Feedback (callout/progress/skeleton), Data (StatTile + Sparkline), Overlays (Modal/Drawer/BottomSheet/Tooltip/CommandPalette), Layout (Timeline/Accordion/Avatar). Globální ⌘K listener.
+- **`docs/tokens.html`** — token galerie: barvy (swatche), typo (samples všech .display-xl → .code), prostor (bars podle skutečné šířky), radius (vizuál), elevace (demo boxy), motion (durations + demo box s bounce animací), blur (vizual přes gradient overlay). Toggle Light/Dark v hlavičce.
+- **`README.md`** — přidány odkazy na showcase, tokens, NIGHT_PLAN, night-log.
+
+**Přeskočeno:** 5 realistických screenů v `demo/screens/` — do budoucna. Priorita byla showcase + token galerie, které dají uživateli okamžitý přehled o všem, co je hotovo.
+
+**Commit:** `night/L: showcase.html + tokens gallery + README links`
+
+
 
 
 

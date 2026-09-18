@@ -4,7 +4,10 @@ Design system pro aplikace BIfactory: tokeny (barvy, písmo, rozestupy), React k
 
 - **Živý přehled (brand book s náhledy komponent):** artefakt „System 21“ v Claude, <https://claude.ai/artifact/Y29e25HvLxXsQB4tN7M2im> (je potřeba ho nasdílet)
 - **Pravidla použití:** [`docs/brand-manual.md`](docs/brand-manual.md). Začni tady.
-- **Ukázková obrazovka:** [`demo/index.html`](demo/index.html) (`npm run demo` → <http://localhost:3000/demo/>)
+- **Ukázková obrazovka (Zakázky):** [`demo/index.html`](demo/index.html) (`npm run demo` → <http://localhost:3000/demo/>)
+- **Showcase všech komponent:** [`demo/showcase.html`](demo/showcase.html) — hero, buttons, forms, feedback, overlays, timeline, sparkline, ⌘K palette. Toggle light/dark.
+- **Token galerie:** [`docs/tokens.html`](docs/tokens.html) — barvy, typo, prostor, radius, elevace, motion, blur.
+- **Noční změny (v1.1):** [`NIGHT_PLAN.md`](NIGHT_PLAN.md) a průběh v [`docs/night-log.md`](docs/night-log.md).
 
 ## Co je v repozitáři
 

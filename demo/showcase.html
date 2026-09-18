@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · Showcase</title>
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<style>
+  body { background: var(--canvas); }
+  .sc-wrap { max-width: 1200px; margin: 0 auto; padding: var(--space-8) var(--space-6); }
+  @media (max-width: 767px) { .sc-wrap { padding: var(--space-4); } }
+  .sc-hero { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-8); flex-wrap: wrap; }
+  .sc-hero__titles { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
+  .sc-hero__title { margin: 0; font: 800 40px/1.1 var(--font-display); letter-spacing: -.03em; }
+  .sc-hero__sub { margin: 0; font: 400 16px/24px var(--font-body); color: var(--ink-muted); max-width: 640px; }
+  .sc-hero__ctrl { display: inline-flex; gap: var(--space-2); align-items: center; padding: var(--space-2); background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-full); box-shadow: var(--elev-1); }
+  .sc-sect { margin-bottom: var(--space-10); }
+  .sc-sect__head { display: flex; align-items: baseline; gap: var(--space-3); margin-bottom: var(--space-4); border-bottom: 1px solid var(--border); padding-bottom: var(--space-2); }
+  .sc-sect__num { font: 500 12px/16px var(--font-mono); letter-spacing: .18em; text-transform: uppercase; color: var(--primary-text); }
+  .sc-sect__title { margin: 0; font: 700 24px/1.2 var(--font-display); letter-spacing: -.02em; }
+  .sc-block { padding: var(--space-5); background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--elev-1); margin-bottom: var(--space-3); }
+  .sc-block__label { display: block; margin-bottom: var(--space-3); font: 500 11px/16px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); }
+  .sc-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
+  .sc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--space-3); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const { useState, useEffect, useRef } = React;
+  const S = window.S21;
+  const e = React.createElement;
+  const h = (t, p, ...c) => e(t, p, ...c);
+
+  function Section({ n, title, children }) {
+    return h("section", { className: "sc-sect" },
+      h("div", { className: "sc-sect__head" },
+        h("span", { className: "sc-sect__num" }, n),
+        h("h2", { className: "sc-sect__title" }, title)
+      ),
+      children
+    );
+  }
+  function Block({ label, children }) {
+    return h("div", { className: "sc-block" },
+      label && h("span", { className: "sc-block__label" }, label),
+      h("div", { className: "sc-row" }, children)
+    );
+  }
+
+  function App() {
+    const [density, setDensity] = useState("md");
+    const [switchOn, setSwitchOn] = useState(true);
+    const [progress, setProgress] = useState(0);
+    const [radio, setRadio] = useState("b");
+    const [chip, setChip] = useState("all");
+    const [tab, setTab] = useState("v1");
+    const [seg, setSeg] = useState("d");
+    const [modalOpen, setModalOpen] = useState(false);
+    const [drawerOpen, setDrawerOpen] = useState(false);
+    const [sheetOpen, setSheetOpen] = useState(false);
+    const [cmdOpen, setCmdOpen] = useState(false);
+
+    useEffect(() => {
+      // ⌘K / Ctrl+K
+      const onKey = (ev) => {
+        if ((ev.metaKey || ev.ctrlKey) && ev.key.toLowerCase() === "k") { ev.preventDefault(); setCmdOpen(o => !o); }
+      };
+      document.addEventListener("keydown", onKey);
+      return () => document.removeEventListener("keydown", onKey);
+    }, []);
+
+    useEffect(() => {
+      const t = setInterval(() => setProgress(p => (p >= 100 ? 0 : p + 3)), 250);
+      return () => clearInterval(t);
+    }, []);
+
+    const cmdItems = [
+      { title: "Navigace", items: [
+        { label: "Zakázky", icon: "folder", hint: "seznam všech", kbd: "G Z" },
+        { label: "Dashboardy", icon: "dashboard", hint: "KPI přehledy", kbd: "G D" },
+        { label: "Nastavení", icon: "settings", kbd: "G ," },
+      ]},
+      { title: "Akce", items: [
+        { label: "Nová zakázka", icon: "plus", kbd: "N" },
+        { label: "Vyhledat…", icon: "search", kbd: "/" },
+        { label: "Export do CSV", icon: "download" },
+      ]},
+      { title: "Nastavení", items: [
+        { label: "Přepnout tmavý režim", icon: "moon", onSelect: () => document.documentElement.setAttribute("data-theme", document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark") },
+        { label: "Odhlásit se", icon: "logout" },
+      ]},
+    ];
+
+    const sparkData = [4, 6, 5, 8, 7, 9, 11, 10, 13, 14, 12, 15, 18, 16, 19];
+
+    return h(React.Fragment, null,
+      // Command palette (global)
+      h(S.CommandPalette, { open: cmdOpen, onClose: () => setCmdOpen(false), items: cmdItems, shortcut: "⌘K" }),
+
+      // Hero
+      h("div", { className: "sc-wrap" },
+        h("div", { className: "sc-hero" },
+          h("div", { className: "sc-hero__titles" },
+            h("span", { className: "eyebrow" }, "[ system 21 · v1.1 ]"),
+            h("h1", { className: "sc-hero__title" }, "Design system showcase"),
+            h("p", { className: "sc-hero__sub" }, "Všechny komponenty, tokeny a vzory na jedné stránce. Stiskni ", h(S.Kbd, null, "⌘K"), " pro otevření palety.")
+          ),
+          h("div", { className: "sc-hero__ctrl" },
+            h(S.Button, { icon: "search", variant: "ghost", size: "sm", onClick: () => setCmdOpen(true) }, "Rychlé hledání"),
+            h(S.ThemeToggle)
+          )
+        ),
+
+        // 01 Foundations - Colors
+        h(Section, { n: "01 · Foundations", title: "Palette" },
+          h(Block, { label: "Primary / semantic" },
+            h(SwatchSet, null)
+          )
+        ),
+
+        // 02 Typography
+        h(Section, { n: "02 · Foundations", title: "Typografie" },
+          h("div", { className: "sc-block" },
+            h("div", { style: { display: "flex", flexDirection: "column", gap: 12 } },
+              h("div", { className: "display-xl" }, "Display XL 48"),
+              h("div", { className: "display-lg" }, "Display LG 32"),
+              h("div", { className: "page-title" }, "Page title 18"),
+              h("div", { className: "section-title" }, "Section title 16"),
+              h("div", { className: "body" }, "Body 14 — Procesy zjednodušujeme, automatizujeme a propojujeme."),
+              h("div", { className: "body-strong" }, "Body strong 14 — Uložit změny"),
+              h("div", { className: "small" }, "Small 12 — Z CRM + ručně založené v aplikaci"),
+              h("div", { className: "caption" }, "Caption 11 — 12. 05. 2026 · 14:32"),
+              h("div", { className: "label" }, "Label 11 · mono uppercase"),
+              h("div", { className: "eyebrow" }, "[ 03 · brand eyebrow ]"),
+              h("div", { className: "overline" }, "Overline 10 · micro label"),
+              h("div", { className: "code" }, "ZAK-2026-0142")
+            )
+          )
+        ),
+
+        // 03 Buttons
+        h(Section, { n: "03 · Actions", title: "Buttons" },
+          h(Block, { label: "Varianty" },
+            h(S.Button, { variant: "primary" }, "Primary"),
+            h(S.Button, { variant: "secondary" }, "Secondary"),
+            h(S.Button, { variant: "ghost" }, "Ghost"),
+            h(S.Button, { variant: "danger" }, "Danger")
+          ),
+          h(Block, { label: "Velikosti + ikona + loading" },
+            h(S.Button, { size: "sm", icon: "plus" }, "sm"),
+            h(S.Button, { size: "md", icon: "plus" }, "md"),
+            h(S.Button, { size: "lg", icon: "plus" }, "lg"),
+            h(S.Button, { loading: true }, "Ukládám…"),
+            h(S.Button, { iconOnly: true, icon: "settings", "aria-label": "Nastavení" }),
+            h(S.Button, { iconOnly: true, icon: "trash", variant: "ghost", "aria-label": "Smazat" })
+          )
+        ),
+
+        // 04 Badges, Tags, Chips, Kbd
+        h(Section, { n: "04 · Data display", title: "Badges, Tagy, Chips, Kbd" },
+          h(Block, { label: "Badge" },
+            h(S.Badge, { tone: "primary" }, "Aktivní"),
+            h(S.Badge, { tone: "success" }, "Hotovo"),
+            h(S.Badge, { tone: "warning" }, "Čeká"),
+            h(S.Badge, { tone: "danger" }, "Chyba"),
+            h(S.Badge, { tone: "neutral" }, "Koncept")
+          ),
+          h(Block, { label: "Tag" },
+            h(S.Tag, { tone: "neutral" }, "Nový"),
+            h(S.Tag, { tone: "success" }, "Uzavřeno"),
+            h(S.Tag, { tone: "danger" }, "Po termínu"),
+            h(S.Tag, { tone: "warning" }, "Riziko"),
+            h(S.Tag, { tone: "accent" }, "Prio")
+          ),
+          h(Block, { label: "ChipGroup" },
+            h(S.ChipGroup, { value: chip, onChange: setChip, items: [
+              { value: "all", label: "Vše", count: 38 },
+              { value: "todo", label: "Otevřené", count: 12 },
+              { value: "done", label: "Hotové", count: 26 },
+            ]})
+          ),
+          h(Block, { label: "Kbd" },
+            h(S.Kbd, null, "⌘K"),
+            h("span", null, " "),
+            h(S.Kbd, null, "Ctrl"), h("span", null, " + "), h(S.Kbd, null, "N"),
+            h("span", null, " "),
+            h(S.Kbd, null, "↑"), h(S.Kbd, null, "↓"), h(S.Kbd, null, "Enter")
+          )
+        ),
+
+        // 05 Forms
+        h(Section, { n: "05 · Forms", title: "Inputy, Switch, Radio" },
+          h("div", { className: "sc-grid" },
+            h("div", { className: "sc-block" },
+              h(S.Field, { label: "E-mail", hint: "Použijeme jen pro účet" },
+                h(S.Input, { type: "email", placeholder: "vas@email.cz", defaultValue: "hulin@bifactory.cz" })
+              )
+            ),
+            h("div", { className: "sc-block" },
+              h(S.Field, { label: "Vyhledat" },
+                h(S.SearchInput, { value: "", onChange: () => {}, placeholder: "Hledat zakázku…" })
+              )
+            ),
+            h("div", { className: "sc-block" },
+              h(S.Field, { label: "Typ" },
+                h(S.Select, { options: [{value:"a",label:"Reporting"},{value:"b",label:"Automatizace"}], placeholder: "—" })
+              )
+            ),
+            h("div", { className: "sc-block" },
+              h(S.Checkbox, { label: "Souhlasím s podmínkami" })
+            )
+          ),
+          h(Block, { label: "Switch" },
+            h(S.Switch, { checked: switchOn, onChange: setSwitchOn, label: "Notifikace e-mailem", description: "Denní souhrn v 8:00" }),
+            h(S.Switch, { checked: false, disabled: true, label: "Beta funkce", description: "Uzamčeno pro tento plán" })
+          ),
+          h(Block, { label: "RadioGroup" },
+            h(S.RadioGroup, { name: "period", value: radio, onChange: setRadio, options: [
+              { value: "a", label: "Týden" },
+              { value: "b", label: "Měsíc" },
+              { value: "c", label: "Kvartál" },
+            ]})
+          )
+        ),
+
+        // 06 Tabs, SegmentedControl
+        h(Section, { n: "06 · Navigation", title: "Tabs, SegmentedControl, Breadcrumbs" },
+          h(Block, { label: "Tabs" },
+            h("div", { style: { minWidth: 320 } },
+              h(S.Tabs, { value: tab, onChange: setTab, items: [
+                { value: "v1", label: "Přehled" },
+                { value: "v2", label: "Realizace", count: 4 },
+                { value: "v3", label: "Fakturace" },
+                { value: "v4", label: "Aktivita", count: 12 },
+              ]})
+            )
+          ),
+          h(Block, { label: "SegmentedControl" },
+            h(S.SegmentedControl, { value: seg, onChange: setSeg, items: [
+              { value: "d", label: "Den" },
+              { value: "w", label: "Týden" },
+              { value: "m", label: "Měsíc" },
+            ]})
+          ),
+          h(Block, { label: "Breadcrumbs" },
+            h(S.Breadcrumbs, { items: [
+              { label: "Zakázky", href: "/z" },
+              { label: "ZAK-2026-0131", href: "/z/131" },
+              { label: "Realizace", href: "/z/131/r" },
+              { label: "Mapování dat", href: "/z/131/r/7" },
+            ]})
+          )
+        ),
+
+        // 07 Feedback
+        h(Section, { n: "07 · Feedback", title: "Callout, Progress, Skeleton, Toast" },
+          h("div", { className: "sc-grid" },
+            h("div", null,
+              h(S.Callout, { tone: "info", title: "Sync běží na pozadí", action: h(S.Button, { size: "sm", variant: "ghost" }, "Zavřít") }, "Poslední synchronizace 14:32 — příští za 3 min."),
+              h("div", { style: { height: 12 } }),
+              h(S.Callout, { tone: "success", title: "Uloženo" }, "Nastavení uživatele bylo aktualizováno."),
+              h("div", { style: { height: 12 } }),
+              h(S.Callout, { tone: "warning", title: "Blíží se termín" }, "Zakázka ZAK-2026-0131 má termín zítra."),
+              h("div", { style: { height: 12 } }),
+              h(S.Callout, { tone: "danger", title: "Připojení selhalo" }, "Server neodpovídá. Zkuste to znovu.")
+            ),
+            h("div", { className: "sc-block" },
+              h(S.Progress, { value: progress, label: "Import CSV", showValue: true }),
+              h("div", { style: { height: 12 } }),
+              h(S.Progress, { value: 66, tone: "success", size: "sm", label: "Kapacita" }),
+              h("div", { style: { height: 12 } }),
+              h(S.Progress, { value: 90, tone: "danger", size: "lg", label: "Doba stagingu", showValue: true }),
+              h("div", { style: { display: "flex", gap: 16, alignItems: "center", marginTop: 16 } },
+                h(S.Progress.Circular, { value: 68, size: 48 }),
+                h(S.Progress.Circular, { value: 92, tone: "success", size: 48 }),
+                h(S.Progress.Circular, { value: 24, tone: "danger", size: 48 })
+              )
+            ),
+            h("div", { className: "sc-block" },
+              h("div", { style: { display: "flex", flexDirection: "column", gap: 12 } },
+                h(S.Skeleton, { h: 24, w: "50%" }),
+                h(S.Skeleton.Text, { lines: 3 }),
+                h("div", { style: { display: "flex", gap: 12, marginTop: 8 } },
+                  h(S.Skeleton, { w: 48, h: 48, radius: "50%" }),
+                  h("div", { style: { flex: 1 } }, h(S.Skeleton.Text, { lines: 2 }))
+                )
+              )
+            )
+          )
+        ),
+
+        // 08 Data
+        h(Section, { n: "08 · Data", title: "StatTile + Sparkline" },
+          h("div", { className: "sc-block" },
+            h("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 } },
+              h("div", null,
+                h(S.StatTile, { label: "Tržby / měsíc", value: "1 248 500", unit: "Kč", big: true }),
+                h("div", { style: { marginTop: -8, paddingLeft: 16 } }, h(S.Sparkline, { data: sparkData, width: 180, height: 40 }))
+              ),
+              h(S.StatTile, { label: "Marže", value: "+27 %", accent: "success" }),
+              h(S.StatTile, { label: "Po termínu", value: "1", accent: "danger", hint: "ZAK-2026-0131" }),
+              h(S.StatTile, { label: "Rozpracované", value: "3", accent: "primary" })
+            )
+          )
+        ),
+
+        // 09 Overlays
+        h(Section, { n: "09 · Overlays", title: "Modal, Drawer, BottomSheet, Tooltip, Popover" },
+          h(Block, { label: "Triggery" },
+            h(S.Tooltip, { label: "Otevře modální okno" }, h(S.Button, { onClick: () => setModalOpen(true) }, "Modal")),
+            h(S.Tooltip, { label: "Boční panel", side: "top" }, h(S.Button, { variant: "secondary", onClick: () => setDrawerOpen(true) }, "Drawer (right)")),
+            h(S.Tooltip, { label: "Mobilní sheet zdola" }, h(S.Button, { variant: "secondary", onClick: () => setSheetOpen(true) }, "BottomSheet")),
+            h(S.Button, { variant: "ghost", icon: "search", onClick: () => setCmdOpen(true) }, "CommandPalette (⌘K)")
+          ),
+          h(S.Modal, { open: modalOpen, onClose: () => setModalOpen(false), title: "Nová zakázka", description: "Vyplňte základní údaje. Zbytek doplníte později.", size: "md",
+            footer: h(React.Fragment, null,
+              h(S.Button, { variant: "ghost", onClick: () => setModalOpen(false) }, "Zrušit"),
+              h(S.Button, { onClick: () => setModalOpen(false) }, "Vytvořit")
+            )
+          },
+            h(S.Field, { label: "Název zakázky" }, h(S.Input, { placeholder: "např. Reporting obchodu — pilot" })),
+            h(S.Field, { label: "Klient" }, h(S.Input, { placeholder: "Moravia Steel a.s." }))
+          ),
+          h(S.Drawer, { open: drawerOpen, onClose: () => setDrawerOpen(false), title: "Filtr zakázek", description: "Zúžit seznam", size: 380,
+            footer: h(React.Fragment, null,
+              h(S.Button, { variant: "ghost", onClick: () => setDrawerOpen(false) }, "Reset"),
+              h(S.Button, { onClick: () => setDrawerOpen(false) }, "Použít filtr")
+            )
+          },
+            h(S.Field, { label: "Stav" }, h(S.Select, { options: [{value:"a",label:"Realizace"},{value:"b",label:"Nabídka"}] })),
+            h("div", { style: { height: 12 } }),
+            h(S.Field, { label: "Klient" }, h(S.Input, { placeholder: "Hledat…" })),
+            h("div", { style: { height: 12 } }),
+            h(S.Callout, { tone: "info", title: "Tip" }, "Filtr uložíte přes ikonu ⭐ v hlavičce.")
+          ),
+          h(S.BottomSheet, { open: sheetOpen, onClose: () => setSheetOpen(false), title: "Akce" },
+            h("div", { style: { display: "flex", flexDirection: "column", gap: 8 } },
+              h(S.Button, { variant: "ghost", icon: "share" }, "Sdílet"),
+              h(S.Button, { variant: "ghost", icon: "edit" }, "Upravit"),
+              h(S.Button, { variant: "ghost", icon: "download" }, "Stáhnout PDF"),
+              h(S.Button, { variant: "danger", icon: "trash", onClick: () => setSheetOpen(false) }, "Smazat")
+            )
+          )
+        ),
+
+        // 10 Timeline + Accordion
+        h(Section, { n: "10 · Layout", title: "Timeline, Accordion, Avatar" },
+          h("div", { className: "sc-grid" },
+            h("div", { className: "sc-block" },
+              h(S.Timeline, { items: [
+                { time: "12. 05. · 14:32", title: "Zakázka vytvořena", by: "hulin", icon: "plus", tone: "primary" },
+                { time: "12. 05. · 15:10", title: "Přiřazena k realizaci", by: "novák" },
+                { time: "13. 05. · 09:22", title: "Termín upraven", description: "Posun z 20. 5. na 27. 5.", by: "hulin", icon: "clock" },
+                { time: "14. 05. · 16:00", title: "Zakázka dokončena", tone: "success", icon: "check" },
+              ]})
+            ),
+            h("div", null,
+              h(S.Accordion, { items: [
+                { key: "a", title: "Detaily zakázky", meta: "5", content: "Základní údaje a přehled týmu." },
+                { key: "b", title: "Historie změn", meta: "12", content: "Kompletní audit trail." },
+                { key: "c", title: "Přílohy", meta: "3", content: "Dokumenty, obrázky a export." },
+              ], defaultOpen: ["a"]})
+            )
+          ),
+          h(Block, { label: "Avatar + AvatarGroup" },
+            h(S.Avatar, { name: "Lubomír Hulín" }),
+            h(S.Avatar, { name: "Jan Novák", tone: "accent" }),
+            h(S.Avatar, { name: "Marie", tone: "muted" }),
+            h(S.AvatarGroup, { items: [
+              { name: "Lubomír Hulín" },
+              { name: "Jan Novák", tone: "accent" },
+              { name: "Marie K." },
+              { name: "Petr S." },
+              { name: "Ivana T." },
+              { name: "Tomáš V." },
+            ], max: 4 })
+          )
+        ),
+
+        // Footer
+        h("footer", { style: { textAlign: "center", padding: "40px 0", color: "var(--ink-muted)", font: "400 12px/16px var(--font-body)" } },
+          "System 21 · BIfactory · ", h(S.Kbd, null, "⌘K"), " kdykoliv pro paletu"
+        )
+      )
+    );
+  }
+
+  function SwatchSet() {
+    const S = window.S21;
+    const swatches = [
+      { name: "primary", light: "BIfactory green" },
+      { name: "primary-text", light: "Text zelený" },
+      { name: "primary-soft", light: "Zvýrazněné pozadí" },
+      { name: "accent", light: "Spark yellow" },
+      { name: "ink", light: "Hlavní text" },
+      { name: "ink-muted", light: "Popisky" },
+      { name: "surface", light: "Karty" },
+      { name: "canvas", light: "Pozadí" },
+      { name: "border", light: "Obrys" },
+      { name: "black", light: "Sidebar" },
+      { name: "success-solid", light: "Success" },
+      { name: "danger-solid", light: "Danger" },
+      { name: "warning-text", light: "Warning" },
+    ];
+    return h("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 12 } },
+      swatches.map((s, i) =>
+        h("div", { key: i, style: { border: "1px solid var(--border)", borderRadius: "var(--radius-xl)", overflow: "hidden", background: "var(--surface-raised)" } },
+          h("div", { style: { height: 64, background: `var(--${s.name})`, borderBottom: "1px solid var(--border-subtle)" } }),
+          h("div", { style: { padding: 12 } },
+            h("div", { style: { font: "600 12px/16px var(--font-body)" } }, `--${s.name}`),
+            h("div", { style: { font: "400 11px/16px var(--font-body)", color: "var(--ink-muted)" } }, s.light)
+          )
+        )
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(h(App));
+})();
+</script>
+</body>
+</html>

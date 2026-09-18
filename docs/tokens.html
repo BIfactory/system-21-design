@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · Design tokens</title>
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<style>
+  body { background: var(--canvas); color: var(--ink); font-family: var(--font-body); margin: 0; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+  h1 { margin: 0 0 8px; font: 800 40px/1.1 var(--font-display); letter-spacing: -.03em; }
+  .sub { margin: 0 0 40px; color: var(--ink-muted); max-width: 640px; }
+  h2 { margin: 40px 0 12px; font: 700 22px/1.2 var(--font-display); letter-spacing: -.02em; }
+  .card { background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 20px; margin-bottom: 12px; box-shadow: var(--elev-1); }
+  .grid { display: grid; gap: 12px; }
+  .grid--colors { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+  .grid--sizes { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  .grid--elev { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+  .swatch { border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; background: var(--surface); }
+  .swatch__color { height: 72px; }
+  .swatch__meta { padding: 10px 12px; }
+  .swatch__name { font: 600 12px/16px var(--font-body); }
+  .swatch__val { font: 400 11px/16px var(--font-mono); color: var(--ink-muted); word-break: break-all; }
+  .space { display: flex; align-items: baseline; gap: 12px; padding: 8px; border-bottom: 1px solid var(--border-subtle); }
+  .space:last-child { border-bottom: 0; }
+  .space__bar { height: 12px; background: var(--primary); border-radius: 3px; }
+  .space__name { min-width: 100px; font: 500 11px/16px var(--font-mono); color: var(--ink-muted); }
+  .space__val { min-width: 60px; font: 500 11px/16px var(--font-mono); text-align: right; }
+  .radius-demo { display: flex; align-items: flex-end; justify-content: center; height: 80px; width: 100%; background: var(--primary); }
+  .elev-demo { height: 96px; background: var(--surface-raised); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; font: 600 13px/1 var(--font-body); color: var(--ink-muted); }
+  .type-sample { padding: 10px 0; border-bottom: 1px solid var(--border-subtle); }
+  .type-sample:last-child { border-bottom: 0; }
+  .type-sample__meta { display: block; font: 500 10px/14px var(--font-mono); color: var(--ink-muted); margin-bottom: 4px; letter-spacing: .08em; text-transform: uppercase; }
+  .motion-demo { padding: 20px; background: var(--surface-muted); border-radius: var(--radius-lg); text-align: center; font: 500 12px var(--font-mono); color: var(--ink-muted); }
+  .motion-demo > .box { display: inline-block; width: 40px; height: 40px; background: var(--primary); border-radius: var(--radius-md); animation: bounce 1.2s infinite; }
+  @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-16px); } }
+  .toggle { display: inline-flex; margin-bottom: 24px; padding: 4px; background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-full); box-shadow: var(--elev-1); }
+  .toggle button { border: 0; background: transparent; color: var(--ink-muted); padding: 6px 12px; border-radius: var(--radius-full); font: 500 12px/16px var(--font-body); cursor: pointer; }
+  .toggle button.on { background: var(--primary); color: var(--on-primary); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="eyebrow">[ system 21 · tokens ]</span>
+  <h1>Design tokens</h1>
+  <p class="sub">Zdroj pravdy pro barvy, typografii, prostor, radius, elevace, motion a blur. Živě generováno z <code>tokens/tokens.json</code>.</p>
+
+  <div class="toggle" role="group" aria-label="Theme">
+    <button type="button" class="on" data-th="light">Light</button>
+    <button type="button" data-th="dark">Dark</button>
+  </div>
+
+  <h2>Barvy</h2>
+  <div class="card">
+    <div class="grid grid--colors" id="colors"></div>
+  </div>
+
+  <h2>Typografie</h2>
+  <div class="card" id="type"></div>
+
+  <h2>Prostor</h2>
+  <div class="card" id="space"></div>
+
+  <h2>Radius</h2>
+  <div class="card">
+    <div class="grid grid--sizes" id="radius"></div>
+  </div>
+
+  <h2>Elevace</h2>
+  <div class="card">
+    <div class="grid grid--elev" id="elev"></div>
+  </div>
+
+  <h2>Motion</h2>
+  <div class="card">
+    <div class="grid grid--sizes">
+      <div>
+        <div class="motion-demo"><div class="box"></div></div>
+        <div style="margin-top:8px" class="swatch__meta">
+          <div class="swatch__name">Ease-out</div>
+          <div class="swatch__val">cubic-bezier(.2,.8,.2,1)</div>
+        </div>
+      </div>
+      <div id="motion-list"></div>
+    </div>
+  </div>
+
+  <h2>Blur</h2>
+  <div class="card">
+    <div class="grid grid--sizes" id="blur"></div>
+  </div>
+</div>
+
+<script>
+  const COLORS = ["primary","primary-hover","primary-active","on-primary","primary-text","primary-soft","primary-glow","accent","on-accent","ink","ink-muted","ink-subtle","black","white","paper","canvas","surface","surface-raised","surface-sunken","surface-muted","border","border-strong","border-subtle","sidebar-bg","success-solid","success-bg","danger-solid","danger-bg","warning-text","warning-bg","neutral-status","shine","overlay"];
+  const SPACES = ["space-0-5","space-1","space-1-5","space-2","space-3","space-4","space-5","space-6","space-8","space-10"];
+  const RADII = ["radius-xs","radius-sm","radius-md","radius-lg","radius-xl","radius-2xl","radius-3xl","radius-full"];
+  const ELEVS = ["elev-1","elev-2","elev-3","elev-4","elev-5","elev-6"];
+  const MOTIONS = ["motion-duration-instant","motion-duration-fast","motion-duration-base","motion-duration-slow","motion-duration-slower"];
+  const BLURS = ["backdrop-blur-sm","backdrop-blur-md","backdrop-blur-lg"];
+  const TYPES = [
+    { c: "display-xl", label: "Display XL", sample: "Řízení výroby" },
+    { c: "display-lg", label: "Display LG", sample: "Přehled zakázek" },
+    { c: "page-title", label: "Page title", sample: "Zakázky" },
+    { c: "section-title", label: "Section title", sample: "Výkon zakázek" },
+    { c: "kpi-lg", label: "KPI large", sample: "1 248 500 Kč" },
+    { c: "kpi", label: "KPI", sample: "42 %" },
+    { c: "body", label: "Body", sample: "Procesy zjednodušujeme, automatizujeme a propojujeme." },
+    { c: "body-strong", label: "Body strong", sample: "Uložit změny" },
+    { c: "small", label: "Small", sample: "Z CRM + ručně založené v aplikaci" },
+    { c: "caption", label: "Caption", sample: "12. 05. 2026 · 14:32" },
+    { c: "micro", label: "Micro", sample: "3" },
+    { c: "label", label: "Label (mono)", sample: "Zakázka · Stav · Vznik" },
+    { c: "eyebrow", label: "Eyebrow (mono)", sample: "[ 03 · data ]" },
+    { c: "overline", label: "Overline (mono)", sample: "Provoz" },
+    { c: "code", label: "Code (mono)", sample: "ZAK-2026-0142" },
+  ];
+
+  const cs = getComputedStyle(document.documentElement);
+  const val = (n) => cs.getPropertyValue(`--${n}`).trim();
+
+  const cols = document.getElementById("colors");
+  COLORS.forEach(n => {
+    const v = val(n);
+    cols.insertAdjacentHTML("beforeend",
+      `<div class="swatch"><div class="swatch__color" style="background:var(--${n})"></div>
+       <div class="swatch__meta"><div class="swatch__name">--${n}</div><div class="swatch__val">${v || "—"}</div></div></div>`);
+  });
+
+  const ty = document.getElementById("type");
+  TYPES.forEach(t => {
+    ty.insertAdjacentHTML("beforeend",
+      `<div class="type-sample"><span class="type-sample__meta">.${t.c}</span><div class="${t.c}">${t.sample}</div></div>`);
+  });
+
+  const sp = document.getElementById("space");
+  SPACES.forEach(n => {
+    const v = val(n);
+    sp.insertAdjacentHTML("beforeend",
+      `<div class="space"><span class="space__name">--${n}</span><span class="space__val">${v}</span><div class="space__bar" style="width:${v}"></div></div>`);
+  });
+
+  const rd = document.getElementById("radius");
+  RADII.forEach(n => {
+    const v = val(n);
+    rd.insertAdjacentHTML("beforeend",
+      `<div class="swatch"><div style="background:var(--surface-muted); padding: 20px;"><div class="radius-demo" style="border-radius: var(--${n}); height: 60px;"></div></div>
+       <div class="swatch__meta"><div class="swatch__name">--${n}</div><div class="swatch__val">${v}</div></div></div>`);
+  });
+
+  const el = document.getElementById("elev");
+  ELEVS.forEach(n => {
+    const v = val(n);
+    el.insertAdjacentHTML("beforeend",
+      `<div><div class="elev-demo" style="box-shadow: var(--${n})">--${n}</div>
+       <div class="swatch__meta" style="padding-left:0"><div class="swatch__val">${v.substring(0, 60)}…</div></div></div>`);
+  });
+
+  const ml = document.getElementById("motion-list");
+  MOTIONS.forEach(n => {
+    ml.insertAdjacentHTML("beforeend", `<div class="space"><span class="space__name">--${n}</span><span class="space__val">${val(n)}</span></div>`);
+  });
+
+  const bl = document.getElementById("blur");
+  BLURS.forEach(n => {
+    const v = val(n);
+    bl.insertAdjacentHTML("beforeend",
+      `<div class="swatch">
+        <div style="height: 80px; background: linear-gradient(45deg, var(--primary) 0%, var(--accent) 100%); position: relative;">
+          <div style="position: absolute; inset: 20px; backdrop-filter: blur(${v}); -webkit-backdrop-filter: blur(${v}); background: rgba(255,255,255,0.15); border-radius: var(--radius-md);"></div>
+        </div>
+        <div class="swatch__meta"><div class="swatch__name">--${n}</div><div class="swatch__val">${v}</div></div>
+      </div>`);
+  });
+
+  document.querySelectorAll(".toggle button").forEach(b => b.addEventListener("click", (e) => {
+    document.querySelectorAll(".toggle button").forEach(x => x.classList.remove("on"));
+    e.target.classList.add("on");
+    document.documentElement.setAttribute("data-theme", e.target.dataset.th);
+    // Re-populate color swatches with new computed values
+    document.getElementById("colors").innerHTML = "";
+    const cs2 = getComputedStyle(document.documentElement);
+    COLORS.forEach(n => {
+      const v = cs2.getPropertyValue(`--${n}`).trim();
+      document.getElementById("colors").insertAdjacentHTML("beforeend",
+        `<div class="swatch"><div class="swatch__color" style="background:var(--${n})"></div>
+         <div class="swatch__meta"><div class="swatch__name">--${n}</div><div class="swatch__val">${v || "—"}</div></div></div>`);
+    });
+  }));
+</script>
+</body>
+</html>
