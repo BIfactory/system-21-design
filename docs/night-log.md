@@ -154,6 +154,29 @@ TypeScript union type `IconName` aktualizován.
 
 **Commit:** `night/E: dark mode (data-theme=dark) + ThemeToggle + useTheme`
 
+---
+
+## Fáze H — Pokročilé komponenty — ČÁSTEČNĚ (6/8)
+
+**Přidáno:** Drawer, BottomSheet, Accordion, Timeline, Sparkline, **CommandPalette** (premium moment).
+
+**Přeskočeno:** Combobox a DatePicker — scope-heavy (200+ řádků každý s tricky keyboard/focus flow). Přesunuto na následující iteraci.
+
+**Detaily:**
+- **Drawer** — 4 strany (left/right/top/bottom), animace `s21-drawer-in-*`, escape close, body scroll lock, radius 3xl na bottom/top varianta pro sheet look.
+- **BottomSheet** — mobile-first Drawer s `--sheet` className: drag handle indicator (36×4px pill top), padding pro safe area.
+- **Accordion** — single nebo multiple open, chevron rotate + fade-in body.
+- **Timeline** — vertikální osa (`::before` line), dot v barvě dle tone, čas + title + description + author.
+- **Sparkline** — SVG mini graf (line + area + last-point dot), aria-label. Automatický scale z min/max data.
+- **CommandPalette** — ⌘K style. Fullscreen s `backdrop-blur-lg`, fuzzy search (normalizace unicode diakritiky), keyboard nav (↑↓ Enter Esc), sekcionalizace, kbd shortcuts na items, `role="dialog"`.
+
+**Findings:**
+- CommandPalette by potřeboval globální keyboard listener na ⌘K/Ctrl+K — nechal jsem ho externě (aplikace si napíše `useEffect` s add/remove listener a `setOpen`). Interní listener by narušil kontrolu.
+- BottomSheet reuse Drawer je čistý — jen preset props + className s podrobným paddingem.
+
+**Commit:** `night/H: 6 advanced components (Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette)`
+
+
 
 
 

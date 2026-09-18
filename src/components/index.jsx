@@ -967,6 +967,175 @@ function DropdownMenu({ trigger, children, align = "end", className }) {
   );
 }
 
+/* ───────────── Drawer (NEW — Fáze H) ───────────── */
+function Drawer({ open, onClose, side = "right", size = 400, title, description, footer, children, className }) {
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => { if (e.key === "Escape") onClose && onClose(); };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+  }, [open, onClose]);
+  if (!open) return null;
+  const style = (side === "left" || side === "right") ? { width: size } : { height: size };
+  return (
+    <div className={cx("s21-drawer-root", `s21-drawer-root--${side}`)} role="dialog" aria-modal="true" aria-labelledby={title ? "s21-drawer-title" : undefined}>
+      <div className="s21-drawer__backdrop" onClick={onClose} />
+      <aside className={cx("s21-drawer", `s21-drawer--${side}`, className)} style={style}>
+        {(title || onClose) && (
+          <header className="s21-drawer__head">
+            <div className="s21-drawer__titles">
+              {title && <h2 id="s21-drawer-title" className="s21-drawer__title">{title}</h2>}
+              {description && <p className="s21-drawer__desc">{description}</p>}
+            </div>
+            {onClose && <button type="button" onClick={onClose} className="s21-drawer__close" aria-label="Zavřít"><Icon name="x" size={18} /></button>}
+          </header>
+        )}
+        <div className="s21-drawer__body">{children}</div>
+        {footer && <footer className="s21-drawer__foot">{footer}</footer>}
+      </aside>
+    </div>
+  );
+}
+
+/* ───────────── BottomSheet (NEW — Fáze H) — mobile-first Drawer varianta ───────────── */
+function BottomSheet({ open, onClose, title, children, height = "60vh" }) {
+  return <Drawer open={open} onClose={onClose} side="bottom" size={height} title={title} className="s21-drawer--sheet">{children}</Drawer>;
+}
+
+/* ───────────── Accordion (NEW — Fáze H) ───────────── */
+function Accordion({ items = [], multiple = false, defaultOpen = [], className }) {
+  const [open, setOpen] = useState(() => new Set(defaultOpen));
+  const toggle = (k) => setOpen((prev) => {
+    const n = new Set(multiple ? prev : []);
+    if (prev.has(k)) n.delete(k); else n.add(k);
+    return n;
+  });
+  return (
+    <div className={cx("s21-acc", className)}>
+      {items.map((it) => {
+        const isOpen = open.has(it.key);
+        return (
+          <div key={it.key} className={cx("s21-acc__item", isOpen && "is-open")}>
+            <button type="button" className="s21-acc__head" onClick={() => toggle(it.key)} aria-expanded={isOpen}>
+              <span className="s21-acc__title">{it.title}</span>
+              {it.meta && <span className="s21-acc__meta">{it.meta}</span>}
+              <Icon name="chevron-down" size={16} className="s21-acc__chev" />
+            </button>
+            {isOpen && <div className="s21-acc__body">{it.content}</div>}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ───────────── Timeline (NEW — Fáze H) ───────────── */
+function Timeline({ items = [], className }) {
+  return (
+    <ol className={cx("s21-tl", className)}>
+      {items.map((it, i) => (
+        <li key={i} className={cx("s21-tl__item", it.tone && `s21-tl__item--${it.tone}`)}>
+          <span className="s21-tl__dot">{it.icon ? <Icon name={it.icon} size={12} /> : null}</span>
+          <div className="s21-tl__body">
+            {it.time && <span className="s21-tl__time">{it.time}</span>}
+            <div className="s21-tl__title">{it.title}</div>
+            {it.description && <div className="s21-tl__desc">{it.description}</div>}
+            {it.by && <div className="s21-tl__by">— {it.by}</div>}
+          </div>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+/* ───────────── Sparkline (NEW — Fáze H) — mini SVG chart ───────────── */
+function Sparkline({ data = [], width = 100, height = 32, stroke = "var(--primary)", fill = "var(--primary-soft)", strokeWidth = 2, ariaLabel = "Trend", showArea = true }) {
+  if (!data.length) return null;
+  const min = Math.min(...data), max = Math.max(...data);
+  const range = max - min || 1;
+  const stepX = data.length > 1 ? width / (data.length - 1) : 0;
+  const pts = data.map((v, i) => [i * stepX, height - ((v - min) / range) * (height - strokeWidth) - strokeWidth / 2]);
+  const path = pts.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+  const area = showArea ? `${path} L${width.toFixed(1)},${height} L0,${height} Z` : null;
+  const [lx, ly] = pts[pts.length - 1];
+  return (
+    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img" aria-label={ariaLabel} className="s21-spark">
+      {area && <path d={area} fill={fill} />}
+      <path d={path} fill="none" stroke={stroke} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={lx} cy={ly} r={strokeWidth + 1} fill={stroke} />
+    </svg>
+  );
+}
+
+/* ───────────── CommandPalette (NEW — Fáze H) ⌘K ───────────── */
+function CommandPalette({ open, onClose, items = [], placeholder = "Hledat příkazy, stránky…", emptyLabel = "Nic nenalezeno", shortcut = "⌘K" }) {
+  const [q, setQ] = useState("");
+  const [idx, setIdx] = useState(0);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    setQ(""); setIdx(0);
+    const t = setTimeout(() => inputRef.current && inputRef.current.focus(), 30);
+    const onKey = (e) => {
+      if (e.key === "Escape") onClose && onClose();
+    };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => { clearTimeout(t); document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+  }, [open, onClose]);
+
+  const norm = (s) => (s || "").toString().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  const nq = norm(q);
+  const flat = items.flatMap((sec) => (sec.items || []).map((it) => ({ ...it, section: sec.title })));
+  const matches = nq ? flat.filter((it) => norm(it.label).includes(nq) || norm(it.hint || "").includes(nq)) : flat;
+  const grouped = matches.reduce((acc, it) => {
+    (acc[it.section || ""] = acc[it.section || ""] || []).push(it); return acc;
+  }, {});
+
+  const onInputKey = (e) => {
+    if (e.key === "ArrowDown") { e.preventDefault(); setIdx((i) => Math.min(matches.length - 1, i + 1)); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); setIdx((i) => Math.max(0, i - 1)); }
+    else if (e.key === "Enter") { e.preventDefault(); const it = matches[idx]; if (it) { it.onSelect && it.onSelect(); onClose && onClose(); } }
+  };
+
+  if (!open) return null;
+  let running = -1;
+  return (
+    <div className="s21-cmdk" role="dialog" aria-modal="true" aria-label="Command palette">
+      <div className="s21-cmdk__backdrop" onClick={onClose} />
+      <div className="s21-cmdk__panel">
+        <div className="s21-cmdk__head">
+          <Icon name="search" size={18} className="s21-cmdk__searchicon" />
+          <input ref={inputRef} value={q} onChange={(e) => { setQ(e.target.value); setIdx(0); }}
+            onKeyDown={onInputKey} className="s21-cmdk__input" placeholder={placeholder} aria-label={placeholder} />
+          <Kbd>{shortcut}</Kbd>
+        </div>
+        <div className="s21-cmdk__list" role="listbox">
+          {matches.length === 0 && <div className="s21-cmdk__empty">{emptyLabel}</div>}
+          {Object.entries(grouped).map(([sec, list]) => (
+            <div key={sec || "_"} className="s21-cmdk__group">
+              {sec && <div className="s21-cmdk__label">{sec}</div>}
+              {list.map((it) => { running += 1; const i = running; return (
+                <button key={it.id || i} type="button" role="option" aria-selected={i === idx}
+                  className={cx("s21-cmdk__item", i === idx && "is-active")}
+                  onMouseEnter={() => setIdx(i)}
+                  onClick={() => { it.onSelect && it.onSelect(); onClose && onClose(); }}>
+                  {it.icon && <Icon name={it.icon} size={16} />}
+                  <span className="s21-cmdk__lbl">{it.label}</span>
+                  {it.hint && <span className="s21-cmdk__hint">{it.hint}</span>}
+                  {it.kbd && <Kbd>{it.kbd}</Kbd>}
+                </button>
+              ); })}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ───────────── Theme (NEW — Fáze E) ───────────── */
 function getInitialTheme() {
   if (typeof window === "undefined") return "light";
@@ -1016,6 +1185,7 @@ export {
   Breadcrumbs, PageHeader, Sidebar, TopBar, AppShell, PageBody, PoweredBy, ListCard, StickyActionBar,
   Tooltip, Skeleton, Progress, Callout, Switch, Avatar, AvatarGroup, Kbd, RadioGroup, Popover, DropdownMenu,
   ThemeToggle, useTheme,
+  Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
 };
 
 if (typeof window !== "undefined") {
@@ -1027,5 +1197,6 @@ if (typeof window !== "undefined") {
   Breadcrumbs, PageHeader, Sidebar, TopBar, AppShell, PageBody, PoweredBy, ListCard, StickyActionBar,
   Tooltip, Skeleton, Progress, Callout, Switch, Avatar, AvatarGroup, Kbd, RadioGroup, Popover, DropdownMenu,
   ThemeToggle, useTheme,
+  Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
 };
 }

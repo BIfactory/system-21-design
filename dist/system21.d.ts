@@ -192,3 +192,23 @@ export declare function DropdownMenu(p: DropdownMenuProps): JSX.Element;
 /* — Theme (Fáze E) — */
 export declare function useTheme(): { theme: "light" | "dark"; toggle(): void; set(t: "light" | "dark"): void };
 export declare function ThemeToggle(p: { className?: string }): JSX.Element;
+
+/* — Fáze H components — */
+export interface DrawerProps { open: boolean; onClose?: () => void; side?: "left" | "right" | "top" | "bottom"; size?: number | string; title?: ReactNode; description?: ReactNode; footer?: ReactNode; children?: ReactNode; className?: string }
+export declare function Drawer(p: DrawerProps): JSX.Element | null;
+export declare function BottomSheet(p: { open: boolean; onClose?: () => void; title?: ReactNode; children?: ReactNode; height?: number | string }): JSX.Element | null;
+
+export interface AccordionItem { key: string; title: ReactNode; meta?: ReactNode; content: ReactNode }
+export interface AccordionProps { items: AccordionItem[]; multiple?: boolean; defaultOpen?: string[]; className?: string }
+export declare function Accordion(p: AccordionProps): JSX.Element;
+
+export interface TimelineItem { time?: ReactNode; title: ReactNode; description?: ReactNode; by?: ReactNode; icon?: IconName; tone?: "primary" | "success" | "danger" }
+export declare function Timeline(p: { items: TimelineItem[]; className?: string }): JSX.Element;
+
+export interface SparklineProps { data: number[]; width?: number; height?: number; stroke?: string; fill?: string; strokeWidth?: number; ariaLabel?: string; showArea?: boolean }
+export declare function Sparkline(p: SparklineProps): JSX.Element | null;
+
+export interface CommandItem { id?: string; label: string; hint?: string; icon?: IconName; kbd?: string; onSelect?: () => void }
+export interface CommandSection { title?: string; items: CommandItem[] }
+export interface CommandPaletteProps { open: boolean; onClose?: () => void; items: CommandSection[]; placeholder?: string; emptyLabel?: string; shortcut?: string }
+export declare function CommandPalette(p: CommandPaletteProps): JSX.Element | null;
