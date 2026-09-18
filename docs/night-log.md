@@ -78,6 +78,28 @@ Průběh práce podle `NIGHT_PLAN.md`. Zapisuju čas začátku fáze, hotovo/př
 
 **Commit:** `night/D: typography (font-features, tabular-nums, display-xl/lg, overline)`
 
+---
+
+## Fáze F — Rozšíření ikonového setu (20 → 65) — HOTOVO
+
+**Přidáno 45 ikon** (Lucide-style, 24×24, stroke 2, ručně do PATHS):
+- Navigace: `chevron-up`, `arrow-up/down/left/right/up-right`, `external-link`
+- Akce: `minus`, `download`, `upload`, `copy`, `edit`, `trash`, `eye`, `eye-off`, `lock`, `unlock`, `refresh`, `save`
+- Komunikace: `mail`, `phone`, `send`, `bell`, `share`, `link`
+- Značení: `bookmark`, `flag`, `heart`, `star`, `tag`, `map-pin`
+- Data view: `sort-asc`, `sort-desc`, `grid`, `list`, `columns`, `expand`, `collapse`
+- Soubory/tisk: `image`, `file`, `paperclip`, `printer`, `credit-card`
+- Osoby/místa: `home`, `building`, `users`, `user-plus`
+- Feedback: `alert-circle`, `alert-triangle`, `info`, `help-circle`
+- Analytika: `sparkles`, `zap`, `activity`, `trending-up`, `trending-down`, `bar-chart`, `pie-chart`
+- Motiv: `sun`, `moon`
+- Média: `play`, `pause`, `arrow-repeat`, `cloud`
+
+TypeScript union type `IconName` aktualizován.
+
+**Commit:** `night/F: expand icon set 20 → 65 (Lucide-style, hand-inlined)`
+
+
 
 
 

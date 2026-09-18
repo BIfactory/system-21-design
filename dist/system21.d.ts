@@ -1,7 +1,19 @@
 // System 21 — window.S21. Types are documentation.
 import type { ReactNode, ButtonHTMLAttributes, InputHTMLAttributes, SelectHTMLAttributes } from "react";
 
-export type IconName = "dashboard" | "tasks" | "calendar" | "clock" | "notes" | "user" | "logout" | "settings" | "chevron-down" | "chevron-right" | "chevron-left" | "search" | "plus" | "check" | "x" | "qr" | "menu" | "folder" | "more" | "filter";
+export type IconName =
+  | "dashboard" | "tasks" | "calendar" | "clock" | "notes" | "user" | "logout" | "settings"
+  | "chevron-down" | "chevron-right" | "chevron-left" | "chevron-up"
+  | "search" | "plus" | "minus" | "check" | "x" | "qr" | "menu" | "folder" | "more" | "filter"
+  | "arrow-up" | "arrow-down" | "arrow-left" | "arrow-right" | "arrow-up-right" | "external-link"
+  | "download" | "upload" | "copy" | "edit" | "trash" | "eye" | "eye-off" | "lock" | "unlock"
+  | "mail" | "phone" | "send" | "bell" | "bookmark" | "flag" | "heart" | "star" | "share" | "link" | "refresh"
+  | "sort-asc" | "sort-desc" | "grid" | "list" | "columns" | "expand" | "collapse"
+  | "image" | "file" | "paperclip" | "printer" | "credit-card" | "tag" | "map-pin"
+  | "home" | "building" | "users" | "user-plus"
+  | "alert-circle" | "alert-triangle" | "info" | "help-circle"
+  | "sparkles" | "zap" | "activity" | "trending-up" | "trending-down" | "bar-chart" | "pie-chart"
+  | "sun" | "moon" | "play" | "pause" | "arrow-repeat" | "cloud" | "save";
 
 export interface IconProps { name: IconName; size?: number; strokeWidth?: number; className?: string; title?: string }
 export declare function Icon(p: IconProps): JSX.Element;
