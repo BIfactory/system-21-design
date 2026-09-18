@@ -149,3 +149,42 @@ export declare function Sidebar(p: SidebarProps): JSX.Element;
 export interface AppShellProps { sidebar: ReactNode; /** <TopBar/>; hosts the mobile menu button. */ topbar?: ReactNode; children: ReactNode; /** Preview only. */ defaultDrawerOpen?: boolean }
 export declare function AppShell(p: AppShellProps): JSX.Element;
 export declare function PageBody(p: { children: ReactNode }): JSX.Element;
+
+/* — Fáze G components — */
+export interface TooltipProps { label: ReactNode; children: ReactNode; side?: "top" | "bottom" | "left" | "right"; delay?: number; className?: string }
+export declare function Tooltip(p: TooltipProps): JSX.Element;
+
+export interface SkeletonProps { w?: number | string; h?: number | string; radius?: string; className?: string; style?: React.CSSProperties }
+export declare const Skeleton: {
+  (p: SkeletonProps): JSX.Element;
+  Text: (p: { lines?: number; gap?: number; w?: number | string }) => JSX.Element;
+};
+
+export interface ProgressProps { value: number; max?: number; label?: ReactNode; showValue?: boolean; tone?: "primary" | "success" | "danger" | "warning"; size?: "sm" | "md" | "lg" }
+export declare const Progress: {
+  (p: ProgressProps): JSX.Element;
+  Circular: (p: { value: number; max?: number; size?: number; stroke?: number; tone?: "primary" | "success" | "danger" | "warning" }) => JSX.Element;
+};
+
+export interface CalloutProps { tone?: "info" | "success" | "warning" | "danger"; icon?: IconName; title?: ReactNode; action?: ReactNode; children?: ReactNode; className?: string }
+export declare function Callout(p: CalloutProps): JSX.Element;
+
+export interface SwitchProps { checked?: boolean; onChange?: (checked: boolean, e?: Event) => void; label?: ReactNode; description?: ReactNode; disabled?: boolean; name?: string; id?: string }
+export declare function Switch(p: SwitchProps): JSX.Element;
+
+export interface AvatarProps { name?: string; src?: string; size?: number; tone?: "primary" | "accent" | "muted"; className?: string }
+export declare function Avatar(p: AvatarProps): JSX.Element;
+export interface AvatarGroupProps { items: { name?: string; src?: string; tone?: "primary" | "accent" | "muted" }[]; max?: number; size?: number }
+export declare function AvatarGroup(p: AvatarGroupProps): JSX.Element;
+
+export declare function Kbd(p: { children: ReactNode; className?: string }): JSX.Element;
+
+export interface RadioOption { value: string; label: ReactNode; description?: ReactNode }
+export interface RadioGroupProps { name: string; value?: string; onChange?: (v: string) => void; options: RadioOption[]; orientation?: "horizontal" | "vertical"; disabled?: boolean }
+export declare function RadioGroup(p: RadioGroupProps): JSX.Element;
+
+export interface PopoverProps { open: boolean; onClose?: () => void; anchor?: React.RefObject<HTMLElement>; side?: "top" | "bottom"; align?: "start" | "end" | "center"; children?: ReactNode; className?: string }
+export declare function Popover(p: PopoverProps): JSX.Element | null;
+
+export interface DropdownMenuProps { trigger: ReactNode | ((s: { open: boolean }) => ReactNode); children: ReactNode | ((s: { close: () => void }) => ReactNode); align?: "start" | "end"; className?: string }
+export declare function DropdownMenu(p: DropdownMenuProps): JSX.Element;

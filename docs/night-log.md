@@ -99,6 +99,33 @@ TypeScript union type `IconName` aktualizován.
 
 **Commit:** `night/F: expand icon set 20 → 65 (Lucide-style, hand-inlined)`
 
+---
+
+## Fáze G — Nové komponenty: základ — HOTOVO (10/10)
+
+**Přidáno v `src/components/index.jsx` + `bundle.css` + `system21.d.ts`:**
+
+1. **Tooltip** — hover/focus s delay, 4 strany (top/bottom/left/right), portal-less, tmavý pop se šipkou, `role="tooltip"`.
+2. **Skeleton** — animovaný shimmer (`s21-shimmer` keyframe), `Skeleton.Text` helper (n řádků, poslední kratší).
+3. **Progress** — lineární (sm/md/lg), 4 tony (primary/success/danger/warning), aria-progressbar, hlavička s label + % (tabular). `Progress.Circular` (SVG, konfigurovatelná velikost a stroke).
+4. **Callout** — inline notice s tonem info/success/warning/danger, default ikonou, volitelnou action. `role=alert` pro warning/danger.
+5. **Switch** — accessible `role="switch"` toggle, thumb s ease-out-back animací (16px slide), focus glow, disabled state.
+6. **Avatar + AvatarGroup** — kruhový avatar iniciál nebo image, 3 tone (primary/accent/muted); group s max overlap a "+N" spillover.
+7. **Kbd** — `<kbd>` ve stylu fyzické klávesy (border-bottom 2px + mono font).
+8. **RadioGroup** — kartová varianta (checked = primary-soft podklad), horizontal/vertical, aria-radiogroup, focus glow.
+9. **Popover** — trigger anchored (top/bottom × start/end/center), escape + outside click close, `s21-pop-in` entrance.
+10. **DropdownMenu** — controlled wrapper nad existujícím `.s21-dd` markup; `trigger` a `children` mohou být funkce (render-prop pro state).
+
+**Findings:**
+- `role="switch"` + native checkbox = nejlepší accessibility bez custom keyboard handleru.
+- `color-mix` pro Callout borders → světlejší varianta primary/warning-text jako border v mixu s `--border`.
+- Skeleton používá gradient bg + shimmer keyframe — cache-friendly.
+
+**Poznámka:** Previews (`components/*/preview.html`) pro tyto komponenty přidám v Fázi L (showcase). Zatím jsou dostupné přes `window.S21.<Name>` v `dist/system21.js`.
+
+**Commit:** `night/G: 10 base components (Tooltip, Skeleton, Progress, Callout, Switch, Avatar, Kbd, RadioGroup, Popover, DropdownMenu)`
+
+
 
 
 

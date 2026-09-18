@@ -794,6 +794,179 @@ function StickyActionBar({ label, value, note, action, inline = false }) {
   );
 }
 
+/* ───────────── Tooltip (NEW — Fáze G) ───────────── */
+function Tooltip({ label, children, side = "top", delay = 250, className }) {
+  const [open, setOpen] = useState(false);
+  const t = useRef(null);
+  const show = () => { clearTimeout(t.current); t.current = setTimeout(() => setOpen(true), delay); };
+  const hide = () => { clearTimeout(t.current); setOpen(false); };
+  useEffect(() => () => clearTimeout(t.current), []);
+  return (
+    <span className={cx("s21-tt", className)} onMouseEnter={show} onMouseLeave={hide} onFocus={show} onBlur={hide}>
+      {children}
+      {open && <span role="tooltip" className={cx("s21-tt__pop", `s21-tt__pop--${side}`)}>{label}</span>}
+    </span>
+  );
+}
+
+/* ───────────── Skeleton (NEW — Fáze G) ───────────── */
+function Skeleton({ w, h, radius = "var(--radius-md)", className, style }) {
+  const s = { width: w, height: h, borderRadius: radius, ...style };
+  return <span aria-hidden="true" className={cx("s21-sk", className)} style={s} />;
+}
+Skeleton.Text = function ({ lines = 3, gap = 8, w = "100%" }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap }}>
+      {Array.from({ length: lines }).map((_, i) =>
+        <Skeleton key={i} h={12} w={i === lines - 1 ? "60%" : w} />)}
+    </div>
+  );
+};
+
+/* ───────────── Progress (NEW — Fáze G) ───────────── */
+function Progress({ value, max = 100, label, showValue = false, tone = "primary", size = "md" }) {
+  const pct = Math.max(0, Math.min(100, (value / max) * 100));
+  return (
+    <div className={cx("s21-progress", `s21-progress--${size}`, `s21-progress--${tone}`)}>
+      {(label || showValue) && (
+        <div className="s21-progress__head">
+          {label && <span className="s21-progress__label">{label}</span>}
+          {showValue && <span className="s21-progress__val">{Math.round(pct)} %</span>}
+        </div>
+      )}
+      <div className="s21-progress__track" role="progressbar" aria-valuenow={value} aria-valuemin={0} aria-valuemax={max}>
+        <div className="s21-progress__fill" style={{ width: `${pct}%` }} />
+      </div>
+    </div>
+  );
+}
+Progress.Circular = function ({ value, max = 100, size = 40, stroke = 4, tone = "primary" }) {
+  const pct = Math.max(0, Math.min(100, (value / max) * 100));
+  const r = (size - stroke) / 2, c = 2 * Math.PI * r;
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className={cx("s21-progress-c", `s21-progress-c--${tone}`)} role="progressbar" aria-valuenow={value} aria-valuemin={0} aria-valuemax={max}>
+      <circle cx={size / 2} cy={size / 2} r={r} strokeWidth={stroke} className="s21-progress-c__track" fill="none" />
+      <circle cx={size / 2} cy={size / 2} r={r} strokeWidth={stroke} className="s21-progress-c__fill" fill="none"
+        strokeDasharray={c} strokeDashoffset={c * (1 - pct / 100)} strokeLinecap="round"
+        transform={`rotate(-90 ${size / 2} ${size / 2})`} />
+    </svg>
+  );
+};
+
+/* ───────────── Callout (NEW — Fáze G) ───────────── */
+function Callout({ tone = "info", icon, title, action, children, className }) {
+  const defaultIcon = { info: "info", success: "check", warning: "alert-triangle", danger: "alert-circle" }[tone] || "info";
+  return (
+    <div className={cx("s21-callout", `s21-callout--${tone}`, className)} role={tone === "danger" || tone === "warning" ? "alert" : "note"}>
+      <span className="s21-callout__icon"><Icon name={icon || defaultIcon} size={18} /></span>
+      <div className="s21-callout__body">
+        {title && <div className="s21-callout__title">{title}</div>}
+        {children && <div className="s21-callout__desc">{children}</div>}
+      </div>
+      {action && <div className="s21-callout__action">{action}</div>}
+    </div>
+  );
+}
+
+/* ───────────── Switch (NEW — Fáze G) ───────────── */
+function Switch({ checked, onChange, label, description, disabled, name, id }) {
+  const _id = id || (name && `s21-sw-${name}`) || undefined;
+  return (
+    <label className={cx("s21-switch", disabled && "is-disabled")}>
+      <input id={_id} name={name} type="checkbox" role="switch" checked={!!checked} disabled={disabled}
+        onChange={(e) => onChange && onChange(e.target.checked, e)} className="s21-switch__input" />
+      <span className="s21-switch__track" aria-hidden="true"><span className="s21-switch__thumb" /></span>
+      {(label || description) && (
+        <span className="s21-switch__txt">
+          {label && <span className="s21-switch__label">{label}</span>}
+          {description && <span className="s21-switch__desc">{description}</span>}
+        </span>
+      )}
+    </label>
+  );
+}
+
+/* ───────────── Avatar + AvatarGroup (NEW — Fáze G) ───────────── */
+function Avatar({ name, src, size = 36, tone = "primary", className }) {
+  const style = { width: size, height: size, fontSize: Math.max(10, Math.round(size * 0.38)) };
+  return (
+    <span className={cx("s21-avatar2", `s21-avatar2--${tone}`, className)} style={style} aria-label={name} title={name}>
+      {src ? <img src={src} alt="" /> : <span>{initials(name || "?")}</span>}
+    </span>
+  );
+}
+function AvatarGroup({ items = [], max = 4, size = 32 }) {
+  const shown = items.slice(0, max);
+  const rest = items.length - shown.length;
+  return (
+    <span className="s21-avatar-grp" style={{ "--sz": `${size}px` }}>
+      {shown.map((it, i) => <Avatar key={i} name={it.name} src={it.src} size={size} tone={it.tone} />)}
+      {rest > 0 && <span className="s21-avatar2 s21-avatar2--muted" style={{ width: size, height: size, fontSize: Math.max(10, Math.round(size * 0.38)) }}>+{rest}</span>}
+    </span>
+  );
+}
+
+/* ───────────── Kbd (NEW — Fáze G) ───────────── */
+function Kbd({ children, className }) {
+  return <kbd className={cx("s21-kbd", className)}>{children}</kbd>;
+}
+
+/* ───────────── RadioGroup (NEW — Fáze G) ───────────── */
+function RadioGroup({ name, value, onChange, options = [], orientation = "horizontal", disabled }) {
+  return (
+    <div className={cx("s21-radio-grp", `s21-radio-grp--${orientation}`)} role="radiogroup">
+      {options.map((o) => {
+        const id = `${name}-${o.value}`;
+        const checked = value === o.value;
+        return (
+          <label key={o.value} htmlFor={id} className={cx("s21-radio", checked && "is-checked", disabled && "is-disabled")}>
+            <input id={id} type="radio" name={name} value={o.value} checked={checked} disabled={disabled}
+              onChange={() => onChange && onChange(o.value)} className="s21-radio__input" />
+            <span className="s21-radio__dot" aria-hidden="true" />
+            <span className="s21-radio__label">{o.label}</span>
+            {o.description && <span className="s21-radio__desc">{o.description}</span>}
+          </label>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ───────────── Popover (NEW — Fáze G) ───────────── */
+function Popover({ open, onClose, anchor, side = "bottom", align = "start", children, className }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e) => { if (ref.current && !ref.current.contains(e.target) && !(anchor && anchor.current && anchor.current.contains(e.target))) onClose && onClose(); };
+    const onKey = (e) => { if (e.key === "Escape") onClose && onClose(); };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("mousedown", onDoc); document.removeEventListener("keydown", onKey); };
+  }, [open, onClose, anchor]);
+  if (!open) return null;
+  return <div ref={ref} className={cx("s21-popover", `s21-popover--${side}`, `s21-popover--${align}`, className)} role="dialog">{children}</div>;
+}
+
+/* ───────────── DropdownMenu (NEW — Fáze G, řízená alternativa k .s21-dd surové ─────────────) */
+function DropdownMenu({ trigger, children, align = "end", className }) {
+  const [open, setOpen] = useState(false);
+  const wrap = useRef(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e) => { if (wrap.current && !wrap.current.contains(e.target)) setOpen(false); };
+    const onKey = (e) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("mousedown", onDoc); document.removeEventListener("keydown", onKey); };
+  }, [open]);
+  return (
+    <div ref={wrap} className={cx("s21-dd", className)}>
+      <span onClick={() => setOpen((v) => !v)}>{typeof trigger === "function" ? trigger({ open }) : trigger}</span>
+      {open && <div className={cx("s21-dd__menu", align === "start" && "s21-dd__menu--start")} role="menu">{typeof children === "function" ? children({ close: () => setOpen(false) }) : children}</div>}
+    </div>
+  );
+}
+
 /* ───────────── Page ───────────── */
 function PageBody({ children }) {
   return <div className="s21-pagebody">{children}</div>;
@@ -805,6 +978,7 @@ export {
   DataTable, SortIcon, Pagination, StatTile, Section, EmptyState, Stepper,
   Modal, Toast, ToastProvider, useToast,
   Breadcrumbs, PageHeader, Sidebar, TopBar, AppShell, PageBody, PoweredBy, ListCard, StickyActionBar,
+  Tooltip, Skeleton, Progress, Callout, Switch, Avatar, AvatarGroup, Kbd, RadioGroup, Popover, DropdownMenu,
 };
 
 if (typeof window !== "undefined") {
@@ -814,5 +988,6 @@ if (typeof window !== "undefined") {
   DataTable, SortIcon, Pagination, StatTile, Section, EmptyState, Stepper,
   Modal, Toast, ToastProvider, useToast,
   Breadcrumbs, PageHeader, Sidebar, TopBar, AppShell, PageBody, PoweredBy, ListCard, StickyActionBar,
+  Tooltip, Skeleton, Progress, Callout, Switch, Avatar, AvatarGroup, Kbd, RadioGroup, Popover, DropdownMenu,
 };
 }

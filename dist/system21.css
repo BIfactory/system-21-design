@@ -439,3 +439,111 @@ body { font-family: var(--font-body); color: var(--ink); margin: 0; font-feature
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
+
+/* ─── Tooltip (Fáze G) ─── */
+.s21-tt { position: relative; display: inline-flex; }
+.s21-tt__pop { position: absolute; z-index: 70; padding: 4px var(--space-2); background: #1f2124; color: #f5f5f5; font: 500 12px/16px var(--font-body); border-radius: var(--radius-md); white-space: nowrap; pointer-events: none; box-shadow: var(--elev-3); animation: s21-pop-in var(--motion-duration-fast) var(--motion-ease-out); max-width: 240px; }
+.s21-tt__pop::after { content: ""; position: absolute; width: 8px; height: 8px; background: #1f2124; transform: rotate(45deg); }
+.s21-tt__pop--top { bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); }
+.s21-tt__pop--top::after { top: 100%; left: 50%; margin-top: -4px; margin-left: -4px; }
+.s21-tt__pop--bottom { top: calc(100% + 6px); left: 50%; transform: translateX(-50%); }
+.s21-tt__pop--bottom::after { bottom: 100%; left: 50%; margin-bottom: -4px; margin-left: -4px; }
+.s21-tt__pop--left { right: calc(100% + 6px); top: 50%; transform: translateY(-50%); }
+.s21-tt__pop--left::after { left: 100%; top: 50%; margin-left: -4px; margin-top: -4px; }
+.s21-tt__pop--right { left: calc(100% + 6px); top: 50%; transform: translateY(-50%); }
+.s21-tt__pop--right::after { right: 100%; top: 50%; margin-right: -4px; margin-top: -4px; }
+
+/* ─── Skeleton (Fáze G) ─── */
+.s21-sk { display: block; background: linear-gradient(90deg, var(--surface-muted) 0%, var(--paper) 50%, var(--surface-muted) 100%); background-size: 200% 100%; animation: s21-shimmer 1.4s var(--motion-ease-in-out) infinite; }
+
+/* ─── Progress (Fáze G) ─── */
+.s21-progress { display: flex; flex-direction: column; gap: var(--space-1-5); min-width: 0; }
+.s21-progress__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2); }
+.s21-progress__label { font: 500 12px/16px var(--font-body); color: var(--ink-muted); }
+.s21-progress__val { font: 600 12px/16px var(--font-mono); color: var(--ink); font-variant-numeric: tabular-nums; }
+.s21-progress__track { height: 8px; background: var(--surface-muted); border-radius: var(--radius-full); overflow: hidden; }
+.s21-progress--sm .s21-progress__track { height: 4px; }
+.s21-progress--lg .s21-progress__track { height: 12px; }
+.s21-progress__fill { height: 100%; background: var(--primary); border-radius: inherit; transition: width var(--motion-duration-slow) var(--motion-ease-out); box-shadow: inset 0 1px 0 var(--shine); }
+.s21-progress--success .s21-progress__fill { background: var(--success-solid); }
+.s21-progress--danger .s21-progress__fill { background: var(--danger-solid); }
+.s21-progress--warning .s21-progress__fill { background: var(--accent); }
+.s21-progress-c { display: inline-block; }
+.s21-progress-c__track { stroke: var(--surface-muted); }
+.s21-progress-c__fill { stroke: var(--primary); transition: stroke-dashoffset var(--motion-duration-slow) var(--motion-ease-out); }
+.s21-progress-c--success .s21-progress-c__fill { stroke: var(--success-solid); }
+.s21-progress-c--danger .s21-progress-c__fill { stroke: var(--danger-solid); }
+.s21-progress-c--warning .s21-progress-c__fill { stroke: var(--accent); }
+
+/* ─── Callout (Fáze G) ─── */
+.s21-callout { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3) var(--space-4); border: 1px solid; border-radius: var(--radius-xl); background: var(--surface-raised); }
+.s21-callout__icon { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: var(--radius-full); }
+.s21-callout__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.s21-callout__title { font: 600 14px/20px var(--font-body); }
+.s21-callout__desc { font: 400 13px/18px var(--font-body); color: var(--ink-muted); }
+.s21-callout__action { flex-shrink: 0; }
+.s21-callout--info { border-color: color-mix(in srgb, var(--primary-text) 20%, var(--border)); background: color-mix(in srgb, var(--primary-soft) 40%, var(--surface-raised)); }
+.s21-callout--info .s21-callout__icon { background: var(--primary-soft); color: var(--primary-text); }
+.s21-callout--info .s21-callout__title { color: var(--primary-text); }
+.s21-callout--success { border-color: var(--success-border); background: var(--success-bg); }
+.s21-callout--success .s21-callout__icon { background: color-mix(in srgb, var(--success-solid) 15%, transparent); color: var(--success-text); }
+.s21-callout--success .s21-callout__title { color: var(--success-text); }
+.s21-callout--warning { border-color: color-mix(in srgb, var(--warning-text) 25%, var(--border)); background: var(--warning-bg); }
+.s21-callout--warning .s21-callout__icon { background: color-mix(in srgb, var(--warning-text) 15%, transparent); color: var(--warning-text); }
+.s21-callout--warning .s21-callout__title { color: var(--warning-text); }
+.s21-callout--danger { border-color: var(--danger-border); background: var(--danger-bg); }
+.s21-callout--danger .s21-callout__icon { background: color-mix(in srgb, var(--danger-solid) 15%, transparent); color: var(--danger-text); }
+.s21-callout--danger .s21-callout__title { color: var(--danger-text); }
+
+/* ─── Switch (Fáze G) ─── */
+.s21-switch { display: inline-flex; align-items: flex-start; gap: var(--space-3); cursor: pointer; user-select: none; }
+.s21-switch.is-disabled { opacity: .5; cursor: not-allowed; }
+.s21-switch__input { position: absolute; opacity: 0; pointer-events: none; }
+.s21-switch__track { position: relative; flex-shrink: 0; width: 36px; height: 20px; margin-top: 2px; border-radius: var(--radius-full); background: var(--surface-muted); border: 1px solid var(--border); transition: background var(--motion-duration-fast) var(--motion-ease-out), border-color var(--motion-duration-fast) var(--motion-ease-out); }
+.s21-switch__thumb { position: absolute; top: 1px; left: 1px; width: 16px; height: 16px; border-radius: var(--radius-full); background: var(--white); box-shadow: var(--elev-1); transition: transform var(--motion-duration-base) var(--motion-ease-out-back); }
+.s21-switch__input:checked + .s21-switch__track { background: var(--primary); border-color: var(--primary); }
+.s21-switch__input:checked + .s21-switch__track .s21-switch__thumb { transform: translateX(16px); }
+.s21-switch__input:focus-visible + .s21-switch__track { box-shadow: var(--elev-focus-glow); }
+.s21-switch__txt { display: flex; flex-direction: column; gap: 2px; }
+.s21-switch__label { font: 600 14px/20px var(--font-body); }
+.s21-switch__desc { font: 400 12px/16px var(--font-body); color: var(--ink-muted); }
+
+/* ─── Avatar (Fáze G) ─── */
+.s21-avatar2 { display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-full); overflow: hidden; font-family: var(--font-display); font-weight: 700; line-height: 1; }
+.s21-avatar2 img { width: 100%; height: 100%; object-fit: cover; }
+.s21-avatar2--primary { background: var(--primary); color: var(--on-primary); }
+.s21-avatar2--accent { background: var(--accent); color: var(--on-accent); }
+.s21-avatar2--muted { background: var(--surface-muted); color: var(--ink-muted); border: 1px solid var(--border); }
+.s21-avatar-grp { display: inline-flex; }
+.s21-avatar-grp .s21-avatar2 { box-shadow: 0 0 0 2px var(--surface); margin-left: calc(var(--sz, 32px) / -4); }
+.s21-avatar-grp .s21-avatar2:first-child { margin-left: 0; }
+
+/* ─── Kbd (Fáze G) ─── */
+.s21-kbd { display: inline-flex; align-items: center; padding: 1px 6px; min-width: 20px; height: 20px; box-sizing: border-box; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: var(--radius-md); background: var(--surface-raised); color: var(--ink-muted); font: 600 11px/1 var(--font-mono); letter-spacing: .04em; white-space: nowrap; }
+
+/* ─── RadioGroup (Fáze G) ─── */
+.s21-radio-grp { display: flex; gap: var(--space-2); }
+.s21-radio-grp--vertical { flex-direction: column; }
+.s21-radio { position: relative; display: inline-flex; align-items: flex-start; gap: var(--space-2); padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface-raised); cursor: pointer; user-select: none; min-height: var(--control-h); box-sizing: border-box; transition: border-color var(--motion-duration-fast) var(--motion-ease-out), background var(--motion-duration-fast) var(--motion-ease-out); }
+.s21-radio:hover { background: var(--canvas); }
+.s21-radio.is-checked { border-color: var(--primary); background: var(--primary-soft); }
+.s21-radio.is-disabled { opacity: .5; cursor: not-allowed; }
+.s21-radio__input { position: absolute; opacity: 0; pointer-events: none; }
+.s21-radio__dot { flex-shrink: 0; margin-top: 2px; width: 16px; height: 16px; border: 2px solid var(--border-strong); border-radius: var(--radius-full); transition: border-color var(--motion-duration-fast) var(--motion-ease-out), background var(--motion-duration-fast) var(--motion-ease-out); position: relative; }
+.s21-radio__dot::after { content: ""; position: absolute; inset: 3px; border-radius: var(--radius-full); background: var(--primary); transform: scale(0); transition: transform var(--motion-duration-base) var(--motion-ease-out-back); }
+.s21-radio.is-checked .s21-radio__dot { border-color: var(--primary); }
+.s21-radio.is-checked .s21-radio__dot::after { transform: scale(1); }
+.s21-radio__input:focus-visible + .s21-radio__dot { box-shadow: var(--elev-focus-glow); }
+.s21-radio__label { font: 500 14px/20px var(--font-body); }
+.s21-radio__desc { display: block; font: 400 12px/16px var(--font-body); color: var(--ink-muted); }
+
+/* ─── Popover (Fáze G) ─── */
+.s21-popover { position: absolute; z-index: 60; min-width: 220px; padding: var(--space-3); background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--elev-3); animation: s21-pop-in var(--motion-duration-base) var(--motion-ease-out); }
+.s21-popover--bottom { top: calc(100% + 6px); }
+.s21-popover--top { bottom: calc(100% + 6px); }
+.s21-popover--start { left: 0; }
+.s21-popover--end { right: 0; }
+.s21-popover--center { left: 50%; transform: translateX(-50%); }
+
+/* DropdownMenu — reuses existing .s21-dd. Add start alignment variant */
+.s21-dd__menu--start { left: 0; right: auto; }
