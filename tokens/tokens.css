@@ -74,7 +74,7 @@
   --font-body: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
-.page-title { font-family: var(--font-display); font-size: 24px; line-height: 1.25; font-weight: 700; letter-spacing: -0.025em; }
+.page-title { font-family: var(--font-display); font-size: 18px; line-height: 1.3; font-weight: 700; letter-spacing: -0.02em; }
 .page-title-mobile { font-family: var(--font-display); font-size: 16px; line-height: 1.25; font-weight: 700; letter-spacing: -0.025em; }
 .section-title { font-family: var(--font-display); font-size: 16px; line-height: 24px; font-weight: 600; }
 .kpi-lg { font-family: var(--font-display); font-size: 30px; line-height: 36px; font-weight: 800; }

@@ -8,7 +8,9 @@ Přilepená bílá hlavička stránky s titulkem, popisem, akcemi vpravo a zálo
 
 **Pravidla:**
 
-- Titulek je `page-title` (Manrope 24 px, na mobilu 16 px), jednořádkový se zkrácením. Shoduje se s poslední úrovní drobečků.
+- Hlavička je kompaktní, protože polohu už ukazují drobečky v `TopBar`. Titulek je `page-title` (Manrope 18 px, na mobilu 16 px), jednořádkový se zkrácením a shoduje se s poslední úrovní drobečků.
+- Popis stojí na desktopu na stejném řádku vedle titulku (13 px, `ink-muted`, zkracuje se), ne pod ním.
+- Svislý padding je `space-3`. Řádek je vysoký jako tlačítka akcí (36 px), záložky 36 px.
 - Popis je `ink-muted` a na mobilu se skrývá.
 - Akce jsou vpravo, primární tlačítko je poslední (nejvíc vpravo). Na mobilu se zalomí pod titulek.
 - Záložky leží v hlavičce, takže při scrollu drží spolu s titulkem. Přilepená hlavička má `shadow-sm` a drží se pod `TopBar`.

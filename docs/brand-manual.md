@@ -31,7 +31,7 @@ Poměr ploch podle brand manuálu **60 / 30 / 10**: bílá a `canvas` jako zákl
 
 ## Typografie
 
-- **Manrope** (`--font-display`) pro titulky stránek (`page-title`), nadpisy sekcí a modalů (`section-title`) a KPI čísla (`kpi`, `kpi-lg`, váha 800).
+- **Manrope** (`--font-display`) pro titulky stránek (`page-title`, 18 px: polohu ukazují drobečky, titulek nemusí křičet), nadpisy sekcí a modalů (`section-title`) a KPI čísla (`kpi`, `kpi-lg`, váha 800).
 - **Archivo** (`--font-body`) pro veškerý text UI: `body` 14 px je výchozí, `small` 12 px pro meta údaje a drobečky, `caption` 11 px pro husté tabulky.
 - **JetBrains Mono** (`--font-mono`) pro strojové věci: záhlaví tabulek, nadpisy sekcí menu, popisky polí a KPI (`label`, verzálky, prostrkání 0.06em), kódy a ID (`code`: „ZAK-2026-0142“), tagy v hranatých závorkách (`eyebrow`: „[ 03 · DATA ]“).
 - Písma se načítají z Google Fonts (import v `components/bundle.css`). V produkci je hostuj lokálně.
@@ -41,7 +41,7 @@ Poměr ploch podle brand manuálu **60 / 30 / 10**: bílá a `canvas` jako zákl
 - **Desktop (≥ 768 px):** `Sidebar` 256 px (`sidebar-width`) je přilepený vlevo na plnou výšku. Nad obsahem je přilepená bílá `TopBar` 56 px (`topbar-h`). Obsah má okraje `space-8` (32 px) a bloky pod sebou mají mezeru `space-4`.
 - **Mobil (< 768 px):** vlastní pravidla v sekci Mobil níže.
 - Tmavý sloupec `Sidebar` vede vždy přes celou výšku okna, od horního po spodní okraj. Obsah menu je přilepený, při scrollu zůstává na místě.
-- `PageHeader` je přilepený hned pod `TopBar` (`shadow-sm`) a drží titulek, akce vpravo a záložky. Při scrollu zůstává na místě.
+- `PageHeader` je přilepený hned pod `TopBar` (`shadow-sm`) a drží titulek, akce vpravo a záložky. Při scrollu zůstává na místě. Je kompaktní: titulek 18 px a popis na stejném řádku, takže TopBar a hlavička dohromady zabírají asi 155 px místo 185 px.
 - Typická stránka seznamu: `TopBar` → `PageHeader` → řada `StatTile` v mřížce `s21-stat-grid` → `ChipGroup` → `FilterBar` → `DataTable` (s `renderCard` pro mobil) → `Pagination`.
 - Typická stránka detailu: `TopBar` s `Breadcrumbs` → `PageHeader` s `Tabs` → obsah záložky v kartách `Section`.
 
@@ -60,12 +60,12 @@ Navigace má dvě osy a každá dělá jednu věc.
 
 Mobilní verze vychází z Polepim Manageru, kde je vyladěná na denní práci v terénu a v dílně. Platí pod 768 px (`breakpoint-md`).
 
-- **Horní lišta:** tmavá lišta 48 px (`topbar-h-mobile`, `sidebar-bg`). Vlevo je hamburger, uprostřed logo a název aplikace, vpravo zelená rychlá akce (40 px) a avatar. Pod ní je bílý řádek drobečků 36 px (`crumbbar-h`) jen s „‹ rodič“. Obě lišty i hlavička stránky zůstávají při scrollu nahoře.
+- **Horní lišta:** tmavá lišta 48 px (`topbar-h-mobile`, `sidebar-bg`). Vlevo je hamburger, uprostřed logo a název aplikace, vpravo zelená rychlá akce (40 px) a avatar. Pod ní je bílý řádek drobečků 36 px (`crumbbar-h`) jen s „‹ rodič“. Na kořenové stránce (Zakázky, Úkoly…) se řádek drobečků nezobrazuje, protože by jen opakoval titulek. Obě lišty i hlavička stránky zůstávají při scrollu nahoře.
 - **Menu:** vysouvá se zleva jako panel `drawer-width` (288 px, max. 85 % šířky) přes rozmazané ztmavení. Zavírá se klepnutím vedle, klávesou Esc a přechodem na jinou stránku. Stránka pod ním nescrolluje.
 - **Nastavení, profil a odhlášení** jsou na mobilu v menu avatara. Ozubené kolo a ikona odhlášení se neukazují.
 - **Seznamy:** místo tabulky jsou karty `ListCard` pod sebou. Nahoře je název (klidně na dva řádky), příznaky a 1 až 2 malé akce, pod nimi meta řádek s kódem a klientem. Pod linkou je jeden řádek čísel (datum, marže, **cena**) a stav vpravo. Celá karta je klikací.
 - **Filtry:** viditelné je jen vyhledávání a vedle něj tlačítko filtru se zeleným počtem aktivních filtrů. Ostatní filtry se rozbalí pod sebe.
-- **Hlavička stránky:** titulek 16 px na celou šířku, akce pod ním vlevo a popis se skrývá. Záložky vodorovně scrollují.
+- **Hlavička stránky:** titulek 16 px a akce vpravo na jednom řádku (tlačítka se zúží, pod titulek spadnou jen když se nevejdou), popis se skrývá. Záložky vodorovně scrollují.
 - **KPI dlaždice** jsou pod sebou přes celou šířku.
 - **Spodní lišta:** v detailu a formulářích s rozpracovanými změnami je dole `StickyActionBar` se souhrnem (například cena) a stavem ukládání nebo jednou akcí.
 - **Stránkování:** jen Předchozí, aktuální stránka a Další.

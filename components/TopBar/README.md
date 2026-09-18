@@ -20,7 +20,7 @@ Bílá horní lišta nad obsahem: vlevo drobečková navigace, vpravo tři ikony
 - Pořadí vpravo je vždy: nastavení → profil → odhlášení.
 - Když něco v nastavení vyžaduje pozornost (`badge` > 0), ukáže se na ozubeném kole červená tečka `danger-solid` a v menu počítadlo u položky.
 - Menu se zavírá klikem mimo, klávesou Esc a výběrem položky. Stín `shadow-lg`, zarovnání k pravému okraji.
-- **Mobil (< 768 px), podle Polepim Manageru:** nahoře je tmavá lišta 48 px (`topbar-h-mobile`) s hamburgerem vlevo, logem a názvem uprostřed a vpravo zelenou rychlou akcí a avatarem. Pod ní je bílý řádek drobečků 36 px (`crumbbar-h`) s „‹ rodič“, na kořenové stránce jen název.
+- **Mobil (< 768 px), podle Polepim Manageru:** nahoře je tmavá lišta 48 px (`topbar-h-mobile`) s hamburgerem vlevo, logem a názvem uprostřed a vpravo zelenou rychlou akcí a avatarem. Pod ní je bílý řádek drobečků 36 px (`crumbbar-h`) s „‹ rodič“. Na kořenové stránce (drobečky s jedinou úrovní) se řádek skryje.
 - Na mobilu mizí ozubené kolo i ikona odhlášení. Nastavení a „Odhlásit se“ jsou v menu avatara a tečku upozornění nese avatar. Menu se otevírá přes celou šířku displeje.
 - Lišta respektuje výřez a zaoblené rohy iPhonu (`safe-area-inset-*`).
 

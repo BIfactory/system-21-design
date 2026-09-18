@@ -604,8 +604,9 @@ function TopBar({ breadcrumbs, title, settings, user, onLogout, extra, brand, qu
       )}
     </div>
   );
+  const isRoot = !!(breadcrumbs && breadcrumbs.props && Array.isArray(breadcrumbs.props.items) && breadcrumbs.props.items.length <= 1);
   return (
-    <header className="s21-topbar">
+    <header className={cx("s21-topbar", isRoot && "is-root")}>
       <div className="s21-topbar__mbar">
         {shell && (
           <button type="button" className="s21-iconbtn s21-iconbtn--dark" aria-label="Otevřít menu" onClick={shell.openDrawer}><Icon name="menu" size={22} /></button>
