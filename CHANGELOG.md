@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.2 — 2026-09-20 (Olaf inspirace — Fáze N)
+
+Přenos 5 nejlepších vzorů z produkční mobilní aplikace `bifactory/olaf/apps/web` do design systému:
+
+- **`<Reveal>`** komponenta — fade-up entrance s stagger, dashboard hero pattern.
+- **`Avatar` `alert` prop** — "!" indikátor v pravém horním rohu (nedokončený profil, oznámení).
+- **`Toast` `role="alert"` + `aria-live`** — screen readery správně notifikují dle tone.
+- **`[data-theme="paper"]`** — warm outdoor/magazine paletta jako scoped alternative k dark; lze aplikovat na sub-strom.
+- **`@media (max-width: 399px)`** — extra-small mobile paddings (Section, Callout, Modal, Drawer, PageBody, StatTile) pro iPhone SE / malé Androidy.
+
+**Přeskočeno pro budoucí iteraci:** DatePicker (DayPicker popup), PWA cache-bust utility.
+
+---
+
 ## v1.1 — 2026-09-18 (Noční autonomní práce)
 
 Cílem bylo posunout System 21 z „funkčního“ na „luxusní, moderní, propracovaný“ — desktop i mobil. 13 fází, každá samostatný commit `night/*` na `main`.

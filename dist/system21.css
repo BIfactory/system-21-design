@@ -202,6 +202,48 @@ body { font-family: var(--font-body); color: var(--ink); margin: 0; font-feature
 .s21-tap::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at center, currentColor 0%, transparent 50%); opacity: 0; transition: opacity var(--motion-duration-base) var(--motion-ease-out); pointer-events: none; }
 .s21-tap:active::after { opacity: .12; transition-duration: 50ms; }
 
+/* ─── Fáze N — Olaf inspirace: Reveal, Avatar dot, scoped theme, xs mobile ─── */
+
+/* Reveal — fade-up entrance s inline delay pro stagger */
+.s21-reveal { animation: s21-reveal-in var(--rv-dur, 700ms) var(--motion-ease-out-back) var(--rv-delay, 0ms) both; }
+@keyframes s21-reveal-in {
+  from { opacity: 0; transform: translateY(var(--rv-dist, 12px)); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) { .s21-reveal { animation: none; opacity: 1; transform: none; } }
+
+/* Avatar alert dot — "!" indicator (nedokončený profil, oznámení) */
+.s21-avatar2-wrap { position: relative; display: inline-flex; }
+.s21-avatar2__alert { position: absolute; top: -2px; right: -2px; min-width: 16px; height: 16px; padding: 0 4px; box-sizing: border-box; border-radius: var(--radius-full); background: var(--accent); color: var(--on-accent); font: 800 10px/16px var(--font-display); text-align: center; box-shadow: 0 0 0 2px var(--surface); }
+
+/* Scoped [data-theme="paper"] — warm outdoor / magazine feel, aplikovatelné na sub-strom */
+[data-theme="paper"] {
+  --canvas: #f6f1e6;
+  --surface: #fdfaf3;
+  --surface-raised: #fffdf7;
+  --surface-sunken: #efe8d8;
+  --paper: #f0e9d6;
+  --border: rgba(101, 76, 32, 0.14);
+  --border-strong: rgba(101, 76, 32, 0.28);
+  --border-subtle: rgba(101, 76, 32, 0.08);
+  --ink: #2a2419;
+  --ink-muted: #6d5f45;
+  --shine: rgba(255,255,255,0.5);
+}
+
+/* Extra-small mobile (pod 400px) — dodatečné zmenšení paddingů karet */
+@media (max-width: 399px) {
+  .s21-section { padding: var(--space-4); }
+  .s21-callout { padding: var(--space-3); }
+  .s21-modal__body, .s21-drawer__body { padding: var(--space-3); }
+  .s21-modal__head, .s21-modal__foot { padding: var(--space-2) var(--space-3); }
+  .s21-pagebody { padding: var(--space-3); gap: var(--space-3); }
+  .s21-stat { padding: var(--space-3); }
+}
+
+/* Utility: schovat při tisku (opt-in, doplněk k default print pravidlům) */
+.s21-hide-on-print { }
+
 /* ─── Fáze M — accessibility polish + print ─── */
 
 /* Skip link — pro klávesnicové uživatele hned po Tab */

@@ -505,8 +505,9 @@ function Modal({ open, onClose, title, description, size = "md", footer, childre
 const ToastCtx = createContext(null);
 function Toast({ tone = "info", message, onDismiss }) {
   const sym = tone === "success" ? "check" : tone === "error" ? "x" : null;
+  const isError = tone === "error";
   return (
-    <div role="status" className={cx("s21-toast", `s21-toast--${tone}`)}>
+    <div role={isError ? "alert" : "status"} aria-live={isError ? "assertive" : "polite"} aria-atomic="true" className={cx("s21-toast", `s21-toast--${tone}`)}>
       <span className="s21-toast__icon">{sym ? <Icon name={sym} size={16} strokeWidth={2.5} /> : <span className="s21-toast__i">i</span>}</span>
       <span className="s21-toast__msg">{message}</span>
       {onDismiss && <button type="button" className="s21-toast__x" aria-label="Zavřít" onClick={onDismiss}><Icon name="x" size={14} /></button>}
@@ -956,11 +957,14 @@ function Switch({ checked, onChange, label, description, disabled, name, id }) {
 }
 
 /* ───────────── Avatar + AvatarGroup (NEW — Fáze G) ───────────── */
-function Avatar({ name, src, size = 36, tone = "primary", className }) {
+function Avatar({ name, src, size = 36, tone = "primary", alert = false, alertLabel = "Nedokončený profil", className }) {
   const style = { width: size, height: size, fontSize: Math.max(10, Math.round(size * 0.38)) };
   return (
-    <span className={cx("s21-avatar2", `s21-avatar2--${tone}`, className)} style={style} aria-label={name} title={name}>
-      {src ? <img src={src} alt="" /> : <span>{initials(name || "?")}</span>}
+    <span className={cx("s21-avatar2-wrap", className)} style={{ display: "inline-flex", position: "relative" }}>
+      <span className={cx("s21-avatar2", `s21-avatar2--${tone}`)} style={style} aria-label={name} title={name}>
+        {src ? <img src={src} alt="" /> : <span>{initials(name || "?")}</span>}
+      </span>
+      {alert && <span className="s21-avatar2__alert" aria-label={alertLabel} title={alertLabel} role="img">!</span>}
     </span>
   );
 }
@@ -1034,6 +1038,12 @@ function DropdownMenu({ trigger, children, align = "end", className }) {
       {open && <div className={cx("s21-dd__menu", align === "start" && "s21-dd__menu--start")} role="menu">{typeof children === "function" ? children({ close: () => setOpen(false) }) : children}</div>}
     </div>
   );
+}
+
+/* ───────────── Reveal (NEW — Fáze N) — fade-up entrance s stagger ───────────── */
+function Reveal({ delay = 0, distance = 12, duration, as: Tag = "div", children, className, style, ...rest }) {
+  const s = { "--rv-delay": `${delay}ms`, "--rv-dist": `${distance}px`, ...(duration ? { "--rv-dur": `${duration}ms` } : null), ...style };
+  return <Tag className={cx("s21-reveal", className)} style={s} {...rest}>{children}</Tag>;
 }
 
 /* ───────────── SkipLink (NEW — Fáze M) — a11y ───────────── */
@@ -1379,7 +1389,7 @@ export {
   Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
   InputGroup, Textarea, FileDrop,
   BottomNav, useScrollDirection,
-  SkipLink,
+  SkipLink, Reveal,
 };
 
 if (typeof window !== "undefined") {
@@ -1394,6 +1404,6 @@ if (typeof window !== "undefined") {
   Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
   InputGroup, Textarea, FileDrop,
   BottomNav, useScrollDirection,
-  SkipLink,
+  SkipLink, Reveal,
 };
 }

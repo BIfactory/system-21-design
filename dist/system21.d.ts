@@ -190,7 +190,11 @@ export declare function Callout(p: CalloutProps): JSX.Element;
 export interface SwitchProps { checked?: boolean; onChange?: (checked: boolean, e?: Event) => void; label?: ReactNode; description?: ReactNode; disabled?: boolean; name?: string; id?: string }
 export declare function Switch(p: SwitchProps): JSX.Element;
 
-export interface AvatarProps { name?: string; src?: string; size?: number; tone?: "primary" | "accent" | "muted"; className?: string }
+export interface AvatarProps { name?: string; src?: string; size?: number; tone?: "primary" | "accent" | "muted"; className?: string;
+  /** Show a "!" alert dot on top-right (e.g. incomplete profile). */
+  alert?: boolean;
+  alertLabel?: string;
+}
 export declare function Avatar(p: AvatarProps): JSX.Element;
 export interface AvatarGroupProps { items: { name?: string; src?: string; tone?: "primary" | "accent" | "muted" }[]; max?: number; size?: number }
 export declare function AvatarGroup(p: AvatarGroupProps): JSX.Element;
@@ -254,3 +258,7 @@ export declare function useScrollDirection(opts?: { threshold?: number }): "up" 
 
 /* — Fáze M a11y — */
 export declare function SkipLink(p: { href?: string; children?: ReactNode }): JSX.Element;
+
+/* — Fáze N (Olaf-inspired) — */
+export interface RevealProps { delay?: number; distance?: number; duration?: number; as?: keyof JSX.IntrinsicElements; children?: ReactNode; className?: string; style?: React.CSSProperties }
+export declare function Reveal(p: RevealProps): JSX.Element;

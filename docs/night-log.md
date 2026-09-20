@@ -259,6 +259,27 @@ TypeScript union type `IconName` aktualizován.
 
 **Commit:** `night/M: a11y (SkipLink, sr-only, high-contrast, forced-colors) + print styles`
 
+---
+
+## Fáze N — Olaf inspirace — HOTOVO
+
+Prošel `/Users/hulin/3_Dev/olaf/apps/web` a přenesl 5 nejlepších vzorů:
+
+- **`<Reveal>`** komponenta — fade-up entrance (12px → 0 + fade) s inline stagger delay. Použití pro dashboard KPI karty, hero rows: `<Reveal delay={0}>...</Reveal>` a `<Reveal delay={80}>...</Reveal>` atd. Respektuje reduced-motion.
+- **`Avatar` `alert` prop** — subtle "!" žlutý dot v pravém horním rohu (např. nedokončený profil). Se `role="img"` a customizovatelným `alertLabel`.
+- **Toast `role="alert"` + `aria-live`** — automaticky pro error tone `assertive`, jinak `polite`. `aria-atomic="true"`.
+- **`[data-theme="paper"]` scoped varianta** — warm outdoor/magazine palette (`#f6f1e6` canvas, `#fdfaf3` surface, warm brown borders). Lze dát na jakýkoli sub-strom, netřeba měnit root.
+- **Extra-small mobile media query** (`max-width: 399px`) — dodatečné zmenšení paddingů Section (space-4), Callout (space-3), Modal/Drawer body (space-3), PageBody (space-3), StatTile (space-3). Řeší 360px iPhone SE / malé Androidy.
+
+**Ostatní analyzované, ale neimplementované:**
+- DatePicker (DayPicker popup) — přeskočeno v H, stále dobrý kandidát.
+- PWA cache-bust utility — spíš aplikační, ne DS.
+- Card responsive `p-4 sm:p-6` — už řešeno stávajícím `--space-5` na Section + nyní xs override.
+- 16px input na mobilu — již existuje.
+
+**Commit:** `night/N: Olaf inspiration — Reveal, Avatar alert dot, Toast aria-live, [data-theme=paper], xs mobile paddings`
+
+
 
 
 
