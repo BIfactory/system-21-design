@@ -397,6 +397,27 @@ export interface FormWizardProps {
 }
 export declare function FormWizard(p: FormWizardProps): JSX.Element | null;
 
+/* — Advanced lists (polepim/J, 2026-11-04) — */
+export interface BulkAction { label: string; icon?: IconName; variant?: "primary" | "secondary" | "ghost" | "danger"; onClick: () => void }
+export interface BulkActionBarProps {
+  count: number;
+  actions: BulkAction[];
+  onClear?: () => void;
+  label?: string;
+  className?: string;
+}
+export declare function BulkActionBar(p: BulkActionBarProps): JSX.Element | null;
+
+export interface FunnelStage { id: string; label: string; count: number; value?: string; color?: string }
+export interface SalesFunnelProps {
+  stages: FunnelStage[];
+  value?: string | null;
+  onChange?: (stageId: string | null) => void;
+  title?: ReactNode;
+  className?: string;
+}
+export declare function SalesFunnel(p: SalesFunnelProps): JSX.Element;
+
 /* — Fáze H components — */
 export interface DrawerProps { open: boolean; onClose?: () => void; side?: "left" | "right" | "top" | "bottom"; size?: number | string; title?: ReactNode; description?: ReactNode; footer?: ReactNode; children?: ReactNode; className?: string }
 export declare function Drawer(p: DrawerProps): JSX.Element | null;

@@ -2095,6 +2095,105 @@ function FormWizard({ steps = [], onComplete, onCancel, initialValues = {}, clas
   );
 }
 
+/* ───────────── BulkActionBar (NEW — polepim/J) ─────────────
+   Floating bar u spodku viewportu se zobrazí při count > 0.
+   Komponenta se postará jen o render; selection state drží parent. */
+
+function BulkActionBar({ count, actions = [], onClear, label = "vybráno", className }) {
+  if (!count || count <= 0) return null;
+  return (
+    <div className={cx("s21-bab", className)} role="region" aria-label="Hromadné akce">
+      <span className="s21-bab__count">
+        <strong>{count}</strong> {label}
+      </span>
+      <div className="s21-bab__sep" aria-hidden="true" />
+      <div className="s21-bab__actions">
+        {actions.map((a, i) => (
+          <Button
+            key={a.label + i}
+            size="sm"
+            variant={a.variant || "secondary"}
+            icon={a.icon}
+            onClick={a.onClick}
+          >
+            {a.label}
+          </Button>
+        ))}
+      </div>
+      {typeof onClear === "function" && (
+        <button type="button" className="s21-bab__clear" onClick={onClear} aria-label="Zrušit výběr" title="Zrušit výběr">
+          <Icon name="x" size={16} />
+        </button>
+      )}
+    </div>
+  );
+}
+
+/* ───────────── SalesFunnel (NEW — polepim/J) ─────────────
+   Responsive funnel: desktop = SVG trapezoid chain, mobile = stacked bars.
+   Klikatelné stages → onChange(stageId). */
+
+function SalesFunnel({ stages = [], value, onChange, title, className }) {
+  const total = stages.reduce((s, x) => s + (x.count || 0), 0) || 1;
+  const maxCount = Math.max(...stages.map((s) => s.count || 0), 1);
+  const stageColor = (s) => s.color || "var(--primary)";
+
+  return (
+    <div className={cx("s21-funnel", className)}>
+      {title && <h3 className="s21-funnel__title">{title}</h3>}
+
+      {/* Desktop: horizontal trapezoid chain */}
+      <div className="s21-funnel__desk">
+        {stages.map((s, i) => {
+          const w = Math.max(16, (s.count / maxCount) * 100);
+          const active = value === s.id;
+          return (
+            <button
+              key={s.id}
+              type="button"
+              className={cx("s21-funnel__stage", active && "is-active")}
+              onClick={() => onChange && onChange(active ? null : s.id)}
+              style={{ "--s21-funnel-w": `${w}%`, "--s21-funnel-c": stageColor(s) }}
+              aria-pressed={active}
+            >
+              <span className="s21-funnel__shape" aria-hidden="true" />
+              <span className="s21-funnel__meta">
+                <span className="s21-funnel__label">{s.label}</span>
+                <span className="s21-funnel__count">{s.count}</span>
+                {s.value && <span className="s21-funnel__value">{s.value}</span>}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Mobile: stacked bars */}
+      <div className="s21-funnel__mob">
+        {stages.map((s) => {
+          const w = Math.max(6, (s.count / maxCount) * 100);
+          const active = value === s.id;
+          return (
+            <button
+              key={s.id}
+              type="button"
+              className={cx("s21-funnel__bar", active && "is-active")}
+              onClick={() => onChange && onChange(active ? null : s.id)}
+              style={{ "--s21-funnel-c": stageColor(s) }}
+              aria-pressed={active}
+            >
+              <span className="s21-funnel__barfill" style={{ width: `${w}%` }} />
+              <span className="s21-funnel__barmeta">
+                <span className="s21-funnel__label">{s.label}</span>
+                <span className="s21-funnel__count">{s.count}{s.value && ` · ${s.value}`}</span>
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 /* ───────────── Theme (NEW — Fáze E) ───────────── */
 function getInitialTheme() {
   if (typeof window === "undefined") return "light";
@@ -2224,6 +2323,7 @@ export {
   CommentThread, AttachmentList,
   InlineEditor, QuickActionModal,
   SearchSelect, FileUploadZone, FormWizard,
+  BulkActionBar, SalesFunnel,
   Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
   InputGroup, Textarea, FileDrop,
   BottomNav, useScrollDirection,
@@ -2245,6 +2345,7 @@ if (typeof window !== "undefined") {
   CommentThread, AttachmentList,
   InlineEditor, QuickActionModal,
   SearchSelect, FileUploadZone, FormWizard,
+  BulkActionBar, SalesFunnel,
   Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
   InputGroup, Textarea, FileDrop,
   BottomNav, useScrollDirection,

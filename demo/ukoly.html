@@ -50,6 +50,7 @@
     const [tab, setTab] = React.useState("moje");
     const [chip, setChip] = React.useState("all");
     const [q, setQ] = React.useState("");
+    const [selected, setSelected] = React.useState([]);
     return e(S.AppShell, {
       sidebar: e(D.DemoSidebar, { active: "/ukoly" }),
       topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
@@ -81,7 +82,20 @@
           e(S.SearchInput, { className: "s21-grow", value: q, onChange: setQ, placeholder: "Hledat úkol…" }),
           e(S.Select, { placeholder: "Všichni zadavatelé", options: [{ value: "me", label: "Já" }, { value: "pavel", label: "Pavel" }, { value: "alena", label: "Alena" }] })
         ),
-        e(S.DataTable, { columns: COLUMNS, rows: TASKS, onRowClick: () => {}, minWidth: 820 })
+        e(S.DataTable, {
+          columns: COLUMNS, rows: TASKS, onRowClick: () => {}, minWidth: 820,
+          selectable: true, selected, onSelectedChange: setSelected,
+        }),
+        e(S.BulkActionBar, {
+          count: selected.length,
+          label: "úkolů vybráno",
+          onClear: () => setSelected([]),
+          actions: [
+            { label: "Označit hotové", icon: "check", onClick: () => { setSelected([]); } },
+            { label: "Delegovat", icon: "users", onClick: () => {} },
+            { label: "Smazat", icon: "trash", variant: "danger", onClick: () => {} },
+          ],
+        })
       )
     );
   }

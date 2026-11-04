@@ -45,9 +45,19 @@
 
   const CRUMBS = [{ label: "CRM", href: "/crm" }, { label: "Obchodní případy", href: "/crm/obchodni-pripady" }];
 
+  const FUNNEL = [
+    { id: "draft", label: "Rozpracováno", count: 24, value: "— Kč" },
+    { id: "offer", label: "Nabídka", count: 14, value: "248 500 Kč", color: "var(--primary)" },
+    { id: "negotiation", label: "V jednání", count: 8, value: "412 300 Kč", color: "#d97706" },
+    { id: "win", label: "Výhra", count: 38, value: "1 240 500 Kč", color: "var(--success-solid)" },
+    { id: "loss", label: "Prohra", count: 6, value: "187 200 Kč", color: "var(--danger-solid)" },
+  ];
+
   function Page() {
     const [tab, setTab] = React.useState("otevrene");
     const [q, setQ] = React.useState("");
+    const [stage, setStage] = React.useState(null);
+    const rows = stage ? DEALS.filter((d) => d.state === stage) : DEALS;
     return e(S.AppShell, {
       sidebar: e(D.DemoSidebar, { active: "/crm/obchodni-pripady" }),
       topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
@@ -73,6 +83,7 @@
           e(S.StatTile, { label: "Konverze", value: "63 %", accent: "success" }),
           e(S.StatTile, { label: "Doba uzavření", value: "18", unit: "dní" })
         ),
+        e(S.SalesFunnel, { title: "Pipeline", stages: FUNNEL, value: stage, onChange: setStage }),
         e(S.FilterBar, null,
           e(S.SearchInput, { className: "s21-grow", value: q, onChange: setQ, placeholder: "Hledat případ, klient, číslo…" }),
           e(S.Select, { placeholder: "Všichni obchodníci", options: [{ value: "pavel", label: "Pavel O." }, { value: "alena", label: "Alena D." }, { value: "tomas", label: "Tomáš N." }] }),
@@ -81,7 +92,7 @@
             { value: "negotiation", label: "V jednání" }, { value: "win", label: "Výhra" }
           ] })
         ),
-        e(S.DataTable, { columns: COLUMNS, rows: DEALS, onRowClick: () => {}, minWidth: 980 })
+        e(S.DataTable, { columns: COLUMNS, rows: rows, onRowClick: () => {}, minWidth: 980 })
       )
     );
   }
