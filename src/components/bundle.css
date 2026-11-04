@@ -1228,3 +1228,35 @@ a.s21-stat, button.s21-stat { font: inherit; text-align: left; text-decoration: 
 @media (max-width: 767px) {
   .s21-aip { max-width: 100%; }
 }
+
+/* ─── NotificationCenter (polepim/N, 2026-11-04) ─── */
+.s21-nc { position: relative; display: inline-block; }
+.s21-nc__trigger { position: relative; }
+.s21-nc__dot { position: absolute; top: 2px; right: 2px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: var(--radius-full); background: var(--danger-solid); color: var(--white); font: 700 10px/16px var(--font-mono); text-align: center; box-shadow: 0 0 0 2px var(--surface); }
+.s21-nc__pop { position: absolute; top: calc(100% + 8px); right: 0; z-index: 50; width: 380px; max-width: calc(100vw - 2 * var(--space-4)); max-height: 70vh; background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--elev-4); display: flex; flex-direction: column; animation: s21-fade-in var(--motion-duration-fast) var(--motion-ease-out); }
+.s21-nc__head { display: flex; align-items: center; justify-content: space-between; padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border-subtle); }
+.s21-nc__title { margin: 0; font: 600 14px/20px var(--font-display); color: var(--ink); }
+.s21-nc__markall { background: transparent; border: 0; color: var(--primary-text); font: 500 12px/16px var(--font-body); cursor: pointer; padding: 2px var(--space-2); border-radius: var(--radius-sm); }
+.s21-nc__markall:hover { background: var(--primary-soft); }
+.s21-nc__body { flex: 1; overflow-y: auto; padding: var(--space-1); }
+.s21-nc__empty { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-6) var(--space-4); color: var(--ink-muted); font: 400 13px/18px var(--font-body); text-align: center; }
+.s21-nc__group + .s21-nc__group { border-top: 1px solid var(--border-subtle); margin-top: var(--space-1); padding-top: var(--space-1); }
+.s21-nc__grouplabel { padding: var(--space-2) var(--space-3) var(--space-1); font: 500 10px/14px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); }
+.s21-nc__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.s21-nc__item { position: relative; display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-2) var(--space-3); background: transparent; border: 0; width: 100%; text-align: left; cursor: pointer; border-radius: var(--radius-md); font: inherit; }
+.s21-nc__item:hover { background: var(--surface-muted); }
+.s21-nc__item.is-unread { background: var(--primary-soft); }
+.s21-nc__item.is-unread:hover { background: color-mix(in srgb, var(--primary) 18%, var(--surface)); }
+.s21-nc__icon { flex-shrink: 0; width: 28px; height: 28px; border-radius: var(--radius-full); background: var(--surface-muted); color: var(--ink-muted); display: inline-flex; align-items: center; justify-content: center; }
+.s21-nc__icon--primary { background: var(--primary-soft); color: var(--primary-text); }
+.s21-nc__icon--success { background: var(--success-bg); color: var(--success-text); }
+.s21-nc__icon--warning { background: var(--warning-bg); color: var(--warning-text); }
+.s21-nc__icon--danger { background: var(--danger-bg); color: var(--danger-text); }
+.s21-nc__itemmain { flex: 1; min-width: 0; }
+.s21-nc__itemtitle { font: 500 13px/18px var(--font-body); color: var(--ink); }
+.s21-nc__itemdesc { font: 400 12px/16px var(--font-body); color: var(--ink-muted); margin-top: 2px; }
+.s21-nc__itemtime { font: 400 11px/14px var(--font-body); color: var(--ink-subtle); margin-top: 2px; }
+.s21-nc__itemdot { flex-shrink: 0; width: 8px; height: 8px; border-radius: var(--radius-full); background: var(--primary); margin-top: 6px; }
+.s21-nc__foot { padding: var(--space-2) var(--space-3); border-top: 1px solid var(--border-subtle); text-align: center; }
+.s21-nc__viewall { background: transparent; border: 0; color: var(--primary-text); font: 500 13px/18px var(--font-body); cursor: pointer; padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); }
+.s21-nc__viewall:hover { background: var(--primary-soft); }

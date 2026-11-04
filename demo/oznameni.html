@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · Oznámení</title>
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  const ALL = [
+    { id: 1, group: "Dnes", icon: "sparkles", tone: "primary", title: "AI navrhuje vykázat 6 h", description: "Včera jsi strávil 6 h na ZAK-2026-0131.", time: "9:42", read: false },
+    { id: 2, group: "Dnes", icon: "check", tone: "success", title: "Smlouva podepsaná", description: "SM-2026-089 Moravia Steel — klient podepsal.", time: "8:23", read: false },
+    { id: 3, group: "Dnes", icon: "alert-triangle", tone: "warning", title: "Smlouva vyprší za 7 dnů", description: "Procházkovi — živnostenské pojištění.", time: "6:01", read: false },
+    { id: 4, group: "Včera", icon: "chat", tone: "primary", title: "Alena okomentovala smlouvu", description: "„Podpis plánujeme na 20. 11. v kanceláři.“", time: "14:32", read: true },
+    { id: 5, group: "Včera", icon: "tasks", title: "3 úkoly dokončené", description: "Dvořákovi · Novákovi · Agro Slovácko", time: "10:12", read: true },
+    { id: 6, group: "Včera", icon: "mail", title: "Nová zpráva v mailu", description: "Jan Novák — Dotaz na pojištění", time: "9:05", read: true },
+    { id: 7, group: "Minulý týden", icon: "upload", title: "Automatizace zpracovala 42 dokumentů", description: "Z toho 4 vyžadují ruční kontrolu.", time: "ne 10. 11.", read: true },
+    { id: 8, group: "Minulý týden", icon: "alert-circle", tone: "danger", title: "Chybná faktura — Hradecká str.", description: "Nesouhlasí DIČ. Automaticky otevřen úkol pro Alenu.", time: "pá 8. 11.", read: true },
+    { id: 9, group: "Minulý týden", icon: "user-plus", title: "Nový člen týmu", description: "Jana Svobodová přijala pozvánku.", time: "čt 7. 11.", read: true },
+    { id: 10, group: "Minulý týden", icon: "sparkles", tone: "primary", title: "AI vygenerovala týdenní shrnutí", description: "32 zpracovaných smluv, 94% úspěšnost.", time: "po 4. 11.", read: true },
+  ];
+
+  const CRUMBS = [{ label: "Oznámení", href: "/oznameni" }];
+
+  function Page() {
+    const [chip, setChip] = React.useState("all");
+    const [items, setItems] = React.useState(ALL);
+    const filtered = chip === "unread" ? items.filter((n) => !n.read) : items;
+    const groups = {};
+    filtered.forEach((n) => { if (!groups[n.group]) groups[n.group] = []; groups[n.group].push(n); });
+    const unread = items.filter((n) => !n.read).length;
+
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/oznameni" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
+    },
+      e(S.PageHeader, {
+        title: "Oznámení",
+        description: unread + " nepřečtených z " + items.length + " celkem",
+        actions: e(React.Fragment, null,
+          e(S.Button, { variant: "secondary", icon: "check", onClick: () => setItems(items.map((n) => ({ ...n, read: true }))) }, "Vše jako přečtené"),
+          e(S.Button, { variant: "secondary", icon: "settings", onClick: () => window.location.href = "./nastaveni.html" }, "Nastavení")
+        )
+      }),
+      e(S.PageBody, null,
+        e(S.ChipGroup, { value: chip, onChange: setChip, items: [
+          { value: "all", label: "Všechna", count: items.length },
+          { value: "unread", label: "Nepřečtená", count: unread },
+        ] }),
+        e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-4)", maxWidth: 820 } },
+          Object.entries(groups).map(([group, list]) =>
+            e(S.Section, { key: group, title: group },
+              e("ul", { style: { listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 2 } },
+                list.map((n) =>
+                  e("li", { key: n.id,
+                    style: {
+                      display: "flex", alignItems: "flex-start", gap: "var(--space-3)",
+                      padding: "var(--space-3)", borderRadius: "var(--radius-lg)",
+                      background: n.read ? "transparent" : "var(--primary-soft)",
+                      border: "1px solid " + (n.read ? "var(--border-subtle)" : "transparent"),
+                    }
+                  },
+                    e("span", {
+                      className: "s21-nc__icon" + (n.tone ? " s21-nc__icon--" + n.tone : ""),
+                      "aria-hidden": "true"
+                    }, e(S.Icon, { name: n.icon, size: 14 })),
+                    e("div", { style: { flex: 1, minWidth: 0 } },
+                      e("div", { style: { font: "500 14px/20px var(--font-body)", color: "var(--ink)" } }, n.title),
+                      e("div", { style: { font: "400 13px/18px var(--font-body)", color: "var(--ink-muted)", marginTop: 2 } }, n.description),
+                      e("div", { style: { font: "400 11px/14px var(--font-body)", color: "var(--ink-subtle)", marginTop: 4 } }, n.time)
+                    ),
+                    !n.read && e("span", { style: { width: 8, height: 8, borderRadius: "50%", background: "var(--primary)", marginTop: 6, flexShrink: 0 }, "aria-hidden": "true" })
+                  )
+                )
+              )
+            )
+          ),
+          filtered.length === 0 && e(S.EmptyState, { title: "Žádná oznámení", description: "Jakmile něco přijde, objeví se tady." })
+        )
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>

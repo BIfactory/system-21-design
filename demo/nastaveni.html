@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · Nastavení</title>
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  const TEAM = [
+    { id: 1, name: "Lubomír Hulín", email: "hulin@bifactory.cz", role: "Admin", status: "Aktivní", lastSeen: "nyní" },
+    { id: 2, name: "Pavel Obdržálek", email: "pavel@bifactory.cz", role: "Manager", status: "Aktivní", lastSeen: "před 12 min" },
+    { id: 3, name: "Alena Dvořáková", email: "alena@bifactory.cz", role: "Manager", status: "Aktivní", lastSeen: "před 1 h" },
+    { id: 4, name: "Tomáš Novák", email: "tomas@bifactory.cz", role: "Operátor", status: "Aktivní", lastSeen: "včera" },
+    { id: 5, name: "Jana Svobodová", email: "jana@bifactory.cz", role: "Operátor", status: "Pozvána", lastSeen: "—" },
+  ];
+
+  const TEAM_COLUMNS = [
+    { key: "name", label: "Jméno", sortable: true, width: "26%", render: (p) =>
+      e("div", null, e("div", { className: "s21-cell-title" }, p.name), e("div", { className: "s21-cell-meta" }, p.email))
+    },
+    { key: "role", label: "Role", width: "16%", render: (p) => e(S.Tag, { tone: p.role === "Admin" ? "primary" : "neutral" }, p.role) },
+    { key: "status", label: "Stav", width: "14%", render: (p) => e(S.Badge, { tone: p.status === "Aktivní" ? "success" : "warning" }, p.status) },
+    { key: "lastSeen", label: "Poslední přihlášení", align: "right", width: "22%" },
+    { key: "actions", label: "", align: "center", width: "12%", render: () =>
+      e("span", { className: "s21-row-actions", "data-no-row-click": true },
+        e(S.Button, { size: "sm", iconOnly: true, icon: "edit", variant: "ghost", "aria-label": "Upravit", title: "Upravit" }),
+        e(S.Button, { size: "sm", iconOnly: true, icon: "more", variant: "ghost", "aria-label": "Víc", title: "Víc" })
+      )
+    }
+  ];
+
+  const ROLES = [
+    { id: "admin", label: "Admin", desc: "Plný přístup ke všem modulům a nastavení", members: 1, perms: 42 },
+    { id: "manager", label: "Manager", desc: "Správa klientů, smluv, zakázek; vidí týmové reporty", members: 2, perms: 28 },
+    { id: "operator", label: "Operátor", desc: "Zpracování dokumentů, komunikace s klienty", members: 2, perms: 14 },
+    { id: "viewer", label: "Viewer", desc: "Jen čtení (reporty, dashboard, exporty)", members: 0, perms: 8 },
+  ];
+
+  const INTEGRATIONS = [
+    { id: 1, icon: "mail", title: "Gmail", desc: "Email + attachments z Gmailu do DMS", connected: true },
+    { id: 2, icon: "folder", title: "Google Drive", desc: "Automatický backup dokumentů", connected: true },
+    { id: 3, icon: "cloud", title: "Azure Blob", desc: "DMS úložiště", connected: true },
+    { id: 4, icon: "sparkles", title: "Claude AI", desc: "AI asistentka, extrakce ze smluv, návrhy", connected: true },
+    { id: 5, icon: "send", title: "ZS SMS gateway", desc: "SMS připomínky klientům", connected: false },
+    { id: 6, icon: "credit-card", title: "Fakturační systém", desc: "Napojení na externí fakturaci", connected: false },
+  ];
+
+  const CRUMBS = [{ label: "Nastavení", href: "/nastaveni" }];
+
+  function ProfilTab() {
+    const [name, setName] = React.useState("Lubomír Hulín");
+    const [email, setEmail] = React.useState("hulin@bifactory.cz");
+    const [lang, setLang] = React.useState("cs");
+    return e("div", { style: { display: "grid", gridTemplateColumns: "1fr 320px", gap: "var(--space-5)", alignItems: "start" } },
+      e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-4)" } },
+        e(S.Section, { title: "Osobní údaje" },
+          e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+            e(S.Field, { label: "Celé jméno" }, e(S.Input, { value: name, onChange: setName })),
+            e(S.Field, { label: "E-mail" }, e(S.Input, { value: email, onChange: setEmail, type: "email" })),
+            e(S.Field, { label: "Jazyk rozhraní" }, e(S.Select, { value: lang, onChange: setLang, options: [
+              { value: "cs", label: "Čeština" }, { value: "en", label: "English" }, { value: "sk", label: "Slovenčina" }
+            ] })),
+            e("div", { style: { display: "flex", justifyContent: "flex-end" } },
+              e(S.Button, { icon: "check" }, "Uložit změny")
+            )
+          )
+        ),
+        e(S.Section, { title: "Bezpečnost" },
+          e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+            e(S.Button, { variant: "secondary", icon: "lock" }, "Změnit heslo"),
+            e(S.Button, { variant: "secondary", icon: "sparkles" }, "Zapnout 2FA (dvoufázové ověření)")
+          )
+        )
+      ),
+      e(S.Section, { title: "Aktuální role" },
+        e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+          e(S.Tag, { tone: "primary" }, "Admin"),
+          e("div", { style: { font: "400 13px/18px var(--font-body)", color: "var(--ink-muted)" } },
+            "Plný přístup ke všem modulům a nastavení. Změnu role může provést pouze jiný Admin."
+          )
+        )
+      )
+    );
+  }
+
+  function TymTab() {
+    return e("div", null,
+      e(S.Section, {
+        title: "Členové týmu",
+        action: e(S.Button, { size: "sm", icon: "user-plus" }, "Pozvat člena")
+      },
+        e(S.DataTable, { columns: TEAM_COLUMNS, rows: TEAM, minWidth: 820 })
+      )
+    );
+  }
+
+  function RoleTab() {
+    return e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+      e(S.Section, {
+        title: "Role a oprávnění",
+        action: e(S.Button, { size: "sm", icon: "plus" }, "Nová role")
+      },
+        e("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "var(--space-3)" } },
+          ROLES.map((r) => e(S.EntityCard, {
+            key: r.id,
+            icon: "lock",
+            title: r.label,
+            subtitle: r.desc,
+            meta: [
+              { label: "Členů", value: r.members },
+              { label: "Oprávnění", value: r.perms },
+            ],
+            onClick: () => {}
+          }))
+        )
+      )
+    );
+  }
+
+  function NotifTab() {
+    const [push, setPush] = React.useState(true);
+    const [emailN, setEmailN] = React.useState(true);
+    const [sms, setSms] = React.useState(false);
+    const [daily, setDaily] = React.useState(true);
+    return e(S.Section, { title: "Oznámení" },
+      e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+        e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "var(--space-2) 0" } },
+          e("div", null,
+            e("div", { style: { font: "500 14px/20px var(--font-body)" } }, "Push notifikace v aplikaci"),
+            e("div", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)" } }, "Zobrazovat červenou tečku u zvonku")
+          ),
+          e(S.Switch, { checked: push, onChange: setPush })
+        ),
+        e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "var(--space-2) 0" } },
+          e("div", null,
+            e("div", { style: { font: "500 14px/20px var(--font-body)" } }, "E-mailové souhrny"),
+            e("div", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)" } }, "Denní digest v 8:00")
+          ),
+          e(S.Switch, { checked: emailN, onChange: setEmailN })
+        ),
+        e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "var(--space-2) 0" } },
+          e("div", null,
+            e("div", { style: { font: "500 14px/20px var(--font-body)" } }, "SMS pro kritická upozornění"),
+            e("div", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)" } }, "Pouze po termínu / expirace do 24 h")
+          ),
+          e(S.Switch, { checked: sms, onChange: setSms })
+        ),
+        e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "var(--space-2) 0" } },
+          e("div", null,
+            e("div", { style: { font: "500 14px/20px var(--font-body)" } }, "AI denní shrnutí"),
+            e("div", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)" } }, "Každý den AI shrne, co se v tvojí praxi stalo")
+          ),
+          e(S.Switch, { checked: daily, onChange: setDaily })
+        )
+      )
+    );
+  }
+
+  function IntegrTab() {
+    return e(S.Section, {
+      title: "Integrace",
+      action: e(S.Button, { size: "sm", icon: "plus" }, "Nová integrace")
+    },
+      e("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "var(--space-3)" } },
+        INTEGRATIONS.map((i) => e(S.EntityCard, {
+          key: i.id,
+          icon: i.icon,
+          title: i.title,
+          subtitle: i.desc,
+          tags: i.connected
+            ? [{ label: "Napojeno", tone: "success" }]
+            : [{ label: "Nenapojeno", tone: "neutral" }],
+          actions: e(S.Button, { size: "sm", variant: i.connected ? "ghost" : "secondary", icon: i.connected ? "settings" : "plus" }, i.connected ? "Nastavit" : "Napojit"),
+          onClick: () => {}
+        }))
+      )
+    );
+  }
+
+  function Page() {
+    const [tab, setTab] = React.useState("profil");
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/nastaveni" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
+    },
+      e(S.PageHeader, {
+        title: "Nastavení",
+        description: "Profil, tým, role, oznámení a napojení na externí systémy",
+        tabs: e(S.Tabs, { value: tab, onChange: setTab, items: [
+          { value: "profil", label: "Profil" },
+          { value: "tym", label: "Tým", count: TEAM.length },
+          { value: "role", label: "Role a oprávnění" },
+          { value: "oznameni", label: "Oznámení" },
+          { value: "integrace", label: "Integrace" },
+        ] })
+      }),
+      e(S.PageBody, null,
+        tab === "profil" && e(ProfilTab),
+        tab === "tym" && e(TymTab),
+        tab === "role" && e(RoleTab),
+        tab === "oznameni" && e(NotifTab),
+        tab === "integrace" && e(IntegrTab)
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>

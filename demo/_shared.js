@@ -65,14 +65,32 @@
       "/zpravy": "./zpravy.html",
       "/nastenka": "./nastenka.html",
       "/kb": "./kb.html",
+      "/nastaveni": "./nastaveni.html",
+      "/oznameni": "./oznameni.html",
     };
     return map[path] || "./dashboard.html";
   }
 
+  const NOTIFICATIONS = [
+    { id: 1, group: "Dnes", icon: "sparkles", tone: "primary", title: "AI navrhuje vykázat 6 h", description: "Včera jsi strávil 6 h na ZAK-2026-0131.", time: "před 2 h", read: false, href: "/dashboard" },
+    { id: 2, group: "Dnes", icon: "check", tone: "success", title: "Smlouva podepsaná", description: "SM-2026-089 Moravia Steel — klient podepsal.", time: "před 3 h", read: false, href: "/dms/smlouvy" },
+    { id: 3, group: "Dnes", icon: "alert-triangle", tone: "warning", title: "Smlouva vyprší za 7 dnů", description: "Procházkovi — živnostenské pojištění.", time: "před 5 h", read: false, href: "/dms/smlouvy" },
+    { id: 4, group: "Včera", icon: "chat", tone: "primary", title: "Alena okomentovala smlouvu", description: "„Podpis plánujeme na 20. 11. v kanceláři.“", time: "včera 14:32", read: true, href: "/dms/smlouva-detail" },
+    { id: 5, group: "Včera", icon: "tasks", title: "3 úkoly dokončené", description: "Dvořákovi · Novákovi · Agro Slovácko", time: "včera 10:12", read: true, href: "/ukoly" },
+    { id: 6, group: "Dříve", icon: "mail", title: "Nová zpráva v mailu", description: "Jan Novák — Dotaz na pojištění", time: "2 dny zpět", read: true, href: "/email" },
+  ];
+
   function DemoTopBar({ crumbs, onNavigate }) {
+    const [notifs, setNotifs] = R.useState(NOTIFICATIONS);
     return h(S.TopBar, {
       breadcrumbs: h(S.Breadcrumbs, { items: crumbs, onNavigate: onNavigate || (() => {}) }),
       extra: h(R.Fragment, null,
+        h(S.NotificationCenter, {
+          notifications: notifs,
+          onMarkAllRead: () => setNotifs(notifs.map((n) => ({ ...n, read: true }))),
+          onNavigate: (n) => { if (n.href && demoHref(n.href)) global.location.href = demoHref(n.href); },
+          onClick: (n) => setNotifs(notifs.map((x) => x.id === n.id ? { ...x, read: true } : x)),
+        }),
         h(S.BrandToggle),
         h(S.ThemeToggle)
       ),

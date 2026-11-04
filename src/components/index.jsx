@@ -2374,6 +2374,95 @@ function AIPanel({ open, onClose, title = "AI asistentka", context, suggestedPro
   );
 }
 
+/* ───────────── NotificationCenter (NEW — polepim/N) ─────────────
+   Bell icon + dropdown panel s grupovanými notifikacemi. */
+
+function NotificationCenter({ notifications = [], onMarkAllRead, onNavigate, onClick, className }) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e) => { if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false); };
+    const onKey = (e) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("mousedown", onDoc); document.removeEventListener("keydown", onKey); };
+  }, [open]);
+
+  const unread = notifications.filter((n) => !n.read).length;
+  const groups = {};
+  notifications.forEach((n) => {
+    const g = n.group || "Dříve";
+    if (!groups[g]) groups[g] = [];
+    groups[g].push(n);
+  });
+
+  return (
+    <div ref={wrapRef} className={cx("s21-nc", className)}>
+      <button
+        type="button"
+        className={cx("s21-iconbtn s21-nc__trigger", open && "is-open")}
+        onClick={() => setOpen((v) => !v)}
+        aria-label={`Oznámení${unread ? ` (${unread} nepřečtených)` : ""}`}
+        aria-expanded={open}
+      >
+        <Icon name="bell" size={18} />
+        {unread > 0 && <span className="s21-nc__dot" aria-hidden="true">{unread > 9 ? "9+" : unread}</span>}
+      </button>
+      {open && (
+        <div className="s21-nc__pop" role="dialog" aria-label="Oznámení">
+          <header className="s21-nc__head">
+            <h3 className="s21-nc__title">Oznámení</h3>
+            {unread > 0 && typeof onMarkAllRead === "function" && (
+              <button type="button" className="s21-nc__markall" onClick={() => { onMarkAllRead(); }}>
+                Vše jako přečtené
+              </button>
+            )}
+          </header>
+          <div className="s21-nc__body">
+            {notifications.length === 0 ? (
+              <div className="s21-nc__empty">
+                <Icon name="check-circle" size={28} />
+                <div>Žádná nová oznámení</div>
+              </div>
+            ) : Object.entries(groups).map(([group, items]) => (
+              <section key={group} className="s21-nc__group">
+                <div className="s21-nc__grouplabel">{group}</div>
+                <ul className="s21-nc__list" role="list">
+                  {items.map((n) => (
+                    <li key={n.id}>
+                      <button
+                        type="button"
+                        className={cx("s21-nc__item", !n.read && "is-unread")}
+                        onClick={() => { onClick && onClick(n); if (n.href && onNavigate) onNavigate(n); setOpen(false); }}
+                      >
+                        {n.icon && <span className={cx("s21-nc__icon", n.tone && `s21-nc__icon--${n.tone}`)}><Icon name={n.icon} size={14} /></span>}
+                        <div className="s21-nc__itemmain">
+                          <div className="s21-nc__itemtitle">{n.title}</div>
+                          {n.description && <div className="s21-nc__itemdesc">{n.description}</div>}
+                          {n.time && <div className="s21-nc__itemtime">{n.time}</div>}
+                        </div>
+                        {!n.read && <span className="s21-nc__itemdot" aria-hidden="true" />}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </div>
+          {typeof onNavigate === "function" && (
+            <footer className="s21-nc__foot">
+              <button type="button" className="s21-nc__viewall" onClick={() => { onNavigate({ href: "/oznameni" }); setOpen(false); }}>
+                Zobrazit všechna
+              </button>
+            </footer>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ───────────── Theme (NEW — Fáze E) ───────────── */
 function getInitialTheme() {
   if (typeof window === "undefined") return "light";
@@ -2505,6 +2594,7 @@ export {
   SearchSelect, FileUploadZone, FormWizard,
   BulkActionBar, SalesFunnel,
   AIBadge, AISuggestion, AIInputHelper, AIPanel,
+  NotificationCenter,
   Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
   InputGroup, Textarea, FileDrop,
   BottomNav, useScrollDirection,
@@ -2528,6 +2618,7 @@ if (typeof window !== "undefined") {
   SearchSelect, FileUploadZone, FormWizard,
   BulkActionBar, SalesFunnel,
   AIBadge, AISuggestion, AIInputHelper, AIPanel,
+  NotificationCenter,
   Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
   InputGroup, Textarea, FileDrop,
   BottomNav, useScrollDirection,

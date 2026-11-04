@@ -458,6 +458,27 @@ export interface AIPanelProps {
 }
 export declare function AIPanel(p: AIPanelProps): JSX.Element | null;
 
+/* — Notifications (polepim/N, 2026-11-04) — */
+export interface NotificationItem {
+  id: string | number;
+  title: ReactNode;
+  description?: ReactNode;
+  icon?: IconName;
+  tone?: "primary" | "success" | "warning" | "danger";
+  time?: ReactNode;
+  group?: string;
+  read?: boolean;
+  href?: string;
+}
+export interface NotificationCenterProps {
+  notifications: NotificationItem[];
+  onMarkAllRead?: () => void;
+  onNavigate?: (notification: NotificationItem | { href: string }) => void;
+  onClick?: (notification: NotificationItem) => void;
+  className?: string;
+}
+export declare function NotificationCenter(p: NotificationCenterProps): JSX.Element;
+
 /* — Fáze H components — */
 export interface DrawerProps { open: boolean; onClose?: () => void; side?: "left" | "right" | "top" | "bottom"; size?: number | string; title?: ReactNode; description?: ReactNode; footer?: ReactNode; children?: ReactNode; className?: string }
 export declare function Drawer(p: DrawerProps): JSX.Element | null;
