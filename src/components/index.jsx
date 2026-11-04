@@ -93,6 +93,7 @@ const PATHS = {
   "arrow-repeat": <><polyline points="17 1 21 5 17 9" /><path d="M3 11V9a4 4 0 0 1 4-4h14" /><polyline points="7 23 3 19 7 15" /><path d="M21 13v2a4 4 0 0 1-4 4H3" /></>,
   cloud: <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />,
   save: <><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></>,
+  palette: <><circle cx="13.5" cy="6.5" r=".9" fill="currentColor" stroke="none" /><circle cx="17.5" cy="10.5" r=".9" fill="currentColor" stroke="none" /><circle cx="8.5" cy="7.5" r=".9" fill="currentColor" stroke="none" /><circle cx="6.5" cy="12.5" r=".9" fill="currentColor" stroke="none" /><path d="M12 22a10 10 0 1 1 0-20c5.5 0 10 3.9 10 8.7 0 3.3-2.7 6-6 6h-2.5c-.8 0-1.5.7-1.5 1.5 0 .5.2.9.5 1.2.3.3.5.7.5 1.1 0 .8-.6 1.5-1.5 1.5z" /></>,
 };
 
 function Icon({ name, size = 18, strokeWidth = 2, className, title }) {
@@ -1373,6 +1374,80 @@ function ThemeToggle({ className }) {
   );
 }
 
+/* ───────────── Brand (NEW — 2026-11-04 demo-prep/A) ─────────────
+   Multi-brand overlay přes [data-brand="<id>"] na <html>. Bifactory je
+   default (žádný atribut na <html>); ostatní brandy mají overlay v
+   tokens.css (generované z tokens.json → brand.themes[]).
+
+   Zákaznické GUI typicky BrandToggle nerenderuje, ale useBrand zůstává
+   exportovaný — kdyby zákazník potřeboval runtime switch (preview mode,
+   staging vs. prod brand). */
+
+const BRANDS = [
+  { id: "bifactory", name: "BIfactory" },
+  { id: "demo-alt", name: "Demo (modrá)" },
+];
+
+function getInitialBrand() {
+  if (typeof window === "undefined") return "bifactory";
+  try {
+    const stored = window.localStorage.getItem("system21-brand");
+    if (stored && BRANDS.some((b) => b.id === stored)) return stored;
+  } catch {}
+  return "bifactory";
+}
+function applyBrand(b) {
+  if (typeof document === "undefined") return;
+  if (b === "bifactory") document.documentElement.removeAttribute("data-brand");
+  else document.documentElement.setAttribute("data-brand", b);
+  try { window.localStorage.setItem("system21-brand", b); } catch {}
+}
+function useBrand() {
+  const [brand, setBrandState] = useState("bifactory");
+  useEffect(() => {
+    const b = getInitialBrand();
+    setBrandState(b);
+    applyBrand(b);
+  }, []);
+  const setBrand = useCallback((b) => { setBrandState(b); applyBrand(b); }, []);
+  return { brand, setBrand, brands: BRANDS };
+}
+function BrandToggle({ className }) {
+  const { brand, setBrand, brands } = useBrand();
+  const current = brands.find((b) => b.id === brand) || brands[0];
+  return (
+    <DropdownMenu
+      trigger={({ open }) => (
+        <button
+          type="button"
+          className={cx("s21-iconbtn", className)}
+          aria-label={`Přepnout brand (aktuální: ${current.name})`}
+          aria-expanded={open}
+          title={`Brand: ${current.name}`}
+        >
+          <Icon name="palette" size={18} />
+        </button>
+      )}
+    >
+      {({ close }) => brands.map((b) => (
+        <button
+          key={b.id}
+          type="button"
+          role="menuitem"
+          className={cx("s21-dd__item s21-dd__item--btn", b.id === brand && "is-active")}
+          onClick={() => { setBrand(b.id); close(); }}
+        >
+          <span className="s21-dd__itemmain">
+            <Icon name="palette" size={14} />
+            <span>{b.name}</span>
+          </span>
+          {b.id === brand && <Icon name="check" size={14} />}
+        </button>
+      ))}
+    </DropdownMenu>
+  );
+}
+
 /* ───────────── Page ───────────── */
 function PageBody({ children }) {
   return <div className="s21-pagebody">{children}</div>;
@@ -1386,6 +1461,7 @@ export {
   Breadcrumbs, PageHeader, Sidebar, TopBar, AppShell, PageBody, PoweredBy, ListCard, StickyActionBar,
   Tooltip, Skeleton, Progress, Callout, Switch, Avatar, AvatarGroup, Kbd, RadioGroup, Popover, DropdownMenu,
   ThemeToggle, useTheme,
+  BrandToggle, useBrand,
   Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
   InputGroup, Textarea, FileDrop,
   BottomNav, useScrollDirection,
@@ -1401,6 +1477,7 @@ if (typeof window !== "undefined") {
   Breadcrumbs, PageHeader, Sidebar, TopBar, AppShell, PageBody, PoweredBy, ListCard, StickyActionBar,
   Tooltip, Skeleton, Progress, Callout, Switch, Avatar, AvatarGroup, Kbd, RadioGroup, Popover, DropdownMenu,
   ThemeToggle, useTheme,
+  BrandToggle, useBrand,
   Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
   InputGroup, Textarea, FileDrop,
   BottomNav, useScrollDirection,

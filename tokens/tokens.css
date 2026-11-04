@@ -104,6 +104,22 @@
   --font-body: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
+
+/* Brand overlay: Demo (modrá) */
+[data-brand="demo-alt"] {
+  --primary: #1e4bd6;
+  --primary-hover: #1b44c2;
+  --primary-active: #1839a8;
+  --on-primary: #ffffff;
+  --primary-text: #1839a8;
+  --primary-soft: rgba(30,75,214,0.12);
+  --primary-glow: rgba(30,75,214,0.28);
+  --primary-glow-strong: rgba(30,75,214,0.45);
+  --focus-ring: #1b44c2;
+  --sidebar-bg: #0a0e1f;
+  --sidebar-hover: #121930;
+  --sidebar-border: #2a3450;
+}
 .display-xl { font-family: var(--font-display); font-size: 48px; line-height: 1.1; font-weight: 800; letter-spacing: -0.03em; }
 .display-lg { font-family: var(--font-display); font-size: 32px; line-height: 1.15; font-weight: 800; letter-spacing: -0.025em; }
 .page-title { font-family: var(--font-display); font-size: 18px; line-height: 1.3; font-weight: 700; letter-spacing: -0.02em; }

@@ -794,6 +794,24 @@ body { font-family: var(--font-body); color: var(--ink); margin: 0; font-feature
 
 /* Segmented control aktiv v dark — --primary funguje, ale on-primary černá málo kontrastní na plné zelené. Nechme být, WCAG 8:1 stále. */
 
+/* ═══════════════════════════════════════════════════════════════════
+   Brand × Dark: demo-alt + dark
+   Overlay se přidává přes :root → [data-brand="demo-alt"] overlay
+   (z tokens.css) × [data-theme="dark"] overlay (výše v tomto souboru).
+   Specificita obou je 0,1,0 — pořadí v souboru rozhoduje.
+   Zde doladíme barvy, které v dark darku vypadají vybledle.
+   ═══════════════════════════════════════════════════════════════════ */
+
+[data-brand="demo-alt"][data-theme="dark"] {
+  --primary-soft: rgba(30,75,214,0.18);
+  --primary-glow: rgba(30,75,214,0.42);
+  --primary-glow-strong: rgba(30,75,214,0.55);
+  --primary-text: #7ba3ff; /* svítivější modrá na tmavém podkladu (6.1:1 na --canvas dark) */
+  --sidebar-bg: #050714;
+  --sidebar-hover: #0e1428;
+  --sidebar-border: rgba(129,160,255,0.08);
+}
+
 /* ─── Drawer / BottomSheet (Fáze H) ─── */
 .s21-drawer-root { position: fixed; inset: 0; z-index: 90; display: flex; }
 .s21-drawer-root--left { justify-content: flex-start; }

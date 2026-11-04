@@ -13,7 +13,8 @@ export type IconName =
   | "home" | "building" | "users" | "user-plus"
   | "alert-circle" | "alert-triangle" | "info" | "help-circle"
   | "sparkles" | "zap" | "activity" | "trending-up" | "trending-down" | "bar-chart" | "pie-chart"
-  | "sun" | "moon" | "play" | "pause" | "arrow-repeat" | "cloud" | "save";
+  | "sun" | "moon" | "play" | "pause" | "arrow-repeat" | "cloud" | "save"
+  | "palette";
 
 export interface IconProps { name: IconName; size?: number; strokeWidth?: number; className?: string; title?: string }
 export declare function Icon(p: IconProps): JSX.Element;
@@ -214,6 +215,11 @@ export declare function DropdownMenu(p: DropdownMenuProps): JSX.Element;
 /* — Theme (Fáze E) — */
 export declare function useTheme(): { theme: "light" | "dark"; toggle(): void; set(t: "light" | "dark"): void };
 export declare function ThemeToggle(p: { className?: string }): JSX.Element;
+
+/* — Brand (demo-prep/A, 2026-11-04) — */
+export interface BrandInfo { id: string; name: string }
+export declare function useBrand(): { brand: string; setBrand(id: string): void; brands: BrandInfo[] };
+export declare function BrandToggle(p: { className?: string }): JSX.Element;
 
 /* — Fáze H components — */
 export interface DrawerProps { open: boolean; onClose?: () => void; side?: "left" | "right" | "top" | "bottom"; size?: number | string; title?: ReactNode; description?: ReactNode; footer?: ReactNode; children?: ReactNode; className?: string }
