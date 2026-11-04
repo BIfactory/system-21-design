@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · Vykazování</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+<style>
+  .timer { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3); background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-full); font-variant-numeric: tabular-nums; font: 500 15px/20px var(--font-mono); }
+  .timer.is-running { background: var(--primary-soft); color: var(--primary-text); border-color: var(--primary); }
+  .timer__dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; opacity: .4; }
+  .timer.is-running .timer__dot { background: var(--primary); opacity: 1; animation: pulse 1s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+  .kind-ic { flex-shrink: 0; width: 28px; height: 28px; border-radius: var(--radius-full); display: inline-flex; align-items: center; justify-content: center; }
+  .kind-work { background: var(--primary-soft); color: var(--primary-text); }
+  .kind-material { background: var(--warning-bg); color: var(--warning-text); }
+  .kind-adhoc { background: var(--surface-muted); color: var(--ink-muted); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  // ─── mock data ─────────────────────────────────────────────────────
+  const ORDERS = [
+    { value: "zak-131", label: "ZAK-2026-0131 Napojení ERP → CRM", hint: "Agro Slovácko · Realizace" },
+    { value: "zak-139", label: "ZAK-2026-0139 Automatizace výkazů", hint: "Hradecká strojírna · Realizace" },
+    { value: "zak-118", label: "ZAK-2026-0118 Import historie z Raynet", hint: "Agro Slovácko · Realizace" },
+    { value: "zak-142", label: "ZAK-2026-0142 Reporting obchodu — pilot", hint: "Moravia Steel · Nabídka" },
+  ];
+  const OPS = {
+    "zak-131": [
+      { value: "op-03", label: "OP-03 Mapování dat z CRM", hint: "8/12 h" },
+      { value: "op-04", label: "OP-04 Setup pipeline", hint: "4/6 h" },
+      { value: "op-05", label: "OP-05 Testy integrace", hint: "0/8 h" },
+      { value: "op-06", label: "OP-06 Dokumentace", hint: "2/4 h" },
+    ],
+    "zak-139": [
+      { value: "op-01", label: "OP-01 Analýza", hint: "6/8 h" },
+      { value: "op-02", label: "OP-02 Implementace", hint: "12/24 h" },
+    ],
+    "zak-118": [
+      { value: "op-01", label: "OP-01 Export dat z Raynet", hint: "10/12 h" },
+      { value: "op-02", label: "OP-02 Transformace", hint: "6/8 h" },
+    ],
+    "zak-142": [
+      { value: "op-01", label: "OP-01 Workshop s klientem", hint: "0/4 h" },
+    ],
+  };
+  const MATERIALS = [
+    { value: "m-01", label: "Postgres cluster — 3 měsíce", hint: "12 000 Kč / ks" },
+    { value: "m-02", label: "SSL certifikát (DigiCert)", hint: "3 500 Kč / ks" },
+    { value: "m-03", label: "OpenAI API kredity (10k)", hint: "8 400 Kč / ks" },
+    { value: "m-04", label: "Hosting Azure App Service", hint: "4 200 Kč / měsíc" },
+    { value: "m-05", label: "Licence Vercel Pro", hint: "480 Kč / měsíc" },
+  ];
+  const MAT_PRICES = { "m-01": 12000, "m-02": 3500, "m-03": 8400, "m-04": 4200, "m-05": 480 };
+  const DEVIATION = [
+    { value: "", label: "Bez odchylky" },
+    { value: "material", label: "Materiálová odchylka" },
+    { value: "time", label: "Časová odchylka" },
+    { value: "quality", label: "Kvalitativní odchylka" },
+  ];
+
+  // Mock worklog — merged (work/material/adhoc)
+  const WORKLOG_INITIAL = [
+    { id: 1, kind: "work", when: "dnes 10:42", who: "Pavel Obdržálek", order: "ZAK-2026-0131", title: "OP-03 Mapování dat", meta: "2:30 h · Pavel O.", amount: 2.5 },
+    { id: 2, kind: "material", when: "dnes 09:15", who: "Alena Dvořáková", order: "ZAK-2026-0131", title: "M-01 Postgres cluster", meta: "1 ks · 12 000 Kč", amount: 12000 },
+    { id: 3, kind: "work", when: "dnes 08:30", who: "Alena Dvořáková", order: "ZAK-2026-0139", title: "OP-02 Implementace", meta: "4:00 h", amount: 4 },
+    { id: 4, kind: "work", when: "včera 16:00", who: "Pavel Obdržálek", order: "ZAK-2026-0131", title: "OP-03 Mapování dat", meta: "4:00 h", amount: 4 },
+    { id: 5, kind: "adhoc", when: "pondělí 14:00", who: "Pavel Obdržálek", order: "ZAK-2026-0131", title: "Doprava Zlín → Olomouc", meta: "transport · 450 Kč", amount: 450 },
+    { id: 6, kind: "work", when: "pondělí 11:20", who: "Alena Dvořáková", order: "ZAK-2026-0131", title: "OP-04 Setup pipeline", meta: "2:00 h", amount: 2 },
+    { id: 7, kind: "work", when: "pondělí 09:00", who: "Pavel Obdržálek", order: "ZAK-2026-0131", title: "OP-02 Analýza", meta: "6:00 h · Hotovo", amount: 6 },
+  ];
+
+  const CRUMBS = [{ label: "Vykazování", href: "/vykazovani" }];
+  const fmtMoney = (n) => n.toLocaleString("cs-CZ").replace(/,/g, " ") + " Kč";
+
+  // ─── Timer hook ─────────────────────────────────────────────────────
+  function useTimer() {
+    const [running, setRunning] = React.useState(false);
+    const [elapsed, setElapsed] = React.useState(0); // seconds
+    const startRef = React.useRef(null);
+    React.useEffect(() => {
+      if (!running) return;
+      const iv = setInterval(() => setElapsed(Math.floor((Date.now() - startRef.current) / 1000) + initialRef.current), 1000);
+      return () => clearInterval(iv);
+    }, [running]);
+    const initialRef = React.useRef(0);
+    const start = () => { initialRef.current = elapsed; startRef.current = Date.now(); setRunning(true); };
+    const stop = () => { setRunning(false); };
+    const reset = () => { setElapsed(0); initialRef.current = 0; setRunning(false); };
+    const fmt = (s) => {
+      const h = Math.floor(s / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      const sec = s % 60;
+      return (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m + ":" + (sec < 10 ? "0" : "") + sec;
+    };
+    return { running, elapsed, start, stop, reset, display: fmt(elapsed), hoursDecimal: (elapsed / 3600).toFixed(2) };
+  }
+
+  function Page() {
+    const [tab, setTab] = React.useState("zapsat");
+    const [worklog, setWorklog] = React.useState(WORKLOG_INITIAL);
+
+    // Zapsat tab state
+    const [order, setOrder] = React.useState("zak-131");
+    const [op, setOp] = React.useState("op-03");
+    const [hours, setHours] = React.useState("");
+    const [note, setNote] = React.useState("");
+    const [deviation, setDeviation] = React.useState("");
+    const [material, setMaterial] = React.useState("");
+    const [qty, setQty] = React.useState("1");
+    const [adhocType, setAdhocType] = React.useState("transport");
+    const [adhocAmount, setAdhocAmount] = React.useState("");
+    const [adhocDesc, setAdhocDesc] = React.useState("");
+
+    const timer = useTimer();
+    React.useEffect(() => { if (!timer.running && timer.elapsed > 0 && hours === "") setHours(timer.hoursDecimal); }, [timer.running]);
+
+    const opOptions = OPS[order] || [];
+    const matPrice = material ? MAT_PRICES[material] * (parseFloat(qty) || 0) : 0;
+
+    // Denní přehled — filter today only
+    const today = worklog.filter((w) => w.when.startsWith("dnes"));
+    const todayHours = today.filter((w) => w.kind === "work").reduce((s, w) => s + w.amount, 0);
+    const todayCost = today.filter((w) => w.kind !== "work").reduce((s, w) => s + w.amount, 0);
+
+    const saveWork = () => {
+      if (!hours || !order || !op) return;
+      const orderLabel = (ORDERS.find((o) => o.value === order) || {}).label || order;
+      const opLabel = (opOptions.find((o) => o.value === op) || {}).label || op;
+      setWorklog([{ id: Date.now(), kind: "work", when: "právě teď", who: "Lubomír Hulín", order: orderLabel.split(" ")[0], title: opLabel, meta: hours + " h" + (note ? " · " + note : ""), amount: parseFloat(hours) }, ...worklog]);
+      setHours(""); setNote(""); timer.reset();
+    };
+    const saveMaterial = () => {
+      if (!material || !qty) return;
+      const orderLabel = (ORDERS.find((o) => o.value === order) || {}).label || order;
+      const mat = MATERIALS.find((m) => m.value === material);
+      setWorklog([{ id: Date.now(), kind: "material", when: "právě teď", who: "Lubomír Hulín", order: orderLabel.split(" ")[0], title: mat.label, meta: qty + " ks · " + fmtMoney(matPrice), amount: matPrice }, ...worklog]);
+      setMaterial(""); setQty("1");
+    };
+    const saveAdhoc = () => {
+      if (!adhocAmount || !adhocDesc) return;
+      const orderLabel = (ORDERS.find((o) => o.value === order) || {}).label || order;
+      setWorklog([{ id: Date.now(), kind: "adhoc", when: "právě teď", who: "Lubomír Hulín", order: orderLabel.split(" ")[0], title: adhocDesc, meta: adhocType + " · " + fmtMoney(parseFloat(adhocAmount) || 0), amount: parseFloat(adhocAmount) || 0 }, ...worklog]);
+      setAdhocDesc(""); setAdhocAmount("");
+    };
+    const deleteEntry = (id) => setWorklog(worklog.filter((w) => w.id !== id));
+
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/vykazovani" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
+    },
+      e(S.PageHeader, {
+        title: "Vykazování",
+        description: "Zapiš práci, materiál a ad-hoc náklady na zakázku",
+        tabs: e(S.Tabs, { value: tab, onChange: setTab, items: [
+          { value: "zapsat", label: "Zapsat" },
+          { value: "prehled", label: "Denní přehled", count: today.length },
+        ] })
+      }),
+      e(S.PageBody, null,
+
+        // ───── ZAPSAT ─────────────────────────────────────────────
+        tab === "zapsat" && e("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-4)", alignItems: "start" } },
+
+          // Levý sloupec — forms
+          e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-4)" } },
+
+            e(S.Section, { title: "Práce",
+              action: e("div", { className: "timer " + (timer.running ? "is-running" : "") },
+                e("span", { className: "timer__dot" }),
+                e("span", null, timer.display),
+                timer.running
+                  ? e(S.Button, { size: "sm", variant: "ghost", iconOnly: true, icon: "pause", "aria-label": "Zastavit", onClick: timer.stop })
+                  : e(S.Button, { size: "sm", variant: "ghost", iconOnly: true, icon: "play", "aria-label": "Spustit", onClick: timer.start }),
+                (timer.elapsed > 0 && !timer.running) && e(S.Button, { size: "sm", variant: "ghost", iconOnly: true, icon: "refresh", "aria-label": "Reset", onClick: timer.reset })
+              )
+            },
+              e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+                e(S.Field, { label: "Zakázka" },
+                  e(S.SearchSelect, { value: order, onChange: (v) => { setOrder(v); setOp(""); }, options: ORDERS, placeholder: "Vyberte zakázku…" })
+                ),
+                e(S.Field, { label: "Operace" },
+                  e(S.SearchSelect, { value: op, onChange: setOp, options: opOptions, placeholder: "Vyberte operaci…" })
+                ),
+                e(S.Field, { label: "Hodiny" },
+                  e(S.Input, { type: "number", value: hours, onChange: setHours, placeholder: "např. 2,5" })
+                ),
+                e(S.Field, { label: "Poznámka (volitelné)" },
+                  e(S.Textarea, { value: note, onChange: setNote, placeholder: "Co jsi dnes udělal?" })
+                ),
+                e(S.Field, { label: "Odchylka (volitelné)" },
+                  e(S.Select, { value: deviation, onChange: setDeviation, options: DEVIATION })
+                ),
+                e("div", { style: { display: "flex", justifyContent: "flex-end" } },
+                  e(S.Button, { icon: "check", onClick: saveWork, disabled: !hours || !order || !op }, "Zapsat práci")
+                )
+              )
+            )
+          ),
+
+          // Pravý sloupec — material + ad-hoc
+          e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-4)" } },
+
+            e(S.Section, { title: "Materiál" },
+              e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+                e(S.Field, { label: "Materiál" },
+                  e(S.SearchSelect, { value: material, onChange: setMaterial, options: MATERIALS, placeholder: "Vyberte z katalogu…", searchPlaceholder: "Hledat materiál…" })
+                ),
+                e(S.Field, { label: "Množství" },
+                  e(S.Input, { type: "number", value: qty, onChange: setQty, placeholder: "1" })
+                ),
+                material && e(S.Callout, { tone: "info", title: "Cena" }, fmtMoney(matPrice)),
+                e("div", { style: { display: "flex", justifyContent: "flex-end" } },
+                  e(S.Button, { icon: "check", onClick: saveMaterial, disabled: !material || !qty, variant: "secondary" }, "Zapsat materiál")
+                )
+              )
+            ),
+
+            e(S.Section, { title: "Ad-hoc náklady" },
+              e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+                e(S.Field, { label: "Typ" },
+                  e(S.Select, { value: adhocType, onChange: setAdhocType, options: [
+                    { value: "transport", label: "Doprava" },
+                    { value: "service", label: "Služba" },
+                    { value: "material-adhoc", label: "Materiál (mimo katalog)" },
+                    { value: "other", label: "Ostatní" },
+                  ] })
+                ),
+                e(S.Field, { label: "Popis" },
+                  e(S.Input, { value: adhocDesc, onChange: setAdhocDesc, placeholder: "např. Doprava Zlín → Olomouc" })
+                ),
+                e(S.Field, { label: "Částka (Kč)" },
+                  e(S.Input, { type: "number", value: adhocAmount, onChange: setAdhocAmount, placeholder: "0" })
+                ),
+                e("div", { style: { display: "flex", justifyContent: "flex-end" } },
+                  e(S.Button, { icon: "check", onClick: saveAdhoc, disabled: !adhocAmount || !adhocDesc, variant: "secondary" }, "Zapsat ad-hoc")
+                )
+              )
+            )
+          )
+        ),
+
+        // ───── DENNÍ PŘEHLED ──────────────────────────────────────
+        tab === "prehled" && e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-4)" } },
+          e(S.KpiRow, { cols: 4 },
+            e(S.StatTile, { label: "Dnes hodin", value: todayHours.toFixed(1), unit: "h", big: true }),
+            e(S.StatTile, { label: "Dnes náklady", value: fmtMoney(todayCost).replace(" Kč", ""), unit: "Kč" }),
+            e(S.StatTile, { label: "Záznamů dnes", value: String(today.length) }),
+            e(S.StatTile, { label: "Celkem (7 dní)", value: String(worklog.length) })
+          ),
+
+          e(S.Section, { title: "Dnešní záznamy (práce · materiál · ad-hoc)" },
+            today.length === 0
+              ? e(S.EmptyState, { icon: "clock", title: "Ještě nic dnes", description: "Zapiš první záznam v tabu Zapsat." })
+              : e("ul", { style: { listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "var(--space-2)" } },
+                  today.map((w) => e("li", { key: w.id,
+                    style: { display: "flex", alignItems: "flex-start", gap: "var(--space-3)", padding: "var(--space-2) var(--space-3)", background: "var(--surface-raised)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-lg)" }
+                  },
+                    e("span", { className: "kind-ic kind-" + w.kind },
+                      e(S.Icon, { name: w.kind === "work" ? "clock" : w.kind === "material" ? "folder" : "credit-card", size: 14 })
+                    ),
+                    e("div", { style: { flex: 1, minWidth: 0 } },
+                      e("div", { style: { font: "500 14px/20px var(--font-body)" } }, w.title),
+                      e("div", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)" } }, w.who, " · ", w.order, " · ", w.when, " · ", w.meta)
+                    ),
+                    e(S.Button, { size: "sm", iconOnly: true, icon: "trash", variant: "ghost", "aria-label": "Smazat záznam", title: "Smazat", onClick: () => deleteEntry(w.id) })
+                  ))
+                )
+          ),
+
+          e(S.Section, { title: "Dříve tento týden" },
+            e("ul", { style: { listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "var(--space-2)" } },
+              worklog.filter((w) => !w.when.startsWith("dnes") && !w.when.startsWith("právě")).map((w) => e("li", { key: w.id,
+                style: { display: "flex", alignItems: "flex-start", gap: "var(--space-3)", padding: "var(--space-2) var(--space-3)", background: "var(--surface-raised)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-lg)" }
+              },
+                e("span", { className: "kind-ic kind-" + w.kind },
+                  e(S.Icon, { name: w.kind === "work" ? "clock" : w.kind === "material" ? "folder" : "credit-card", size: 14 })
+                ),
+                e("div", { style: { flex: 1, minWidth: 0 } },
+                  e("div", { style: { font: "500 14px/20px var(--font-body)" } }, w.title),
+                  e("div", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)" } }, w.who, " · ", w.order, " · ", w.when, " · ", w.meta)
+                )
+              ))
+            )
+          )
+        )
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>

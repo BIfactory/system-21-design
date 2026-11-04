@@ -28,7 +28,7 @@
     "/zakazky": "./zakazky.html",
     "/zakazky/nova": "./zakazka-nova.html",
     "/zakazky/131": "./zakazka-detail.html",
-    "/vykazovani": "./_coming.html#/vykazovani",
+    "/vykazovani": "./vykazovani.html",
     "/crm/klienti": "./_coming.html#/crm/klienti",
     "/crm/osoby": "./_coming.html#/crm/osoby",
     "/crm/obchodni-pripady": "./_coming.html#/crm/obchodni-pripady",
