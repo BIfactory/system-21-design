@@ -151,7 +151,7 @@
     { key: "code", label: "Číslo", sortable: true, width: "10%", render: (c) =>
       e("span", { className: "s21-cell-code" }, c.code)
     },
-    { key: "product", label: "Smlouva", sortable: true, width: "28%", render: (c) =>
+    { key: "product", label: "Smlouva", sortable: true, width: "26%", render: (c) =>
       e("div", null,
         e("div", { style: { display: "flex", alignItems: "center", gap: 6 } },
           e(KomoditaBadge, { k: c.komodita }),
@@ -160,7 +160,7 @@
         e("div", { className: "s21-cell-meta" }, c.insurer, " · pojistník ", c.pojistnik, " · přes ", c.pres)
       )
     },
-    { key: "client", label: "Klient", width: "14%" },
+    { key: "client", label: "Klient", width: "16%" },
     { key: "_days", label: "Výročí / Fixace", sortable: true, width: "14%", render: (c) =>
       e("div", null,
         e(AnnivBadge, { c }),
@@ -176,7 +176,7 @@
         e("div", { className: "s21-cell-meta" }, c.frequency)
       )
     },
-    { key: "state", label: "Stav", width: "8%", render: (c) => {
+    { key: "state", label: "Stav", width: "10%", render: (c) => {
       const s = stateLabel[c.state] || stateLabel.active;
       return e(S.Badge, { tone: s.tone, fitCell: true }, s.label);
     } },

@@ -145,7 +145,7 @@
         ),
 
         // ───── PŘEHLED ────────────────────────────────────────────
-        tab === "prehled" && e("div", { style: { display: "grid", gridTemplateColumns: "1fr 320px", gap: "var(--space-5)", alignItems: "start", marginTop: "var(--space-4)" } },
+        tab === "prehled" && e("div", { className: "s21-grid-main-aside", style: { marginTop: "var(--space-4)" } },
           e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-4)" } },
 
             e(S.Section, { title: "Údaje o smlouvě" },
@@ -166,7 +166,7 @@
                 e("dt", null, "Deadline výpovědi"), e("dd", null, CONTRACT.deadline),
                 e("dt", null, "Pojistné (při sjednání)"), e("dd", null, fmt(CONTRACT.premiumInitial), " Kč"),
                 e("dt", null, "Pojistné (aktuální)"), e("dd", null,
-                  e(S.InlineEditor, { value: String(premium), type: "number", onSave: (v) => setPremium(parseInt(v, 10) || premium), label: "pojistné" }),
+                  e(S.InlineEditor, { value: fmt(premium), type: "number", onSave: (v) => setPremium(parseInt(String(v).replace(/\s/g, ""), 10) || premium), label: "pojistné" }),
                   " Kč / rok"
                 ),
                 e("dt", null, "Frekvence placení"), e("dd", null,

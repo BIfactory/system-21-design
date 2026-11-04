@@ -113,6 +113,7 @@
     const [worklog, setWorklog] = React.useState(WORKLOG_INITIAL);
 
     // Zapsat tab state
+    const [kind, setKind] = React.useState("work");
     const [order, setOrder] = React.useState("zak-131");
     const [op, setOp] = React.useState("op-03");
     const [hours, setHours] = React.useState("");
@@ -172,25 +173,34 @@
       e(S.PageBody, null,
 
         // ───── ZAPSAT ─────────────────────────────────────────────
-        tab === "zapsat" && e("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-4)", alignItems: "start" } },
+        tab === "zapsat" && e("div", { style: { maxWidth: 820, width: "100%", marginInline: "auto", display: "flex", flexDirection: "column", gap: "var(--space-4)" } },
 
-          // Levý sloupec — forms
-          e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-4)" } },
+          // Kind switcher + (jen pro práci) timer
+          e("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "var(--space-3)" } },
+            e(S.SegmentedControl, { value: kind, onChange: setKind, items: [
+              { value: "work", label: "Práce", icon: "clock" },
+              { value: "material", label: "Materiál", icon: "package" },
+              { value: "adhoc", label: "Ad-hoc", icon: "zap" },
+            ] }),
+            kind === "work" && e("div", { className: "timer " + (timer.running ? "is-running" : "") },
+              e("span", { className: "timer__dot" }),
+              e("span", null, timer.display),
+              timer.running
+                ? e(S.Button, { size: "sm", variant: "ghost", iconOnly: true, icon: "pause", "aria-label": "Zastavit", onClick: timer.stop })
+                : e(S.Button, { size: "sm", variant: "ghost", iconOnly: true, icon: "play", "aria-label": "Spustit", onClick: timer.start }),
+              (timer.elapsed > 0 && !timer.running) && e(S.Button, { size: "sm", variant: "ghost", iconOnly: true, icon: "refresh", "aria-label": "Reset", onClick: timer.reset })
+            )
+          ),
 
-            e(S.Section, { title: "Práce",
-              action: e("div", { className: "timer " + (timer.running ? "is-running" : "") },
-                e("span", { className: "timer__dot" }),
-                e("span", null, timer.display),
-                timer.running
-                  ? e(S.Button, { size: "sm", variant: "ghost", iconOnly: true, icon: "pause", "aria-label": "Zastavit", onClick: timer.stop })
-                  : e(S.Button, { size: "sm", variant: "ghost", iconOnly: true, icon: "play", "aria-label": "Spustit", onClick: timer.start }),
-                (timer.elapsed > 0 && !timer.running) && e(S.Button, { size: "sm", variant: "ghost", iconOnly: true, icon: "refresh", "aria-label": "Reset", onClick: timer.reset })
-              )
-            },
-              e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
-                e(S.Field, { label: "Zakázka" },
-                  e(S.SearchSelect, { value: order, onChange: (v) => { setOrder(v); setOp(""); }, options: ORDERS, placeholder: "Vyberte zakázku…" })
-                ),
+          // Form card — zakázka na všech třech, pak specifická pole
+          e(S.Section, null,
+            e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+
+              e(S.Field, { label: "Zakázka" },
+                e(S.SearchSelect, { value: order, onChange: (v) => { setOrder(v); if (kind === "work") setOp(""); }, options: ORDERS, placeholder: "Vyberte zakázku…" })
+              ),
+
+              kind === "work" && e(React.Fragment, null,
                 e(S.Field, { label: "Operace" },
                   e(S.SearchSelect, { value: op, onChange: setOp, options: opOptions, placeholder: "Vyberte operaci…" })
                 ),
@@ -206,15 +216,9 @@
                 e("div", { style: { display: "flex", justifyContent: "flex-end" } },
                   e(S.Button, { icon: "check", onClick: saveWork, disabled: !hours || !order || !op }, "Zapsat práci")
                 )
-              )
-            )
-          ),
+              ),
 
-          // Pravý sloupec — material + ad-hoc
-          e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-4)" } },
-
-            e(S.Section, { title: "Materiál" },
-              e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+              kind === "material" && e(React.Fragment, null,
                 e(S.Field, { label: "Materiál" },
                   e(S.SearchSelect, { value: material, onChange: setMaterial, options: MATERIALS, placeholder: "Vyberte z katalogu…", searchPlaceholder: "Hledat materiál…" })
                 ),
@@ -223,13 +227,11 @@
                 ),
                 material && e(S.Callout, { tone: "info", title: "Cena" }, fmtMoney(matPrice)),
                 e("div", { style: { display: "flex", justifyContent: "flex-end" } },
-                  e(S.Button, { icon: "check", onClick: saveMaterial, disabled: !material || !qty, variant: "secondary" }, "Zapsat materiál")
+                  e(S.Button, { icon: "check", onClick: saveMaterial, disabled: !material || !qty }, "Zapsat materiál")
                 )
-              )
-            ),
+              ),
 
-            e(S.Section, { title: "Ad-hoc náklady" },
-              e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+              kind === "adhoc" && e(React.Fragment, null,
                 e(S.Field, { label: "Typ" },
                   e(S.Select, { value: adhocType, onChange: setAdhocType, options: [
                     { value: "transport", label: "Doprava" },
@@ -245,7 +247,7 @@
                   e(S.Input, { type: "number", value: adhocAmount, onChange: setAdhocAmount, placeholder: "0" })
                 ),
                 e("div", { style: { display: "flex", justifyContent: "flex-end" } },
-                  e(S.Button, { icon: "check", onClick: saveAdhoc, disabled: !adhocAmount || !adhocDesc, variant: "secondary" }, "Zapsat ad-hoc")
+                  e(S.Button, { icon: "check", onClick: saveAdhoc, disabled: !adhocAmount || !adhocDesc }, "Zapsat ad-hoc")
                 )
               )
             )

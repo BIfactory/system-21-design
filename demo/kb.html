@@ -88,7 +88,7 @@
         actions: e(S.Button, { icon: "plus" }, "Nový článek")
       }),
       e(S.PageBody, null,
-        e("div", { style: { display: "grid", gridTemplateColumns: "240px 1fr", gap: "var(--space-4)", alignItems: "start" } },
+        e("div", { className: "s21-grid-sidebar-main" },
 
           // Levý sidebar — kategorie + search
           e("aside", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
@@ -112,7 +112,7 @@
           e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-4)" } },
 
             pinned.length > 0 && e(S.Section, { title: "Připnuté" },
-              e("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-3)" } },
+              e("div", { className: "s21-grid-cards-2" },
                 pinned.map((a) => e("a", { key: a.id, href: "#" + a.slug, className: "art-card",
                   style: { background: "linear-gradient(135deg, var(--primary-soft) 0%, var(--surface-raised) 60%)", borderLeft: "3px solid var(--primary)" }
                 },
@@ -132,7 +132,7 @@
             e(S.Section, { title: cat === "all" && !q ? "Všechny články" : q ? ("Výsledky pro „" + q + "\"") : CATEGORIES.find((c) => c.id === cat).label },
               rest.length === 0
                 ? e(S.EmptyState, { title: "Nic nenalezeno", description: "Zkus upravit hledání nebo vybrat jinou kategorii." })
-                : e("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-3)" } },
+                : e("div", { className: "s21-grid-cards-2" },
                     rest.map((a) => e("a", { key: a.id, href: "#" + a.slug, className: "art-card" },
                       e("div", { className: "art-card__title" }, a.title),
                       e("div", { className: "art-card__excerpt" }, a.excerpt),

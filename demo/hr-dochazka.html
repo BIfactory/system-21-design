@@ -131,7 +131,7 @@
         ),
 
         // ───── 2 sloupce: Punch + Vacation ─────────────────────────
-        e("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-4)", alignItems: "start", marginTop: "var(--space-4)" } },
+        e("div", { className: "s21-grid-cards-2", style: { marginTop: "var(--space-4)", alignItems: "start" } },
 
           // Levý — Punch
           e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-4)" } },
@@ -224,7 +224,7 @@
 
             e(S.Section, { title: "Nová žádost o dovolenou" },
               e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
-                e("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-3)" } },
+                e("div", { className: "s21-grid-cards-2" },
                   e(S.Field, { label: "Od" },
                     e(S.Input, { type: "date", value: vFrom, onChange: setVFrom })
                   ),

@@ -156,7 +156,7 @@
         ),
 
         // ───── PŘEHLED ────────────────────────────────────────────
-        tab === "prehled" && e("div", { style: { display: "grid", gridTemplateColumns: "1fr 320px", gap: "var(--space-5)", alignItems: "start", marginTop: "var(--space-4)" } },
+        tab === "prehled" && e("div", { className: "s21-grid-main-aside", style: { marginTop: "var(--space-4)" } },
           e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-4)" } },
 
             e(S.Section, { title: "Údaje o smlouvě" },
