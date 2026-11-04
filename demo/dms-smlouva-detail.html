@@ -41,17 +41,31 @@
   function Page() {
     const [tab, setTab] = React.useState("prehled");
     const [comments, setComments] = React.useState(COMMENTS);
+    const [sendOpen, setSendOpen] = React.useState(false);
+    const [deleteOpen, setDeleteOpen] = React.useState(false);
+    const [sendTo, setSendTo] = React.useState("jan.novak@novak.cz");
+    const [sendNote, setSendNote] = React.useState("Dobrý den, zasílám smlouvu k podpisu. S pozdravem Pavel");
+    const [data, setData] = React.useState({
+      pojistitel: "Allianz pojišťovna",
+      pojistnik: "Jan Novák",
+      platnost: "12. 04. 2024 – 12. 04. 2027",
+      frekvence: "rocne",
+      pojistne: "14 400 Kč",
+      objekt: "Rodinný dům, Zlín-Malenovice",
+    });
+    const updateField = (k) => (v) => setData((prev) => ({ ...prev, [k]: v }));
     return e(S.AppShell, {
       sidebar: e(D.DemoSidebar, { active: "/dms/smlouvy" }),
       topbar: e(D.DemoTopBar, { crumbs: CRUMBS, onNavigate: (it, i) => { if (i === 1) window.location.href = "./dms-smlouvy.html"; } }),
     },
       e(S.PageHeader, {
         title: "SM-2026-0117 Pojištění majetku",
-        description: "Novákovi · Allianz · Pojistné 14 400 Kč / rok",
+        description: "Novákovi · Allianz · Pojistné " + data.pojistne + " / rok",
         actions: e(React.Fragment, null,
           e(S.WorkflowBadge, { state: "in-progress" }),
           e(S.Button, { variant: "secondary", icon: "download" }, "Stáhnout"),
-          e(S.Button, { icon: "send" }, "Odeslat k podpisu")
+          e(S.Button, { variant: "secondary", icon: "trash", onClick: () => setDeleteOpen(true) }, "Smazat"),
+          e(S.Button, { icon: "send", onClick: () => setSendOpen(true) }, "Odeslat k podpisu")
         ),
         tabs: e(S.Tabs, { value: tab, onChange: setTab, items: [
           { value: "prehled", label: "Přehled" },
@@ -65,12 +79,24 @@
           e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-5)" } },
             e(S.Section, { title: "Údaje" },
               e("dl", { className: "s21-entity__meta", style: { display: "grid", gridTemplateColumns: "max-content 1fr", gap: "4px 24px" } },
-                e("dt", null, "Pojistitel"), e("dd", null, "Allianz pojišťovna"),
-                e("dt", null, "Pojistník"), e("dd", null, "Jan Novák"),
-                e("dt", null, "Platnost"), e("dd", null, "12. 04. 2024 – 12. 04. 2027"),
-                e("dt", null, "Frekvence"), e("dd", null, "Ročně"),
-                e("dt", null, "Pojistné"), e("dd", null, "14 400 Kč"),
-                e("dt", null, "Objekt"), e("dd", null, "Rodinný dům, Zlín-Malenovice")
+                e("dt", null, "Pojistitel"), e("dd", null, e(S.InlineEditor, { value: data.pojistitel, onSave: updateField("pojistitel"), label: "pojistitel" })),
+                e("dt", null, "Pojistník"), e("dd", null, e(S.InlineEditor, { value: data.pojistnik, onSave: updateField("pojistnik"), label: "pojistník" })),
+                e("dt", null, "Platnost"), e("dd", null, e(S.InlineEditor, { value: data.platnost, onSave: updateField("platnost"), label: "platnost" })),
+                e("dt", null, "Frekvence"), e("dd", null, e(S.InlineEditor, {
+                  value: data.frekvence,
+                  type: "select",
+                  onSave: updateField("frekvence"),
+                  label: "frekvence",
+                  options: [
+                    { value: "mesicne", label: "Měsíčně" },
+                    { value: "ctvrtletne", label: "Čtvrtletně" },
+                    { value: "rocne", label: "Ročně" },
+                    { value: "jednorazove", label: "Jednorázově" },
+                  ],
+                  display: (v) => ({ mesicne: "Měsíčně", ctvrtletne: "Čtvrtletně", rocne: "Ročně", jednorazove: "Jednorázově" }[v] || v),
+                })),
+                e("dt", null, "Pojistné"), e("dd", null, e(S.InlineEditor, { value: data.pojistne, onSave: updateField("pojistne"), label: "pojistné" })),
+                e("dt", null, "Objekt"), e("dd", null, e(S.InlineEditor, { value: data.objekt, onSave: updateField("objekt"), type: "textarea", label: "objekt" }))
               )
             ),
             e(S.Section, { title: "Soubory" },
@@ -85,7 +111,36 @@
             )
           ),
           e(S.RelationsSidebar, { sections: RELS })
-        )
+        ),
+        e(S.QuickActionModal, {
+          open: sendOpen, onClose: () => setSendOpen(false),
+          title: "Odeslat k podpisu",
+          description: "Smlouva SM-2026-0117 bude odeslána e-mailem klientovi.",
+          icon: "send",
+          footer: e(React.Fragment, null,
+            e(S.Button, { variant: "secondary", onClick: () => setSendOpen(false) }, "Zrušit"),
+            e(S.Button, { icon: "send", onClick: () => setSendOpen(false) }, "Odeslat")
+          )
+        },
+          e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+            e(S.Field, { label: "Příjemce" },
+              e(S.Input, { value: sendTo, onChange: setSendTo, type: "email" })
+            ),
+            e(S.Field, { label: "Zpráva" },
+              e(S.Textarea, { value: sendNote, onChange: setSendNote, rows: 3 })
+            )
+          )
+        ),
+        e(S.Modal, {
+          open: deleteOpen, onClose: () => setDeleteOpen(false),
+          destructive: true,
+          title: "Smazat smlouvu?",
+          description: "Smlouva SM-2026-0117 Pojištění majetku bude trvale odstraněna včetně příloh (3) a komentářů (" + comments.length + "). Tuto akci nelze vzít zpět.",
+          footer: e(React.Fragment, null,
+            e(S.Button, { variant: "secondary", onClick: () => setDeleteOpen(false) }, "Zrušit"),
+            e(S.Button, { variant: "danger", icon: "trash", onClick: () => setDeleteOpen(false) }, "Smazat trvale")
+          )
+        })
       )
     );
   }

@@ -407,17 +407,20 @@ function Pagination({ page, totalPages, total, pageSize, noun = "záznamů", onP
 }
 
 /* ───────────── StatTile ───────────── */
-function StatTile({ label, value, unit, hint, accent, big }) {
+function StatTile({ label, value, unit, hint, accent, big, href, onClick }) {
   const full = unit ? `${value} ${unit}` : String(value);
+  const clickable = href || typeof onClick === "function";
+  const Tag = href ? "a" : clickable ? "button" : "div";
+  const extra = href ? { href } : clickable ? { type: "button", onClick } : {};
   return (
-    <div className={cx("s21-stat", accent && `s21-stat--${accent}`)}>
+    <Tag className={cx("s21-stat", accent && `s21-stat--${accent}`, clickable && "is-clickable")} {...extra}>
       <div className="s21-stat__label">{label}</div>
       <div className={cx("s21-stat__value", big && "is-big")} title={full}>
         <span className="s21-stat__num">{value}</span>
         {unit && <span className="s21-stat__unit">{unit}</span>}
       </div>
       {hint && <div className="s21-stat__hint">{hint}</div>}
-    </div>
+    </Tag>
   );
 }
 
@@ -476,7 +479,7 @@ function Stepper({ steps, current, onGoTo }) {
 }
 
 /* ───────────── Modal ───────────── */
-function Modal({ open, onClose, title, description, size = "md", footer, children, inline = false }) {
+function Modal({ open, onClose, title, description, size = "md", footer, children, inline = false, destructive = false }) {
   useEffect(() => {
     if (!open || inline) return;
     const onKey = (e) => { if (e.key === "Escape") onClose && onClose(); };
@@ -486,9 +489,10 @@ function Modal({ open, onClose, title, description, size = "md", footer, childre
   }, [open, inline, onClose]);
   if (!open) return null;
   return (
-    <div role="presentation" className={cx("s21-modal", inline && "s21-modal--inline")} onClick={() => onClose && onClose()}>
+    <div role="presentation" className={cx("s21-modal", inline && "s21-modal--inline", destructive && "s21-modal--destructive")} onClick={() => onClose && onClose()}>
       <div role="dialog" aria-modal="true" aria-labelledby="s21-modal-title" className={cx("s21-modal__panel", `s21-modal__panel--${size}`)} onClick={(e) => e.stopPropagation()}>
         <header className="s21-modal__head">
+          {destructive && <Icon name="alert-triangle" size={22} className="s21-modal__warning" />}
           <div className="s21-modal__titles">
             <h2 id="s21-modal-title" className="s21-modal__title">{title}</h2>
             {description && <p className="s21-modal__desc">{description}</p>}
@@ -1754,6 +1758,105 @@ function AttachmentList({ items = [], onDownload, onRemove, compact, className }
   );
 }
 
+/* ───────────── InlineEditor (NEW — polepim/H) ─────────────
+   Click-to-edit pill: read mode zobrazí hodnotu, click přepne do edit mode
+   s inputem + Save/Cancel. Enter=Save, Escape=Cancel, blur=Cancel. */
+
+function InlineEditor({ value, onSave, type = "text", options, placeholder, display, label, disabled, className }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+  const inputRef = useRef(null);
+
+  useEffect(() => { if (editing && inputRef.current) inputRef.current.focus(); }, [editing]);
+  useEffect(() => { setDraft(value); }, [value]);
+
+  const commit = () => {
+    if (draft !== value && typeof onSave === "function") onSave(draft);
+    setEditing(false);
+  };
+  const cancel = () => {
+    setDraft(value);
+    setEditing(false);
+  };
+  const onKey = (e) => {
+    if (e.key === "Enter" && type !== "textarea") { e.preventDefault(); commit(); }
+    else if (e.key === "Escape") { e.preventDefault(); cancel(); }
+  };
+
+  if (!editing) {
+    return (
+      <button
+        type="button"
+        className={cx("s21-inline", disabled && "is-disabled", className)}
+        onClick={() => !disabled && setEditing(true)}
+        aria-label={label ? `Upravit: ${label}` : undefined}
+        disabled={disabled}
+      >
+        <span className="s21-inline__value">
+          {typeof display === "function" ? display(value) : (value || <span className="s21-inline__placeholder">{placeholder || "—"}</span>)}
+        </span>
+        <Icon name="edit" size={12} className="s21-inline__edit" />
+      </button>
+    );
+  }
+
+  let input;
+  if (type === "select") {
+    input = (
+      <select ref={inputRef} className="s21-inline__input" value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={onKey}>
+        {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+      </select>
+    );
+  } else if (type === "textarea") {
+    input = <textarea ref={inputRef} className="s21-inline__input s21-inline__input--area" value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={onKey} rows={2} />;
+  } else {
+    input = <input ref={inputRef} type={type} className="s21-inline__input" value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={onKey} placeholder={placeholder} />;
+  }
+
+  return (
+    <span className={cx("s21-inline", "is-editing", className)}>
+      {input}
+      <button type="button" className="s21-inline__btn s21-inline__btn--ok" onClick={commit} aria-label="Uložit" title="Uložit (Enter)">
+        <Icon name="check" size={14} />
+      </button>
+      <button type="button" className="s21-inline__btn s21-inline__btn--cancel" onClick={cancel} aria-label="Zrušit" title="Zrušit (Esc)">
+        <Icon name="x" size={14} />
+      </button>
+    </span>
+  );
+}
+
+/* ───────────── QuickActionModal (NEW — polepim/H) ─────────────
+   Malý contextual dialog (max 480px) pro akce na záznamu bez navigace.
+   Rozdíl od Modalu: menší, lehčí animace, žádný close X v hlavičce
+   (uzavírá se footer tlačítky / Esc / click na overlay). */
+
+function QuickActionModal({ open, onClose, title, description, icon, children, footer, size = "sm" }) {
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => { if (e.key === "Escape") onClose && onClose(); };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+  }, [open, onClose]);
+  if (!open) return null;
+  return (
+    <div role="presentation" className="s21-qam" onClick={() => onClose && onClose()}>
+      <div role="dialog" aria-modal="true" aria-labelledby="s21-qam-title" className={cx("s21-qam__panel", `s21-qam__panel--${size}`)} onClick={(e) => e.stopPropagation()}>
+        <header className="s21-qam__head">
+          {icon && <span className="s21-qam__icon"><Icon name={icon} size={18} /></span>}
+          <div className="s21-qam__titles">
+            <h3 id="s21-qam-title" className="s21-qam__title">{title}</h3>
+            {description && <p className="s21-qam__desc">{description}</p>}
+          </div>
+        </header>
+        {children && <div className="s21-qam__body">{children}</div>}
+        {footer && <footer className="s21-qam__foot">{footer}</footer>}
+      </div>
+    </div>
+  );
+}
+
 /* ───────────── Theme (NEW — Fáze E) ───────────── */
 function getInitialTheme() {
   if (typeof window === "undefined") return "light";
@@ -1881,6 +1984,7 @@ export {
   moduleNavSections, KpiRow, ActivityFeed, QuickActions,
   EntityCard, WorkflowBadge, RelationsSidebar, ModuleHome,
   CommentThread, AttachmentList,
+  InlineEditor, QuickActionModal,
   Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
   InputGroup, Textarea, FileDrop,
   BottomNav, useScrollDirection,
@@ -1900,6 +2004,7 @@ if (typeof window !== "undefined") {
   moduleNavSections, KpiRow, ActivityFeed, QuickActions,
   EntityCard, WorkflowBadge, RelationsSidebar, ModuleHome,
   CommentThread, AttachmentList,
+  InlineEditor, QuickActionModal,
   Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
   InputGroup, Textarea, FileDrop,
   BottomNav, useScrollDirection,

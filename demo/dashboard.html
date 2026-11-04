@@ -57,10 +57,10 @@
           title: "Dashboard",
           description: "Co se dnes děje v tvojí praxi",
           kpis: e(S.KpiRow, { cols: 4 },
-            e(S.StatTile, { label: "Klienti", value: "124", hint: "Rodiny 92 · Firmy 32", accent: "primary" }),
-            e(S.StatTile, { label: "Smlouvy", value: "208", hint: "tento měsíc +3" }),
-            e(S.StatTile, { label: "Otevřené příležitosti", value: "7", accent: "primary" }),
-            e(S.StatTile, { label: "Nepodepsané smlouvy", value: "2", accent: "danger", hint: "čeká na akci" })
+            e(S.StatTile, { label: "Klienti", value: "124", hint: "Rodiny 92 · Firmy 32", accent: "primary", href: "./crm-klienti.html" }),
+            e(S.StatTile, { label: "Smlouvy", value: "208", hint: "tento měsíc +3", href: "./dms-smlouvy.html" }),
+            e(S.StatTile, { label: "Otevřené příležitosti", value: "7", accent: "primary", href: "./crm-obchodni-pripady.html" }),
+            e(S.StatTile, { label: "Nepodepsané smlouvy", value: "2", accent: "danger", hint: "čeká na akci", href: "./dms-smlouvy.html" })
           ),
           quickActions: e(S.QuickActions, { actions: ACTIONS, cols: 3 }),
           activity: e(S.ActivityFeed, { items: FEED }),

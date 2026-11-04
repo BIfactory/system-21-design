@@ -997,3 +997,49 @@ body { font-family: var(--font-body); color: var(--ink); margin: 0; font-feature
 .s21-atl__meta { font: 400 12px/16px var(--font-body); color: var(--ink-muted); display: flex; flex-wrap: wrap; gap: 4px; }
 .s21-atl__actions { display: inline-flex; gap: 2px; flex-shrink: 0; }
 .s21-atl--compact .s21-atl__item { padding: var(--space-1) var(--space-2); }
+
+/* ─── InlineEditor (polepim/H, 2026-11-04) ─── */
+.s21-inline { display: inline-flex; align-items: center; gap: var(--space-1); background: transparent; border: 0; padding: 2px 6px; margin: -2px -6px; border-radius: var(--radius-md); cursor: text; font: inherit; color: inherit; text-align: inherit; transition: background-color var(--motion-duration-fast) var(--motion-ease-out); max-width: 100%; }
+.s21-inline:hover { background: var(--surface-muted); }
+.s21-inline:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.s21-inline.is-disabled { opacity: .6; cursor: not-allowed; }
+.s21-inline__value { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.s21-inline__placeholder { color: var(--ink-subtle); font-style: italic; }
+.s21-inline__edit { opacity: 0; transition: opacity var(--motion-duration-fast) var(--motion-ease-out); color: var(--ink-muted); flex-shrink: 0; }
+.s21-inline:hover .s21-inline__edit, .s21-inline:focus-visible .s21-inline__edit { opacity: 1; }
+.s21-inline.is-editing { background: var(--surface); padding: 2px 4px; border: 1px solid var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); cursor: auto; }
+.s21-inline__input { font: inherit; color: inherit; background: transparent; border: 0; padding: 2px 4px; margin: 0; outline: none; min-width: 80px; }
+.s21-inline__input--area { resize: vertical; min-height: 44px; min-width: 200px; }
+.s21-inline__btn { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; padding: 0; background: transparent; border: 0; border-radius: var(--radius-sm); cursor: pointer; flex-shrink: 0; }
+.s21-inline__btn--ok { color: var(--success-solid); }
+.s21-inline__btn--ok:hover { background: var(--success-bg); }
+.s21-inline__btn--cancel { color: var(--ink-muted); }
+.s21-inline__btn--cancel:hover { background: var(--surface-muted); color: var(--danger-solid); }
+
+/* ─── QuickActionModal (polepim/H, 2026-11-04) ─── */
+.s21-qam { position: fixed; inset: 0; z-index: 90; background: var(--overlay); backdrop-filter: blur(var(--backdrop-blur-sm)); -webkit-backdrop-filter: blur(var(--backdrop-blur-sm)); display: flex; align-items: center; justify-content: center; padding: var(--space-4); animation: s21-fade-in var(--motion-duration-base) var(--motion-ease-out); }
+.s21-qam__panel { background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--elev-5); width: 100%; max-height: 85vh; display: flex; flex-direction: column; animation: s21-modal-in var(--motion-duration-slow) var(--motion-ease-out); overflow: hidden; }
+.s21-qam__panel--sm { max-width: 460px; }
+.s21-qam__panel--md { max-width: 620px; }
+.s21-qam__head { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-4) var(--space-4) var(--space-2); }
+.s21-qam__icon { flex-shrink: 0; width: 32px; height: 32px; border-radius: var(--radius-lg); background: var(--primary-soft); color: var(--primary-text); display: inline-flex; align-items: center; justify-content: center; }
+.s21-qam__titles { flex: 1; min-width: 0; }
+.s21-qam__title { margin: 0; font: 600 16px/22px var(--font-display); color: var(--ink); }
+.s21-qam__desc { margin: 2px 0 0; font: 400 13px/18px var(--font-body); color: var(--ink-muted); }
+.s21-qam__body { padding: var(--space-3) var(--space-4); flex: 1; overflow-y: auto; }
+.s21-qam__foot { display: flex; justify-content: flex-end; gap: var(--space-2); padding: var(--space-3) var(--space-4); border-top: 1px solid var(--border-subtle); background: var(--surface); }
+
+/* ─── Modal destructive variant (polepim/H, 2026-11-04) ─── */
+.s21-modal--destructive .s21-modal__head { align-items: flex-start; }
+.s21-modal__warning { flex-shrink: 0; color: var(--danger-solid); background: var(--danger-bg); padding: 8px; border-radius: var(--radius-full); width: 22px; height: 22px; box-sizing: content-box; }
+.s21-modal--destructive .s21-modal__title { color: var(--danger-text); }
+.s21-modal--destructive .s21-modal__foot { justify-content: space-between; }
+
+/* ─── StatTile clickable (polepim/H, 2026-11-04) ─── */
+a.s21-stat, button.s21-stat { font: inherit; text-align: left; text-decoration: none; }
+.s21-stat.is-clickable { cursor: pointer; transition: transform var(--motion-duration-fast) var(--motion-ease-out), box-shadow var(--motion-duration-fast) var(--motion-ease-out), border-color var(--motion-duration-fast) var(--motion-ease-out); }
+.s21-stat.is-clickable:hover { transform: translateY(-1px); box-shadow: var(--elev-2); border-color: var(--primary); }
+.s21-stat.is-clickable:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.s21-stat.is-clickable::after { content: ""; position: absolute; top: var(--space-3); right: var(--space-3); width: 14px; height: 14px; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='9 18 15 12 9 6'/></svg>"); opacity: 0; color: var(--primary-text); transition: opacity var(--motion-duration-fast) var(--motion-ease-out), transform var(--motion-duration-fast) var(--motion-ease-out); }
+.s21-stat.is-clickable:hover::after { opacity: 1; transform: translateX(2px); }
+.s21-stat { position: relative; }

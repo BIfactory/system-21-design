@@ -324,6 +324,32 @@ export interface AttachmentListProps {
 }
 export declare function AttachmentList(p: AttachmentListProps): JSX.Element;
 
+/* — Polepim patterns (polepim/H, 2026-11-04) — */
+export interface InlineEditorProps {
+  value: any;
+  onSave?: (newValue: any) => void;
+  type?: "text" | "date" | "number" | "select" | "textarea";
+  options?: Array<{ value: string; label: string }>;
+  placeholder?: string;
+  display?: (value: any) => ReactNode;
+  label?: string;
+  disabled?: boolean;
+  className?: string;
+}
+export declare function InlineEditor(p: InlineEditorProps): JSX.Element;
+
+export interface QuickActionModalProps {
+  open: boolean;
+  onClose?: () => void;
+  title: ReactNode;
+  description?: ReactNode;
+  icon?: IconName;
+  children?: ReactNode;
+  footer?: ReactNode;
+  size?: "sm" | "md";
+}
+export declare function QuickActionModal(p: QuickActionModalProps): JSX.Element | null;
+
 /* — Fáze H components — */
 export interface DrawerProps { open: boolean; onClose?: () => void; side?: "left" | "right" | "top" | "bottom"; size?: number | string; title?: ReactNode; description?: ReactNode; footer?: ReactNode; children?: ReactNode; className?: string }
 export declare function Drawer(p: DrawerProps): JSX.Element | null;
