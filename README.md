@@ -24,6 +24,20 @@ Nad v1.1 katalogem (33 komponent) přibyly v2.0:
 - **Datové primitives:** `EntityCard` (univerzální karta záznamu), `RelationsSidebar` (pravý sloupec s propojenými záznamy), `WorkflowBadge` (stav workflow s enum mapou).
 - **Interakce:** `CommentThread` (diskuse s replies + reakcemi + add form), `AttachmentList` (soubory s meta + download/remove).
 
+## Komponenty v2.2 (polepim patterns — real-app feel)
+
+Přenos nejlepších interakčních patternů z produkční aplikace `polepim-manager`:
+
+- **Inline editace:** `InlineEditor` — click-to-edit pill (text / date / number / select / textarea) s Enter=Save, Esc=Cancel, blur=Cancel.
+- **Rychlé akce:** `QuickActionModal` — menší dialog než `Modal` pro contextual akce bez navigace.
+- **Formuláře:** `FormWizard` — multi-step s validací a chybovými skoky; `SearchSelect` — searchable combobox pro 100+ položek; `FileUploadZone` — drag & drop s per-file progress a error isolací.
+- **Advanced lists:** `BulkActionBar` — floating bar se selection akcemi; `SalesFunnel` — responsive pipeline vizualizace (SVG desktop / stacked bars mobile).
+- **Rozšíření existujícího:** `Modal destructive` (danger CTA + alert icon + reversed footer), `StatTile href/onClick` (klikatelné dlaždice s hover chevron).
+
+**Nové demo stránky v2.2:** `demo/predavaci-protokol.html` (6-step wizard „nová zakázka"), `demo/zakazka-detail.html` (plný detail se všemi novými patterny — inline edit, quick action, file upload, bulk na operacích, komentáře, destruktivní „zrušit").
+
+**Upgrade existujících stránek v2.2:** dashboard (klikatelné KPI tiles), `dms-smlouva-detail` (inline edit údajů + FileUploadZone + quick action + destruktivní smazat), `ukoly` (bulk selection + BulkActionBar), `crm-obchodni-pripady` (SalesFunnel + klikatelný filtr).
+
 ## Co je v repozitáři
 
 ```

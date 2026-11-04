@@ -1,5 +1,49 @@
 # Changelog
 
+## v2.2 — 2026-11-04 (polepim patterns → real-app feel)
+
+Přenos nejlepších interakčních patternů z produkční aplikace `BIfactory/polepim-manager` jako generických komponent (všechno zobecněné, žádné doménové věci jako podpisy / QR / HEIC / PDF nesou nezahrnuty — viz design doc).
+
+### Přidáno
+
+**7 nových komponent:**
+
+- `InlineEditor` — click-to-edit pill (text / date / number / select / textarea). Enter=Save, Esc=Cancel, blur=Cancel. Volitelný `display(value)` pro vlastní read-mode (např. Badge pro status, lokalizované datum).
+- `QuickActionModal` — malý contextual dialog (sm=460 / md=620 px) pro akce bez navigace. Zavírá se jen footer tlačítky / Esc / click na overlay.
+- `FormWizard` — multi-step wrapper s per-step `validate()` vracející array error messages, chybový banner nad body, done/current/future styling kroků, `onComplete(values)` na posledním kroku.
+- `SearchSelect` — searchable combobox pro 100+ options. Trigger + popover s input filtrem, keyboard nav (Arrows + Enter + Esc), hint text per option, substring filter v label i hint.
+- `FileUploadZone` — drag & drop + file picker. Per-file status (uploading / done / failed) + error isolace. `maxSize` guard před `onFiles` Promise.
+- `BulkActionBar` — floating pill u spodku viewportu, spring-in animace. Selection state drží parent; komponenta jen prezentační.
+- `SalesFunnel` — responsive pipeline: desktop = SVG clip-path trapezoid chain (šířka proporcionální k max count), mobile = stacked bars s % fillem. Click na stage → onChange; druhý klik vyruší výběr.
+
+**Rozšíření existujících:**
+
+- `Modal`: nový `destructive: boolean` prop → alert-triangle ikonu v header, danger title color, footer `justify-content: space-between` (Cancel vlevo, Confirm vpravo pro svalovou paměť bezpečnosti).
+- `StatTile`: nový `href` nebo `onClick` prop → renderuje jako `<a>` nebo `<button>`, přidává `.is-clickable` s hover lift + chevron overlay v rohu.
+
+**Nové demo stránky:**
+
+- `demo/predavaci-protokol.html` — 6-step wizard „nová zakázka" (Základní / Materiál / Termíny / Kontakty / Přílohy / Souhrn) s `SearchSelect` pro klient+lokalita+osoby, `FileUploadZone` pro dokumenty, reálná validace (budoucí datum, min délka názvu, povinný vlastník).
+- `demo/zakazka-detail.html` — kompletní detail zakázky používající všechny nové patterny: InlineEditor na polích (klient, deadline s CZ formátem, hodnota, stav se select+WorkflowBadge display), QuickActionModal „Vykázat hodiny" z row akce, FileUploadZone + AttachmentList v Soubory, DataTable selectable + BulkActionBar na operacích, CommentThread, destructive Modal „Zrušit zakázku".
+
+**Upgrade existujících demo stránek:**
+
+- `dashboard.html` — KPI tiles mají `href` na list stránky (Klienti → crm-klienti, Smlouvy → dms-smlouvy, ...).
+- `dms-smlouva-detail.html` — sekce Údaje používá InlineEditor na každém poli; header akce: QuickActionModal „Odeslat k podpisu" (email + poznámka), destructive Modal „Smazat" (vypisuje počet příloh + komentářů, které zmizí); FileUploadZone nad AttachmentList.
+- `ukoly.html` — DataTable `selectable` + BulkActionBar s 3 akcemi (Označit hotové, Delegovat, Smazat [destructive]).
+- `crm-obchodni-pripady.html` — SalesFunnel nad FilterBar s 5 stages; kliknutí na stage filtruje DataTable pod.
+
+### Spec + plán
+
+- `docs/superpowers/specs/2026-11-04-polepim-patterns-design.md`
+- `docs/superpowers/plans/2026-11-04-polepim-patterns.md`
+
+### Zpětná kompatibilita
+
+Žádný existující export, třída, token neupraven ani přejmenován. Všechno aditivně.
+
+---
+
 ## v2.0 — 2026-11-04 (demo-ready — příprava pro `system21-demo-gui`)
 
 Knihovna povýšena ze „katalog komponent + 1 demo obrazovka" na **plně připravenou šablonu pro univerzální demo**. Cíl: budoucí demo aplikace `BIfactory/system21-demo-gui` vznikne převážně skládáním z knihovny, ne psaním nových komponent.

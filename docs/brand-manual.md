@@ -159,6 +159,29 @@ Knihovna rozlišuje **brandové tokeny** (co se mění pro zákazníka) a **syst
 
 **Pozor:** `accent` (Spark Yellow) zůstává napříč brandy — je to systémový akcent pro upozornění, ne brand barva. Pokud zákazník explicitně chce jiný accent, zdokumentuj to v brand tokens.
 
+## Interakční patterny (v2.2)
+
+Rozšíření o patterny převzaté a zobecněné z `polepim-manager`:
+
+**Kdy použít co:**
+
+- **`InlineEditor`** — malá editace existujícího pole bez modálu (deadline, status, krátká poznámka, cena). Ne pro povinná pole v onboarding flow.
+- **`QuickActionModal`** — akce, která nevyžaduje celou stránku (vykázat hodiny, odeslat k podpisu, přidat kontakt). Max 2 tlačítka ve footeru. Při Confirm zavři a ukaž `Toast`.
+- **`FormWizard`** — multi-step flow (nová zakázka, předávací protokol, onboarding). Max 7 kroků. Validuj jen aktuální step; async kontroly nech na `onComplete`.
+- **`SearchSelect`** — vyberem z 15+ položek. Pro míň použij `Select`. Hledá v `label` i `hint` (např. jméno + IČ).
+- **`FileUploadZone`** — nahrávání souborů s progress a per-file error isolací. `onFiles` musí vrátit Promise.
+- **`BulkActionBar`** — plovoucí bar při selection v seznamu. Max 4 akce. Selection state drží parent (tahle komponenta je čistě prezentační).
+- **`SalesFunnel`** — vizualizace pipeline / workflow stages. Max 7 stages. Clickable → filtruje seznam pod.
+- **`Modal` + `destructive`** — potvrzovací dialog pro nevratné akce. Alert icon v hlavičce, Cancel vlevo (autofocus), Confirm vpravo (red variant).
+
+**Pravidla:**
+
+- Nekombinuj `InlineEditor` s `onSave` sync validací; v případě chyby nech komponentu uzavřít a ukaž error na úrovni stránky (Toast nebo inline message).
+- `BulkActionBar` nikdy nedávej vedle interního DataTable `bulkActions` propu (legacy inline bar) — vzniknou 2 bar, matoucí UX.
+- `QuickActionModal` nenaskládej víc do sebe; pokud máš 2 akce, které spolu souvisejí, udělej z nich `FormWizard`.
+
+**Co stále zůstává mimo:** plánovací tabule, časové osy výkazů, podpisové pole, výběr poškození vozu, QR skener, grafy, PDF renderer, HEIC konverze. Doménové, neuniverzální.
+
 ## Nezahrnuto
 
 Tyto části zdrojové aplikace se do systému nepřenášely:
