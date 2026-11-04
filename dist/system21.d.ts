@@ -245,6 +245,48 @@ export interface QuickAction { label: string; icon?: IconName; href?: string; on
 export interface QuickActionsProps { actions: QuickAction[]; cols?: number; className?: string }
 export declare function QuickActions(p: QuickActionsProps): JSX.Element | null;
 
+/* — Entity + workflow (demo-prep/C, 2026-11-04) — */
+export interface EntityCardMeta { label: string; value: ReactNode }
+export interface EntityCardTag { label: string; tone?: "neutral" | "success" | "danger" | "warning" | "primary" }
+export interface EntityCardProps {
+  icon?: IconName | ReactNode;
+  title: ReactNode;
+  subtitle?: ReactNode;
+  meta?: EntityCardMeta[];
+  tags?: EntityCardTag[];
+  actions?: ReactNode;
+  onClick?: () => void;
+  accent?: "primary" | "success" | "warning" | "danger";
+  className?: string;
+}
+export declare function EntityCard(p: EntityCardProps): JSX.Element;
+
+export type WorkflowState =
+  | "draft" | "offer" | "negotiation" | "in-progress" | "win" | "loss" | "done" | "blocked" | "overdue";
+export interface WorkflowBadgeProps { state: WorkflowState; label?: string; fitCell?: boolean }
+export declare function WorkflowBadge(p: WorkflowBadgeProps): JSX.Element;
+
+export interface RelationItem { icon?: IconName; label: ReactNode; meta?: ReactNode; href?: string }
+export interface RelationSection {
+  title: string;
+  count?: number;
+  items: RelationItem[];
+  action?: { label: string; icon?: IconName; onClick: () => void };
+}
+export interface RelationsSidebarProps { sections: RelationSection[]; className?: string }
+export declare function RelationsSidebar(p: RelationsSidebarProps): JSX.Element;
+
+export interface ModuleHomeProps {
+  title: ReactNode;
+  description?: ReactNode;
+  kpis?: ReactNode;
+  quickActions?: ReactNode;
+  activity?: ReactNode;
+  diary?: ReactNode;
+  className?: string;
+}
+export declare function ModuleHome(p: ModuleHomeProps): JSX.Element;
+
 /* — Fáze H components — */
 export interface DrawerProps { open: boolean; onClose?: () => void; side?: "left" | "right" | "top" | "bottom"; size?: number | string; title?: ReactNode; description?: ReactNode; footer?: ReactNode; children?: ReactNode; className?: string }
 export declare function Drawer(p: DrawerProps): JSX.Element | null;

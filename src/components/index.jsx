@@ -1489,6 +1489,146 @@ function QuickActions({ actions = [], cols = 3, className }) {
   );
 }
 
+/* ───────────── EntityCard (NEW — demo-prep/C) ─────────────
+   Reusable karta pro jakoukoliv entitu: klient, projekt, dokument. */
+
+function EntityCard({ icon, title, subtitle, meta, tags, actions, onClick, accent, className }) {
+  const clickable = typeof onClick === "function";
+  const Wrap = clickable ? "button" : "div";
+  const extra = clickable ? { type: "button", onClick } : {};
+  return (
+    <Wrap
+      className={cx(
+        "s21-entity",
+        accent && `s21-entity--${accent}`,
+        clickable && "s21-entity--clickable",
+        className
+      )}
+      {...extra}
+    >
+      <div className="s21-entity__head">
+        {icon && (
+          <span className="s21-entity__icon" aria-hidden="true">
+            {typeof icon === "string" ? <Icon name={icon} size={18} /> : icon}
+          </span>
+        )}
+        <div className="s21-entity__titles">
+          <div className="s21-entity__title">{title}</div>
+          {subtitle && <div className="s21-entity__subtitle">{subtitle}</div>}
+        </div>
+        {actions && (
+          <span className="s21-entity__actions" data-no-row-click>{actions}</span>
+        )}
+      </div>
+      {meta && meta.length > 0 && (
+        <dl className="s21-entity__meta">
+          {meta.map((m, i) => (
+            <React.Fragment key={i}>
+              <dt>{m.label}</dt>
+              <dd>{m.value}</dd>
+            </React.Fragment>
+          ))}
+        </dl>
+      )}
+      {tags && tags.length > 0 && (
+        <div className="s21-entity__tags">
+          {tags.map((t, i) => (
+            <Tag key={i} tone={t.tone || "neutral"}>{t.label || t}</Tag>
+          ))}
+        </div>
+      )}
+    </Wrap>
+  );
+}
+
+/* ───────────── WorkflowBadge (NEW — demo-prep/C) ─────────────
+   Tenký wrapper nad Badge se stavovým enum a CS labely. */
+
+const WORKFLOW_MAP = {
+  draft:         { tone: "neutral", label: "Rozpracováno" },
+  offer:         { tone: "primary", label: "Nabídka" },
+  negotiation:   { tone: "warning", label: "V jednání" },
+  win:           { tone: "success", label: "Výhra" },
+  loss:          { tone: "danger",  label: "Prohra" },
+  "in-progress":{ tone: "primary", label: "Realizace" },
+  done:          { tone: "success", label: "Hotovo" },
+  blocked:       { tone: "danger",  label: "Blokováno" },
+  overdue:       { tone: "danger",  label: "Po termínu" },
+};
+function WorkflowBadge({ state, label, fitCell }) {
+  const def = WORKFLOW_MAP[state] || WORKFLOW_MAP.draft;
+  return <Badge tone={def.tone} fitCell={fitCell}>{label || def.label}</Badge>;
+}
+
+/* ───────────── RelationsSidebar (NEW — demo-prep/C) ─────────────
+   Pravý sloupec na detailu: propojené záznamy (dokumenty, úkoly, kontakty…). */
+
+function RelationsSidebar({ sections = [], className }) {
+  return (
+    <aside className={cx("s21-rel", className)} aria-label="Propojené záznamy">
+      {sections.map((sec, i) => (
+        <section key={sec.title + i} className="s21-rel__sec">
+          <header className="s21-rel__head">
+            <h4 className="s21-rel__title">{sec.title}</h4>
+            {sec.count != null && <span className="s21-rel__count">{sec.count}</span>}
+          </header>
+          {sec.items && sec.items.length > 0 ? (
+            <ul className="s21-rel__list" role="list">
+              {sec.items.map((it, j) => {
+                const ItemTag = it.href ? "a" : "div";
+                const extra = it.href ? { href: it.href } : {};
+                return (
+                  <li key={j}>
+                    <ItemTag className="s21-rel__item" {...extra}>
+                      {it.icon && <Icon name={it.icon} size={14} className="s21-rel__icon" />}
+                      <span className="s21-rel__label">{it.label}</span>
+                      {it.meta && <span className="s21-rel__meta">{it.meta}</span>}
+                    </ItemTag>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <div className="s21-rel__empty">Nic k zobrazení</div>
+          )}
+          {sec.action && (
+            <button type="button" className="s21-rel__action" onClick={sec.action.onClick}>
+              {sec.action.icon && <Icon name={sec.action.icon} size={14} />}
+              <span>{sec.action.label}</span>
+            </button>
+          )}
+        </section>
+      ))}
+    </aside>
+  );
+}
+
+/* ───────────── ModuleHome (NEW — demo-prep/C) ─────────────
+   Layout template pro landing stránku modulu. */
+
+function ModuleHome({ title, description, kpis, quickActions, activity, diary, className }) {
+  return (
+    <div className={cx("s21-modulehome", className)}>
+      <header className="s21-modulehome__head">
+        <h1 className="page-title">{title}</h1>
+        {description && <p className="s21-modulehome__desc">{description}</p>}
+      </header>
+      {kpis && <div className="s21-modulehome__kpis">{kpis}</div>}
+      <div className="s21-modulehome__grid">
+        <div className="s21-modulehome__main">
+          {quickActions && (
+            <Section title="Rychlé akce">{quickActions}</Section>
+          )}
+          {activity && (
+            <Section title="Deník dne">{activity}</Section>
+          )}
+        </div>
+        {diary && <div className="s21-modulehome__aside">{diary}</div>}
+      </div>
+    </div>
+  );
+}
+
 /* ───────────── Theme (NEW — Fáze E) ───────────── */
 function getInitialTheme() {
   if (typeof window === "undefined") return "light";
@@ -1614,6 +1754,7 @@ export {
   ThemeToggle, useTheme,
   BrandToggle, useBrand,
   moduleNavSections, KpiRow, ActivityFeed, QuickActions,
+  EntityCard, WorkflowBadge, RelationsSidebar, ModuleHome,
   Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
   InputGroup, Textarea, FileDrop,
   BottomNav, useScrollDirection,
@@ -1631,6 +1772,7 @@ if (typeof window !== "undefined") {
   ThemeToggle, useTheme,
   BrandToggle, useBrand,
   moduleNavSections, KpiRow, ActivityFeed, QuickActions,
+  EntityCard, WorkflowBadge, RelationsSidebar, ModuleHome,
   Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
   InputGroup, Textarea, FileDrop,
   BottomNav, useScrollDirection,
