@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · Osoby</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  // Cross-entity person directory — key insight z Poema features.md:
+  // rodné číslo = global unique ID napříč rodinami, firmami a osobami.
+  const PERSONS = [
+    { id: 1, name: "Jan Novák", birth: "720514/1234", family: "Novákovi", familyKind: "family", role: "Hlavní kontakt · pojistník", phone: "+420 602 123 456", email: "jan@novak.cz" },
+    { id: 2, name: "Marie Nováková", birth: "755623/5678", family: "Novákovi", familyKind: "family", role: "Manželka", phone: "+420 602 987 654", email: "marie@novak.cz" },
+    { id: 3, name: "Jana Nováková", birth: "086123/4567", family: "Novákovi", familyKind: "family", role: "Dcera", phone: "+420 605 111 222", email: "jana@novak.cz" },
+    { id: 4, name: "Petr Novák", birth: "096224/3456", family: "Novákovi", familyKind: "family", role: "Syn", phone: "+420 605 333 444", email: "" },
+    { id: 5, name: "Pavel Dvořák", birth: "710818/2345", family: "Dvořákovi", familyKind: "family", role: "Hlavní kontakt", phone: "+420 608 234 567", email: "pavel@dvorak.cz" },
+    { id: 6, name: "Marcela Dvořáková", birth: "745012/6789", family: "Dvořákovi", familyKind: "family", role: "Manželka", phone: "+420 608 876 543", email: "marcela@dvorak.cz" },
+    { id: 7, name: "Tomáš Procházka", birth: "820303/1111", family: "Procházkovi", familyKind: "family", role: "Hlavní kontakt", phone: "+420 605 333 444", email: "t.prochazka@seznam.cz" },
+    { id: 8, name: "Zuzana Svobodová", birth: "760911/4321", family: "Svobodovi", familyKind: "family", role: "Hlavní kontakt", phone: "+420 603 111 222", email: "z.svobodova@gmail.com" },
+    { id: 9, name: "Jiří Svoboda", birth: "730418/8765", family: "Svobodovi", familyKind: "family", role: "Manžel", phone: "+420 603 111 333", email: "j.svoboda@gmail.com" },
+    { id: 10, name: "Eva Horáková", birth: "801205/4455", family: "Horákovi", familyKind: "family", role: "Hlavní kontakt", phone: "+420 724 998 877", email: "eva.horakova@email.cz" },
+    { id: 11, name: "Petr Král", birth: "681002/9988", family: "Moravia Steel a.s.", familyKind: "company", role: "Jednatel · podepisuje za firmu", phone: "+420 724 555 777", email: "p.kral@moraviasteel.cz" },
+    { id: 12, name: "Ing. Vlastimil Kříž", birth: "650422/3344", family: "Agro Slovácko s.r.o.", familyKind: "company", role: "Jednatel", phone: "+420 725 111 222", email: "v.kriz@agroslovacko.cz" },
+    { id: 13, name: "Markéta Vondráková", birth: "840829/5566", family: "Agro Slovácko s.r.o.", familyKind: "company", role: "Provozní", phone: "+420 725 333 444", email: "m.vondrakova@agroslovacko.cz" },
+    { id: 14, name: "Jan Vomáčka", birth: "700215/7788", family: "Hradecká strojírna s.r.o.", familyKind: "company", role: "Jednatel", phone: "+420 775 123 456", email: "vomacka@hradecka-strojirna.cz" },
+  ];
+
+  const CRUMBS = [{ label: "Obchod", href: "/obchod" }, { label: "Osoby", href: "/obchod/osoby" }];
+
+  function Page() {
+    const [tab, setTab] = React.useState("all");
+    const [roleFilter, setRoleFilter] = React.useState("");
+    const [q, setQ] = React.useState("");
+    const [sort, setSort] = React.useState({ key: "name", dir: "asc" });
+
+    let rows = tab === "family" ? PERSONS.filter((p) => p.familyKind === "family")
+      : tab === "company" ? PERSONS.filter((p) => p.familyKind === "company")
+      : PERSONS;
+    if (roleFilter) rows = rows.filter((p) => p.role.toLowerCase().includes(roleFilter));
+    if (q) rows = rows.filter((p) =>
+      (p.name + " " + p.birth + " " + p.family + " " + (p.email || "") + " " + p.phone).toLowerCase().includes(q.toLowerCase())
+    );
+    rows = [...rows].sort((a, b) => {
+      const av = a[sort.key] || "", bv = b[sort.key] || "";
+      return sort.dir === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
+    });
+
+    const COLUMNS = [
+      { key: "name", label: "Jméno", sortable: true, width: "22%", render: (p) =>
+        e("div", null,
+          e("div", { className: "s21-cell-title" }, p.name),
+          e("div", { className: "s21-cell-meta" }, p.role)
+        )
+      },
+      { key: "birth", label: "Rodné č.", sortable: true, width: "14%", render: (p) =>
+        e("span", { className: "s21-cell-code" }, p.birth)
+      },
+      { key: "family", label: "Patří do", width: "20%", render: (p) =>
+        e("span", { style: { display: "inline-flex", alignItems: "center", gap: 6 } },
+          e(S.Icon, { name: p.familyKind === "family" ? "users" : "building", size: 14, className: "", title: p.familyKind === "family" ? "Rodina" : "Firma" }),
+          e("span", null, p.family)
+        )
+      },
+      { key: "phone", label: "Telefon", width: "16%", render: (p) =>
+        e("span", { style: { fontVariantNumeric: "tabular-nums" } }, p.phone)
+      },
+      { key: "email", label: "E-mail", width: "22%", render: (p) =>
+        p.email ? e("span", null, p.email) : e("span", { className: "s21-cell-meta" }, "—")
+      },
+      { key: "actions", label: "", align: "center", width: "6%", render: () =>
+        e("span", { className: "s21-row-actions", "data-no-row-click": true },
+          e(S.Button, { size: "sm", iconOnly: true, icon: "phone", variant: "ghost", "aria-label": "Zavolat", title: "Zavolat" }),
+          e(S.Button, { size: "sm", iconOnly: true, icon: "mail", variant: "ghost", "aria-label": "E-mail", title: "E-mail" })
+        )
+      }
+    ];
+
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/obchod/osoby" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
+    },
+      e(S.PageHeader, {
+        title: "Osoby",
+        description: "Fyzické osoby — členové rodin a firemní kontakty. Rodné číslo je global unikátní ID.",
+        actions: e(S.Button, { icon: "user-plus" }, "Nová osoba"),
+        tabs: e(S.Tabs, { value: tab, onChange: setTab, items: [
+          { value: "all", label: "Všichni", count: PERSONS.length },
+          { value: "family", label: "V rodinách", count: PERSONS.filter((p) => p.familyKind === "family").length },
+          { value: "company", label: "Ve firmách", count: PERSONS.filter((p) => p.familyKind === "company").length },
+        ] })
+      }),
+      e(S.PageBody, null,
+        e(S.KpiRow, { cols: 4 },
+          e(S.StatTile, { label: "Celkem osob", value: String(PERSONS.length) }),
+          e(S.StatTile, { label: "Rodinných členů", value: String(PERSONS.filter((p) => p.familyKind === "family").length) }),
+          e(S.StatTile, { label: "Firemních kontaktů", value: String(PERSONS.filter((p) => p.familyKind === "company").length) }),
+          e(S.StatTile, { label: "Nových tento měsíc", value: "3" })
+        ),
+
+        e(S.FilterBar, null,
+          e(S.SearchInput, { className: "s21-grow", value: q, onChange: setQ, placeholder: "Hledat jméno, rodné č., telefon, e-mail…" }),
+          e(S.Select, { value: roleFilter, onChange: setRoleFilter, placeholder: "Všechny role", options: [
+            { value: "", label: "Všechny role" },
+            { value: "hlavní", label: "Hlavní kontakt / pojistník" },
+            { value: "manžel", label: "Manžel/ka" },
+            { value: "dc", label: "Dcera / Syn" },
+            { value: "jednatel", label: "Jednatel" },
+            { value: "provozní", label: "Provozní" },
+          ] })
+        ),
+
+        e(S.DataTable, {
+          columns: COLUMNS, rows, minWidth: 920,
+          sort, onSort: (k, d) => setSort({ key: k, dir: d }),
+          onRowClick: () => window.location.href = "./crm-klient-detail.html"
+        })
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>

@@ -254,6 +254,19 @@
 
         // ───── DENNÍ PŘEHLED ──────────────────────────────────────
         tab === "prehled" && e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-4)" } },
+
+          // Moje / Tým toggle
+          e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "var(--space-3)" } },
+            e(S.SegmentedControl, {
+              value: "moje", onChange: () => {},
+              items: [
+                { value: "moje", label: "Moje" },
+                { value: "tym", label: "Tým (5 lidí)" },
+              ]
+            }),
+            e(S.Button, { size: "sm", variant: "secondary", icon: "download" }, "Export PDF")
+          ),
+
           e(S.KpiRow, { cols: 4 },
             e(S.StatTile, { label: "Dnes hodin", value: todayHours.toFixed(1), unit: "h", big: true }),
             e(S.StatTile, { label: "Dnes náklady", value: fmtMoney(todayCost).replace(" Kč", ""), unit: "Kč" }),

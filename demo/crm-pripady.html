@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · Obchodní případy</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  // Poema features.md Scénář 3 pipeline (6 stavů):
+  // 1. Poptávka od zák. → 2. Poptávka k dodavateli → 3. Vyhodnocení (naše strana)
+  // → 4. Vyhodnocení (klient) → 5. Smlouva k podpisu → 6. Podepsáno / Zrušeno
+  const CASES = [
+    { id: 1, code: "OP-2026-0045", title: "Rozšíření úrazovky pro děti", client: "Novákovi", clientKind: "family", value: 7200, owner: "Pavel O.", stage: "negotiation", stageLabel: "Vyhodnocení (naše)", deadline: "20. 11. 2026", type: "insurance", mails: 3, offers: 2 },
+    { id: 2, code: "OP-2026-0043", title: "Firemní pojištění pro Moravia Steel", client: "Moravia Steel a.s.", clientKind: "company", value: 124000, owner: "Pavel O.", stage: "customer_eval", stageLabel: "Vyhodnocení (klient)", deadline: "25. 11. 2026", type: "insurance", mails: 7, offers: 4 },
+    { id: 3, code: "OP-2026-0041", title: "Pojištění vozového parku", client: "Agro Slovácko", clientKind: "company", value: 86500, owner: "Alena D.", stage: "offer", stageLabel: "Nabídka poslána", deadline: "30. 11. 2026", type: "insurance", mails: 5, offers: 3 },
+    { id: 4, code: "OP-2026-0038", title: "Pojištění budovy Hradecká str.", client: "Hradecká strojírna", clientKind: "company", value: 48000, owner: "Tomáš N.", stage: "supplier_rfq", stageLabel: "Poptávka k dodavateli", deadline: "10. 12. 2026", type: "insurance", mails: 2, offers: 0 },
+    { id: 5, code: "OP-2026-0036", title: "Doplňkové pojištění pro rodinu", client: "Dvořákovi", clientKind: "family", value: 3400, owner: "Pavel O.", stage: "new", stageLabel: "Poptávka od zákazníka", deadline: "28. 11. 2026", type: "insurance", mails: 1, offers: 0 },
+    { id: 6, code: "OP-2026-0032", title: "Firemní pojištění Procházkovi s.r.o.", client: "Procházkovi s.r.o.", clientKind: "company", value: 32400, owner: "Alena D.", stage: "lost", stageLabel: "Prohra", deadline: "—", type: "insurance", mails: 8, offers: 2 },
+    { id: 7, code: "OP-2026-0030", title: "Autopojištění Škoda Octavia", client: "Novákovi", clientKind: "family", value: 18600, owner: "Pavel O.", stage: "won", stageLabel: "Podepsáno · SM-2026-0089", deadline: "—", type: "insurance", mails: 4, offers: 1 },
+  ];
+
+  const FUNNEL = [
+    { id: "new", label: "Poptávka", count: CASES.filter((c) => c.stage === "new").length, color: "var(--ink-muted)" },
+    { id: "supplier_rfq", label: "K dodavateli", count: CASES.filter((c) => c.stage === "supplier_rfq").length, color: "#6366f1" },
+    { id: "offer", label: "Nabídka", count: CASES.filter((c) => c.stage === "offer").length, color: "var(--primary)" },
+    { id: "negotiation", label: "Vyhodnocení (naše)", count: CASES.filter((c) => c.stage === "negotiation").length, color: "#d97706" },
+    { id: "customer_eval", label: "Vyhodnocení (klient)", count: CASES.filter((c) => c.stage === "customer_eval").length, color: "#d97706" },
+    { id: "signed", label: "K podpisu", count: CASES.filter((c) => c.stage === "signed").length, color: "var(--success-text)" },
+    { id: "won", label: "Podepsáno", count: CASES.filter((c) => c.stage === "won").length, color: "var(--success-solid)" },
+    { id: "lost", label: "Prohra", count: CASES.filter((c) => c.stage === "lost").length, color: "var(--danger-solid)" },
+  ];
+
+  const fmt = (n) => n.toLocaleString("cs-CZ").replace(/,/g, " ");
+  function stageTone(s) {
+    if (s === "won") return "success";
+    if (s === "lost") return "danger";
+    if (s === "negotiation" || s === "customer_eval") return "warning";
+    return "primary";
+  }
+
+  const COLUMNS = [
+    { key: "code", label: "Případ", sortable: true, width: "28%", render: (c) =>
+      e("div", null,
+        e("div", { style: { display: "flex", alignItems: "center", gap: 6 } },
+          e(S.Icon, { name: c.clientKind === "family" ? "users" : "building", size: 14 }),
+          e("span", { className: "s21-cell-title" }, c.title)
+        ),
+        e("div", { className: "s21-cell-meta" }, e("span", { className: "s21-cell-code" }, c.code), " · ", c.client, " · ", c.owner)
+      )
+    },
+    { key: "stage", label: "Fáze", width: "20%", render: (c) =>
+      e(S.Badge, { tone: stageTone(c.stage), fitCell: true }, c.stageLabel)
+    },
+    { key: "deadline", label: "Deadline", width: "12%", render: (c) =>
+      c.deadline === "—" ? e("span", { className: "s21-cell-meta" }, "—") : e("span", null, c.deadline)
+    },
+    { key: "value", label: "Hodnota", align: "right", numeric: true, width: "14%", render: (c) =>
+      e("span", { style: { fontVariantNumeric: "tabular-nums", fontWeight: 500 } }, fmt(c.value), " Kč")
+    },
+    { key: "flow", label: "Komunikace", width: "16%", render: (c) =>
+      e("div", { style: { display: "flex", gap: "var(--space-2)", font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)" } },
+        e("span", null, e(S.Icon, { name: "mail", size: 12 }), " ", c.mails),
+        e("span", null, e(S.Icon, { name: "file", size: 12 }), " ", c.offers, " nabídek")
+      )
+    },
+    { key: "actions", label: "", align: "center", width: "10%", render: () =>
+      e("span", { className: "s21-row-actions", "data-no-row-click": true },
+        e(S.Button, { size: "sm", iconOnly: true, icon: "mail", variant: "ghost", "aria-label": "Odeslat mail", title: "Odeslat mail" }),
+        e(S.Button, { size: "sm", iconOnly: true, icon: "more", variant: "ghost", "aria-label": "Akce" })
+      )
+    }
+  ];
+
+  const CRUMBS = [{ label: "Obchod", href: "/obchod" }, { label: "Obchodní případy", href: "/obchod/pripady" }];
+
+  function Page() {
+    const [tab, setTab] = React.useState("open");
+    const [stage, setStage] = React.useState(null);
+    const [q, setQ] = React.useState("");
+
+    const open = CASES.filter((c) => c.stage !== "won" && c.stage !== "lost");
+    const closed = CASES.filter((c) => c.stage === "won" || c.stage === "lost");
+
+    let rows = tab === "open" ? open : tab === "closed" ? closed : CASES;
+    if (stage) rows = rows.filter((c) => c.stage === stage);
+    if (q) rows = rows.filter((c) => (c.code + " " + c.title + " " + c.client).toLowerCase().includes(q.toLowerCase()));
+
+    const openValue = open.reduce((s, c) => s + c.value, 0);
+    const wonValue = CASES.filter((c) => c.stage === "won").reduce((s, c) => s + c.value, 0);
+    const conversion = Math.round((CASES.filter((c) => c.stage === "won").length / Math.max(1, CASES.filter((c) => c.stage === "won" || c.stage === "lost").length)) * 100);
+
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/obchod/pripady" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
+    },
+      e(S.PageHeader, {
+        title: "Obchodní případy",
+        description: "Pipeline od poptávky po podpis smlouvy",
+        actions: e(S.Button, { icon: "plus" }, "Nový případ"),
+        tabs: e(S.Tabs, { value: tab, onChange: setTab, items: [
+          { value: "open", label: "Otevřené", count: open.length },
+          { value: "closed", label: "Uzavřené", count: closed.length },
+          { value: "all", label: "Všechny", count: CASES.length },
+        ] })
+      }),
+      e(S.PageBody, null,
+        e(S.KpiRow, { cols: 4 },
+          e(S.StatTile, { label: "Otevřených případů", value: String(open.length) }),
+          e(S.StatTile, { label: "Hodnota pipeline", value: fmt(openValue), unit: "Kč", big: true }),
+          e(S.StatTile, { label: "Podepsáno YTD", value: fmt(wonValue), unit: "Kč" }),
+          e(S.StatTile, { label: "Konverze", value: conversion + " %" })
+        ),
+
+        e(S.SalesFunnel, { title: "Pipeline — fáze obchodního případu (Scénář 3)", stages: FUNNEL, value: stage, onChange: setStage }),
+
+        e(S.FilterBar, null,
+          e(S.SearchInput, { className: "s21-grow", value: q, onChange: setQ, placeholder: "Hledat případ, klient, číslo…" }),
+          e(S.Select, { placeholder: "Všichni obchodníci", options: [
+            { value: "pavel", label: "Pavel Obdržálek" },
+            { value: "alena", label: "Alena Dvořáková" },
+            { value: "tomas", label: "Tomáš Novák" },
+          ] }),
+          e(S.Select, { placeholder: "Všechny typy", options: [
+            { value: "insurance", label: "Pojištění" },
+            { value: "energy", label: "Energie" },
+          ] })
+        ),
+
+        e(S.DataTable, {
+          columns: COLUMNS, rows, minWidth: 980,
+          onRowClick: () => window.location.href = "./crm-klient-detail.html"
+        })
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>
