@@ -121,7 +121,7 @@
               e(S.Tag, { tone: "neutral" }, active.tag)
             ),
             e("h2", { style: { margin: 0, font: "700 18px/24px var(--font-display)" } }, active.subject),
-            e("div", { style: { font: "400 14px/22px var(--font-body)", color: "var(--ink)", minHeight: 160 } },
+            e("div", { style: { font: "400 14px/22px var(--font-body)", color: "var(--ink)", minHeight: 160, whiteSpace: "pre-wrap" } },
               active.preview + "\n\nS pozdravem,\n" + active.from
             ),
             active.attachments > 0 && e(S.AttachmentList, { items: Array.from({ length: active.attachments }, (_, i) => ({ id: i, name: "Priloha_" + (i+1) + ".pdf", mimeType: "application/pdf", size: 180000 + i * 40000 })), compact: true, onDownload: () => {} }),

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>System 21 · HR Pracovníci</title>
+<title>System 21 · Pracovníci</title>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="../tokens/tokens.css">
 <link rel="stylesheet" href="../dist/system21.css">
@@ -46,14 +46,14 @@
     }
   ];
 
-  const CRUMBS = [{ label: "HR", href: "/hr" }, { label: "Pracovníci", href: "/hr/pracovnici" }];
+  const CRUMBS = [{ label: "Lidé", href: "/lide" }, { label: "Pracovníci", href: "/lide/pracovnici" }];
 
   function Page() {
     const [tab, setTab] = React.useState("aktivni");
     const [q, setQ] = React.useState("");
     const [selected, setSelected] = React.useState([]);
     return e(S.AppShell, {
-      sidebar: e(D.DemoSidebar, { active: "/hr/pracovnici" }),
+      sidebar: e(D.DemoSidebar, { active: "/lide/pracovnici" }),
       topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
     },
       e(S.PageHeader, {
