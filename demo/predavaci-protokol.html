@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · Nová zakázka</title>
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  const COMPANIES = [
+    { value: "moravia", label: "Moravia Steel a.s.", hint: "IČ 25812345" },
+    { value: "agro", label: "Agro Slovácko s.r.o.", hint: "IČ 28192740" },
+    { value: "hradecka", label: "Hradecká strojírna s.r.o.", hint: "IČ 47283756" },
+    { value: "novakovi", label: "Novákovi (rodina)", hint: "VIP" },
+    { value: "dvorakovi", label: "Dvořákovi (rodina)" },
+    { value: "prochazkovi", label: "Procházkovi s.r.o." },
+    { value: "svobodovi", label: "Svobodovi (rodina)" },
+  ];
+
+  const PERSONS = [
+    { value: "pavel", label: "Pavel Obdržálek", hint: "pavel@bifactory.cz" },
+    { value: "alena", label: "Alena Dvořáková", hint: "alena@bifactory.cz" },
+    { value: "tomas", label: "Tomáš Novák", hint: "tomas@bifactory.cz" },
+    { value: "lubomir", label: "Lubomír Hulín", hint: "hulin@bifactory.cz" },
+  ];
+
+  const LOCALITY = [
+    { value: "zlin", label: "Zlín" },
+    { value: "uh", label: "Uherské Hradiště" },
+    { value: "brno", label: "Brno" },
+    { value: "ostrava", label: "Ostrava" },
+    { value: "praha", label: "Praha" },
+  ];
+
+  const CRUMBS = [{ label: "Zakázky", href: "/zakazky" }, { label: "Nová zakázka", href: "/zakazky/nova" }];
+
+  function Page() {
+    const [done, setDone] = React.useState(null);
+
+    const steps = [
+      {
+        id: "basic",
+        title: "Základní",
+        validate: ({ values }) => {
+          const errs = [];
+          if (!values.name || values.name.length < 3) errs.push("Název musí mít alespoň 3 znaky.");
+          if (!values.client) errs.push("Vyberte klienta.");
+          if (!values.locality) errs.push("Vyberte lokalitu.");
+          return errs;
+        },
+        render: ({ values, setValue }) => e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+          e(S.Field, { label: "Název zakázky" },
+            e(S.Input, { value: values.name || "", onChange: (v) => setValue("name", v), placeholder: "např. Reporting obchodu" })
+          ),
+          e(S.Field, { label: "Klient" },
+            e(S.SearchSelect, { value: values.client, onChange: (v) => setValue("client", v), options: COMPANIES, placeholder: "Vyberte klienta…", searchPlaceholder: "Hledat jméno, IČ…" })
+          ),
+          e(S.Field, { label: "Lokalita" },
+            e(S.SearchSelect, { value: values.locality, onChange: (v) => setValue("locality", v), options: LOCALITY, placeholder: "Vyberte lokalitu…" })
+          )
+        ),
+      },
+      {
+        id: "material",
+        title: "Materiál",
+        render: ({ values, setValue }) => e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+          e(S.Callout, { tone: "info", title: "Materiál (volitelné)" },
+            "Pokud zakázka obsahuje materiál, specifikujte ho zde. Jinak přeskočte."
+          ),
+          e(S.Field, { label: "Hlavní materiál" },
+            e(S.Input, { value: values.material || "", onChange: (v) => setValue("material", v), placeholder: "např. Ocelový plech 2mm" })
+          ),
+          e(S.Field, { label: "Množství" },
+            e(S.Input, { type: "number", value: values.quantity || "", onChange: (v) => setValue("quantity", v), placeholder: "0" })
+          )
+        ),
+      },
+      {
+        id: "deadlines",
+        title: "Termíny",
+        validate: ({ values }) => {
+          const errs = [];
+          if (!values.deadline) errs.push("Zadejte termín dokončení.");
+          else if (new Date(values.deadline) < new Date()) errs.push("Termín dokončení musí být v budoucnosti.");
+          if (values.start && values.deadline && new Date(values.start) > new Date(values.deadline)) errs.push("Zahájení nemůže být po termínu dokončení.");
+          return errs;
+        },
+        render: ({ values, setValue }) => e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+          e(S.Field, { label: "Zahájení" },
+            e(S.Input, { type: "date", value: values.start || "", onChange: (v) => setValue("start", v) })
+          ),
+          e(S.Field, { label: "Deadline dokončení" },
+            e(S.Input, { type: "date", value: values.deadline || "", onChange: (v) => setValue("deadline", v) })
+          )
+        ),
+      },
+      {
+        id: "contacts",
+        title: "Kontakty",
+        validate: ({ values }) => {
+          const errs = [];
+          if (!values.owner) errs.push("Přiřaďte vlastníka zakázky.");
+          return errs;
+        },
+        render: ({ values, setValue }) => e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+          e(S.Field, { label: "Vlastník zakázky" },
+            e(S.SearchSelect, { value: values.owner, onChange: (v) => setValue("owner", v), options: PERSONS, placeholder: "Vyberte vlastníka…" })
+          ),
+          e(S.Field, { label: "Spolupracovníci" },
+            e(S.SearchSelect, { value: values.helper, onChange: (v) => setValue("helper", v), options: PERSONS, placeholder: "Volitelně…" })
+          )
+        ),
+      },
+      {
+        id: "attachments",
+        title: "Přílohy",
+        render: () => e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+          e("p", { style: { font: "400 14px/20px var(--font-body)", color: "var(--ink-muted)", margin: 0 } },
+            "Nahraj volitelně dokumenty: smlouvy, specifikace, obrázky."
+          ),
+          e(S.FileUploadZone, { onFiles: (files) => new Promise((res) => setTimeout(res, 1000)), accept: ".pdf,.jpg,.png,.doc,.docx", maxSize: 10 * 1024 * 1024 })
+        ),
+      },
+      {
+        id: "summary",
+        title: "Souhrn",
+        render: ({ values }) => {
+          const label = (list, v) => (list.find((x) => x.value === v) || {}).label || "—";
+          return e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+            e(S.Callout, { tone: "info", title: "Zkontrolujte údaje" }, "Po stisku Dokončit se zakázka založí."),
+            e("dl", { className: "s21-entity__meta", style: { display: "grid", gridTemplateColumns: "max-content 1fr", gap: "4px 24px" } },
+              e("dt", null, "Název"), e("dd", null, values.name || "—"),
+              e("dt", null, "Klient"), e("dd", null, label(COMPANIES, values.client)),
+              e("dt", null, "Lokalita"), e("dd", null, label(LOCALITY, values.locality)),
+              e("dt", null, "Materiál"), e("dd", null, values.material || "—"),
+              e("dt", null, "Zahájení"), e("dd", null, values.start || "—"),
+              e("dt", null, "Deadline"), e("dd", null, values.deadline || "—"),
+              e("dt", null, "Vlastník"), e("dd", null, label(PERSONS, values.owner)),
+              e("dt", null, "Spolupracovník"), e("dd", null, label(PERSONS, values.helper))
+            )
+          );
+        },
+      },
+    ];
+
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/zakazky" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
+    },
+      e(S.PageHeader, {
+        title: "Nová zakázka",
+        description: "Průvodce — zadej základní údaje, termíny a přílohy."
+      }),
+      e(S.PageBody, null,
+        done
+          ? e(S.Callout, { tone: "success", title: "Zakázka vytvořena" },
+              "Zakázka „" + done.name + "“ byla uložena. ",
+              e("a", { href: "./dashboard.html", style: { color: "var(--primary-text)" } }, "Zpět na dashboard")
+            )
+          : e(S.FormWizard, {
+              steps,
+              initialValues: { name: "", client: "", locality: "", material: "", quantity: "", start: "", deadline: "", owner: "", helper: "" },
+              onComplete: setDone,
+              onCancel: () => window.location.href = "./dashboard.html",
+            })
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>

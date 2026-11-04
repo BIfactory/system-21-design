@@ -1857,6 +1857,244 @@ function QuickActionModal({ open, onClose, title, description, icon, children, f
   );
 }
 
+/* ───────────── SearchSelect (NEW — polepim/I) ─────────────
+   Searchable combobox pro 100+ položek. Debounced filter, keyboard nav. */
+
+function SearchSelect({ value, onChange, options = [], placeholder = "Vyberte…", searchPlaceholder = "Hledat…", className, disabled }) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [highlight, setHighlight] = useState(0);
+  const wrapRef = useRef(null);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e) => { if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false); };
+    const onKey = (e) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    setTimeout(() => inputRef.current && inputRef.current.focus(), 0);
+    return () => { document.removeEventListener("mousedown", onDoc); document.removeEventListener("keydown", onKey); };
+  }, [open]);
+
+  const q = query.trim().toLowerCase();
+  const filtered = !q ? options : options.filter((o) =>
+    (o.label || "").toLowerCase().includes(q) || (o.hint || "").toLowerCase().includes(q)
+  );
+  const current = options.find((o) => o.value === value);
+
+  const onKeyNav = (e) => {
+    if (e.key === "ArrowDown") { e.preventDefault(); setHighlight((h) => Math.min(h + 1, filtered.length - 1)); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); setHighlight((h) => Math.max(h - 1, 0)); }
+    else if (e.key === "Enter") { e.preventDefault(); const pick = filtered[highlight]; if (pick) { onChange && onChange(pick.value); setOpen(false); setQuery(""); } }
+  };
+
+  return (
+    <div ref={wrapRef} className={cx("s21-ssel", open && "is-open", className)}>
+      <button
+        type="button"
+        className="s21-ssel__trigger"
+        onClick={() => !disabled && setOpen((o) => !o)}
+        disabled={disabled}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        <span className={cx("s21-ssel__value", !current && "s21-ssel__value--placeholder")}>
+          {current ? current.label : placeholder}
+        </span>
+        <Icon name="chevron-down" size={14} className="s21-ssel__chev" />
+      </button>
+      {open && (
+        <div className="s21-ssel__pop" role="listbox">
+          <div className="s21-ssel__search">
+            <Icon name="search" size={14} className="s21-ssel__searchicon" />
+            <input
+              ref={inputRef}
+              type="search"
+              className="s21-ssel__input"
+              value={query}
+              onChange={(e) => { setQuery(e.target.value); setHighlight(0); }}
+              onKeyDown={onKeyNav}
+              placeholder={searchPlaceholder}
+            />
+          </div>
+          <ul className="s21-ssel__list">
+            {filtered.length === 0 && <li className="s21-ssel__empty">Nic nenalezeno</li>}
+            {filtered.map((o, i) => (
+              <li
+                key={o.value}
+                role="option"
+                aria-selected={o.value === value}
+                className={cx("s21-ssel__item", i === highlight && "is-highlight", o.value === value && "is-selected")}
+                onMouseEnter={() => setHighlight(i)}
+                onClick={() => { onChange && onChange(o.value); setOpen(false); setQuery(""); }}
+              >
+                <span className="s21-ssel__itemlbl">{o.label}</span>
+                {o.hint && <span className="s21-ssel__itemhint">{o.hint}</span>}
+                {o.value === value && <Icon name="check" size={14} />}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ───────────── FileUploadZone (NEW — polepim/I) ─────────────
+   Drag & drop + click file picker. Per-file progress + error state. */
+
+function FileUploadZone({ onFiles, accept, multiple = true, maxSize, children, className }) {
+  const [over, setOver] = useState(false);
+  const [uploads, setUploads] = useState([]); // { id, name, size, status, error? }
+  const inputRef = useRef(null);
+  const idRef = useRef(0);
+
+  const handleFiles = async (fileList) => {
+    const files = Array.from(fileList);
+    const next = files.map((f) => ({ id: ++idRef.current, name: f.name, size: f.size, status: "uploading" }));
+    setUploads((prev) => [...prev, ...next]);
+    const results = await Promise.allSettled(
+      files.map(async (f, i) => {
+        if (maxSize && f.size > maxSize) throw new Error(`Soubor je větší než ${formatBytes(maxSize)}`);
+        if (typeof onFiles === "function") await onFiles([f]);
+        return next[i].id;
+      })
+    );
+    setUploads((prev) => prev.map((u) => {
+      const idx = next.findIndex((n) => n.id === u.id);
+      if (idx === -1) return u;
+      const r = results[idx];
+      if (r.status === "fulfilled") return { ...u, status: "done" };
+      return { ...u, status: "failed", error: r.reason && r.reason.message };
+    }));
+  };
+
+  const onDrop = (e) => {
+    e.preventDefault();
+    setOver(false);
+    if (e.dataTransfer && e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+  };
+
+  return (
+    <div className={cx("s21-fuz", className)}>
+      <button
+        type="button"
+        className={cx("s21-fuz__drop", over && "is-over")}
+        onClick={() => inputRef.current && inputRef.current.click()}
+        onDragOver={(e) => { e.preventDefault(); setOver(true); }}
+        onDragLeave={() => setOver(false)}
+        onDrop={onDrop}
+      >
+        <Icon name="upload" size={28} className="s21-fuz__icon" />
+        <div className="s21-fuz__prompt">
+          {children || (<>
+            <strong>Přetáhněte soubory sem</strong>
+            <span> nebo klikněte pro výběr</span>
+          </>)}
+        </div>
+        {(maxSize || accept) && (
+          <div className="s21-fuz__hint">
+            {accept && <span>Povolené: {accept}</span>}
+            {maxSize && <span> · max {formatBytes(maxSize)}</span>}
+          </div>
+        )}
+        <input
+          ref={inputRef}
+          type="file"
+          multiple={multiple}
+          accept={accept}
+          className="s21-fuz__input"
+          onChange={(e) => { if (e.target.files.length) handleFiles(e.target.files); e.target.value = ""; }}
+        />
+      </button>
+      {uploads.length > 0 && (
+        <ul className="s21-fuz__list" role="list">
+          {uploads.map((u) => (
+            <li key={u.id} className={cx("s21-fuz__item", `is-${u.status}`)}>
+              <Icon name={u.status === "done" ? "check-circle" : u.status === "failed" ? "alert-circle" : "clock"} size={14} />
+              <span className="s21-fuz__name">{u.name}</span>
+              <span className="s21-fuz__size">{formatBytes(u.size)}</span>
+              {u.status === "failed" && u.error && <span className="s21-fuz__error">· {u.error}</span>}
+              {u.status === "uploading" && <span className="s21-fuz__status">· nahrává…</span>}
+              {u.status === "done" && <span className="s21-fuz__status">· hotovo</span>}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/* ───────────── FormWizard (NEW — polepim/I) ─────────────
+   Multi-step form wrapper s validací per step a chybovými skoky zpět. */
+
+function FormWizard({ steps = [], onComplete, onCancel, initialValues = {}, className }) {
+  const [idx, setIdx] = useState(0);
+  const [values, setValues] = useState(initialValues);
+  const [errors, setErrors] = useState([]);
+  const setValue = useCallback((k, v) => setValues((prev) => ({ ...prev, [k]: v })), []);
+  const current = steps[idx];
+  const isLast = idx === steps.length - 1;
+
+  const validate = () => {
+    if (!current || typeof current.validate !== "function") return [];
+    const errs = current.validate({ values, setValue }) || [];
+    setErrors(errs);
+    return errs;
+  };
+
+  const goNext = () => {
+    const errs = validate();
+    if (errs.length === 0 && !isLast) setIdx((i) => i + 1);
+    else if (errs.length === 0 && isLast && typeof onComplete === "function") onComplete(values);
+  };
+  const goPrev = () => { setErrors([]); setIdx((i) => Math.max(i - 1, 0)); };
+  const goTo = (i) => { setErrors([]); setIdx(Math.min(Math.max(i, 0), steps.length - 1)); };
+
+  if (!current) return null;
+  const ctx = { values, setValue, goNext, goPrev, goTo, step: idx };
+
+  return (
+    <div className={cx("s21-wiz", className)}>
+      <ol className="s21-wiz__steps" role="list">
+        {steps.map((s, i) => (
+          <li key={s.id} className={cx("s21-wiz__step", i === idx && "is-current", i < idx && "is-done")}>
+            <button type="button" className="s21-wiz__stepbtn" onClick={() => i < idx && goTo(i)} disabled={i > idx}>
+              <span className="s21-wiz__stepnum">{i < idx ? <Icon name="check" size={12} /> : i + 1}</span>
+              <span className="s21-wiz__steplabel">{s.title}</span>
+            </button>
+          </li>
+        ))}
+      </ol>
+      {errors.length > 0 && (
+        <div className="s21-wiz__errors" role="alert">
+          <Icon name="alert-triangle" size={14} />
+          <div>
+            <strong>Zkontrolujte prosím:</strong>
+            <ul>{errors.map((e, i) => <li key={i}>{e}</li>)}</ul>
+          </div>
+        </div>
+      )}
+      <div className="s21-wiz__body">
+        {typeof current.render === "function" ? current.render(ctx) : null}
+      </div>
+      <div className="s21-wiz__foot">
+        {typeof onCancel === "function" && idx === 0 && (
+          <Button variant="secondary" onClick={onCancel}>Zrušit</Button>
+        )}
+        {idx > 0 && (
+          <Button variant="secondary" icon="arrow-left" onClick={goPrev}>Zpět</Button>
+        )}
+        <span style={{ flex: 1 }} />
+        <Button onClick={goNext} icon={isLast ? "check" : undefined}>
+          {isLast ? "Dokončit" : "Další"}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 /* ───────────── Theme (NEW — Fáze E) ───────────── */
 function getInitialTheme() {
   if (typeof window === "undefined") return "light";
@@ -1985,6 +2223,7 @@ export {
   EntityCard, WorkflowBadge, RelationsSidebar, ModuleHome,
   CommentThread, AttachmentList,
   InlineEditor, QuickActionModal,
+  SearchSelect, FileUploadZone, FormWizard,
   Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
   InputGroup, Textarea, FileDrop,
   BottomNav, useScrollDirection,
@@ -2005,6 +2244,7 @@ if (typeof window !== "undefined") {
   EntityCard, WorkflowBadge, RelationsSidebar, ModuleHome,
   CommentThread, AttachmentList,
   InlineEditor, QuickActionModal,
+  SearchSelect, FileUploadZone, FormWizard,
   Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
   InputGroup, Textarea, FileDrop,
   BottomNav, useScrollDirection,

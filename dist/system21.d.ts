@@ -350,6 +350,53 @@ export interface QuickActionModalProps {
 }
 export declare function QuickActionModal(p: QuickActionModalProps): JSX.Element | null;
 
+/* — Forms (polepim/I, 2026-11-04) — */
+export interface SearchSelectOption { value: string; label: string; hint?: string }
+export interface SearchSelectProps {
+  value?: string;
+  onChange?: (value: string) => void;
+  options: SearchSelectOption[];
+  placeholder?: string;
+  searchPlaceholder?: string;
+  disabled?: boolean;
+  className?: string;
+}
+export declare function SearchSelect(p: SearchSelectProps): JSX.Element;
+
+export interface FileUploadZoneProps {
+  onFiles?: (files: File[]) => Promise<void> | void;
+  accept?: string;
+  multiple?: boolean;
+  maxSize?: number;
+  children?: ReactNode;
+  className?: string;
+}
+export declare function FileUploadZone(p: FileUploadZoneProps): JSX.Element;
+
+export interface WizardCtx {
+  values: Record<string, any>;
+  setValue: (key: string, value: any) => void;
+  goNext: () => void;
+  goPrev: () => void;
+  goTo: (index: number) => void;
+  step: number;
+}
+export interface WizardStep {
+  id: string;
+  title: string;
+  description?: string;
+  validate?: (ctx: WizardCtx) => string[] | null;
+  render: (ctx: WizardCtx) => ReactNode;
+}
+export interface FormWizardProps {
+  steps: WizardStep[];
+  onComplete?: (values: Record<string, any>) => void;
+  onCancel?: () => void;
+  initialValues?: Record<string, any>;
+  className?: string;
+}
+export declare function FormWizard(p: FormWizardProps): JSX.Element | null;
+
 /* — Fáze H components — */
 export interface DrawerProps { open: boolean; onClose?: () => void; side?: "left" | "right" | "top" | "bottom"; size?: number | string; title?: ReactNode; description?: ReactNode; footer?: ReactNode; children?: ReactNode; className?: string }
 export declare function Drawer(p: DrawerProps): JSX.Element | null;

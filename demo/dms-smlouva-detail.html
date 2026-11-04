@@ -100,7 +100,10 @@
               )
             ),
             e(S.Section, { title: "Soubory" },
-              e(S.AttachmentList, { items: FILES, onDownload: () => {} })
+              e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+                e(S.FileUploadZone, { onFiles: (files) => new Promise((res) => setTimeout(res, 800)), accept: ".pdf,.jpg,.png,.doc,.docx", maxSize: 10 * 1024 * 1024 }),
+                e(S.AttachmentList, { items: FILES, onDownload: () => {} })
+              )
             ),
             e(S.Section, { title: "Komentáře" },
               e(S.CommentThread, {
