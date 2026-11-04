@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>System 21 · ZAK-2026-0131</title>
+<link rel="icon" href="data:,">
 <link rel="stylesheet" href="../tokens/tokens.css">
 <link rel="stylesheet" href="../dist/system21.css">
 <script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
@@ -123,8 +124,17 @@
         actions: e(React.Fragment, null,
           e(S.WorkflowBadge, { state: data.stav }),
           e(S.Button, { variant: "secondary", icon: "clock", onClick: () => openLog({ code: "ZAK-2026-0131", name: "Vykázat na zakázku" }) }, "Vykázat"),
-          e(S.Button, { variant: "secondary", icon: "trash", onClick: () => setCancelOpen(true) }, "Zrušit zakázku"),
-          e(S.Button, { icon: "check" }, "Označit hotové")
+          e(S.Button, { icon: "check" }, "Označit hotové"),
+          e(S.DropdownMenu, {
+            trigger: e(S.Button, { variant: "secondary", iconOnly: true, icon: "more", "aria-label": "Další akce" })
+          }, ({ close }) =>
+            e("button", { type: "button", role: "menuitem", className: "s21-dd__item s21-dd__item--btn", onClick: () => { close(); setCancelOpen(true); } },
+              e("span", { className: "s21-dd__itemmain" },
+                e(S.Icon, { name: "trash", size: 14 }),
+                "Zrušit zakázku"
+              )
+            )
+          )
         ),
         tabs: e(S.Tabs, { value: tab, onChange: setTab, items: [
           { value: "realizace", label: "Realizace" },

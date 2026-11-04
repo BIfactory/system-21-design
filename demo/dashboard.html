@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>System 21 · Dashboard</title>
+<link rel="icon" href="data:,">
 <link rel="stylesheet" href="../tokens/tokens.css">
 <link rel="stylesheet" href="../dist/system21.css">
 <script>
@@ -37,54 +38,28 @@
   ];
 
   const ACTIONS = [
-    { label: "Nová zakázka", icon: "plus", onClick: () => {} },
+    { label: "Nová zakázka", icon: "plus", onClick: () => window.location.href = "./predavaci-protokol.html" },
     { label: "Nový úkol", icon: "tasks", onClick: () => {} },
     { label: "Nová smlouva", icon: "file", onClick: () => {} },
-    { label: "Nový klient", icon: "user-plus", onClick: () => {} },
-    { label: "Nový dokument", icon: "paperclip", onClick: () => {}, badge: 3 },
-    { label: "Nová osoba", icon: "users", onClick: () => {} },
   ];
 
   const CRUMBS = [{ label: "Dashboard", href: "/dashboard" }];
 
   function Page() {
     const [dismissed, setDismissed] = React.useState({});
-    const [aiOpen, setAiOpen] = React.useState(false);
-    const [messages, setMessages] = React.useState([]);
-    const [loading, setLoading] = React.useState(false);
-    const sendAI = (text) => {
-      const id = Date.now();
-      setMessages((prev) => [...prev, { id, role: "user", content: text }]);
-      setLoading(true);
-      setTimeout(() => {
-        setMessages((prev) => [...prev, { id: id + 1, role: "assistant", content: "Dobře. Tady je přehled: 124 klientů, 208 aktivních smluv, 7 otevřených příležitostí. Chceš se podívat na nějakou konkrétní oblast?" }]);
-        setLoading(false);
-      }, 900);
-    };
     return e(S.AppShell, {
       sidebar: e(D.DemoSidebar, { active: "/dashboard" }),
       topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
     },
       e(S.PageBody, null,
-        e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)", marginBottom: "var(--space-5)" } },
-          !dismissed[1] && e(S.AISuggestion, {
+        !dismissed[1] && e("div", { style: { marginBottom: "var(--space-5)" } },
+          e(S.AISuggestion, {
             title: "Vykázat hodiny za včerejšek?",
-            description: "Včera jsi strávil 6 h na ZAK-2026-0131 (podle kalendáře a aktivity). Chceš je vykázat jedním klikem?",
-            confidence: 92,
+            description: "Včera jsi strávil 6 h na ZAK-2026-0131. Chceš je vykázat jedním klikem?",
             onDismiss: () => setDismissed((d) => ({ ...d, 1: true })),
             actions: e(React.Fragment, null,
               e(S.Button, { size: "sm", icon: "check" }, "Vykázat 6 h"),
               e(S.Button, { size: "sm", variant: "ghost" }, "Upravit")
-            )
-          }),
-          !dismissed[2] && e(S.AISuggestion, {
-            title: "3 smlouvy expirují do 30 dnů",
-            description: "Novákovi · Hradecká strojírna · Procházkovi. Doporučuji zavolat klientům s předstihem.",
-            confidence: 100,
-            onDismiss: () => setDismissed((d) => ({ ...d, 2: true })),
-            actions: e(React.Fragment, null,
-              e(S.Button, { size: "sm" }, "Zobrazit smlouvy"),
-              e(S.Button, { size: "sm", variant: "ghost" }, "Vytvořit úkoly")
             )
           })
         ),
@@ -107,26 +82,6 @@
               e("li", null, "ÁJA čeká na potvrzení 4 dokumentů")
             )
           ),
-        }),
-        e("button", {
-          type: "button",
-          onClick: () => setAiOpen(true),
-          style: { position: "fixed", bottom: "var(--space-5)", right: "var(--space-5)", width: 56, height: 56, borderRadius: "var(--radius-full)", background: "linear-gradient(135deg, #8b5cf6, #6366f1, #06b6d4)", color: "white", border: 0, boxShadow: "var(--elev-5)", cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center", zIndex: 40 },
-          "aria-label": "Otevřít AI asistentku",
-          title: "AI asistentka"
-        }, e(S.Icon, { name: "sparkles", size: 24 })),
-        e(S.AIPanel, {
-          open: aiOpen,
-          onClose: () => setAiOpen(false),
-          context: { label: "Kontext:", value: "Dashboard" },
-          suggestedPrompts: [
-            { label: "Shrň mi dnešek", prompt: "Shrň aktuální stav mé praxe", icon: "sparkles" },
-            { label: "Co mám dnes dělat?", prompt: "Co mám dnes dělat?", icon: "tasks" },
-            { label: "Naplánuj tento týden", prompt: "Pomož mi naplánovat tento týden", icon: "calendar" },
-          ],
-          messages,
-          onSend: sendAI,
-          loading,
         })
       )
     );

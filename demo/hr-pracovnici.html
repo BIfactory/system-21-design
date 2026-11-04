@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>System 21 · HR Pracovníci</title>
+<link rel="icon" href="data:,">
 <link rel="stylesheet" href="../tokens/tokens.css">
 <link rel="stylesheet" href="../dist/system21.css">
 <script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
@@ -73,8 +74,8 @@
         e(S.KpiRow, { cols: 4 },
           e(S.StatTile, { label: "Celkem", value: "7" }),
           e(S.StatTile, { label: "Mzdové náklady", value: "248 000", unit: "Kč", hint: "/měsíc" }),
-          e(S.StatTile, { label: "Fluktuace", value: "4 %", accent: "success", hint: "/rok" }),
-          e(S.StatTile, { label: "Dovolená dnes", value: "0", accent: "primary" })
+          e(S.StatTile, { label: "Fluktuace", value: "4 %", hint: "/rok" }),
+          e(S.StatTile, { label: "Dovolená dnes", value: "0" })
         ),
         e(S.FilterBar, null,
           e(S.SearchInput, { className: "s21-grow", value: q, onChange: setQ, placeholder: "Hledat jméno, pozici, oddělení…" }),

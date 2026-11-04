@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>System 21 · SM-2026-0117</title>
+<link rel="icon" href="data:,">
 <link rel="stylesheet" href="../tokens/tokens.css">
 <link rel="stylesheet" href="../dist/system21.css">
 <script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
@@ -64,8 +65,17 @@
         actions: e(React.Fragment, null,
           e(S.WorkflowBadge, { state: "in-progress" }),
           e(S.Button, { variant: "secondary", icon: "download" }, "Stáhnout"),
-          e(S.Button, { variant: "secondary", icon: "trash", onClick: () => setDeleteOpen(true) }, "Smazat"),
-          e(S.Button, { icon: "send", onClick: () => setSendOpen(true) }, "Odeslat k podpisu")
+          e(S.Button, { icon: "send", onClick: () => setSendOpen(true) }, "Odeslat k podpisu"),
+          e(S.DropdownMenu, {
+            trigger: e(S.Button, { variant: "secondary", iconOnly: true, icon: "more", "aria-label": "Další akce" })
+          }, ({ close }) =>
+            e("button", { type: "button", role: "menuitem", className: "s21-dd__item s21-dd__item--btn", onClick: () => { close(); setDeleteOpen(true); } },
+              e("span", { className: "s21-dd__itemmain" },
+                e(S.Icon, { name: "trash", size: 14 }),
+                "Smazat smlouvu"
+              )
+            )
+          )
         ),
         tabs: e(S.Tabs, { value: tab, onChange: setTab, items: [
           { value: "prehled", label: "Přehled" },
