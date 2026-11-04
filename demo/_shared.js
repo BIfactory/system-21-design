@@ -57,6 +57,7 @@
       "/dms/automatizace": "./dms-automatizace.html",
       "/zakazky": "./index.html",
       "/zakazky/nova": "./predavaci-protokol.html",
+      "/zakazky/131": "./zakazka-detail.html",
       "/zakazky/dokoncene": "./zakazky-dokoncene.html",
       "/hr/pracovnici": "./hr-pracovnici.html",
       "/hr/dochazka": "./hr-dochazka.html",
