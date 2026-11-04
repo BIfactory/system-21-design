@@ -395,6 +395,29 @@
           )
         ),
 
+        // Ukázkové obrazovky
+        h(Section, { n: "11 · Obrazovky", title: "Ukázkové stránky" },
+          h(Block, { label: "Klikni pro otevření ukázkových obrazovek. Všechny používají moduleNavSections, BrandToggle, ThemeToggle." },
+            h("div", { className: "sc-grid" },
+              [
+                { label: "Dashboard", href: "./dashboard.html", desc: "ModuleHome + KPI + QuickActions + ActivityFeed" },
+                { label: "CRM Klienti", href: "./crm-klienti.html", desc: "Seznam s filtrem, chip group, DataTable" },
+                { label: "CRM Klient — detail", href: "./crm-klient-detail.html", desc: "Tabs + EntityCard grid + RelationsSidebar" },
+                { label: "DMS Smlouvy", href: "./dms-smlouvy.html", desc: "Seznam se stavem (WorkflowBadge)" },
+                { label: "DMS Smlouva — detail", href: "./dms-smlouva-detail.html", desc: "AttachmentList + CommentThread + RelationsSidebar" },
+                { label: "Úkoly", href: "./ukoly.html", desc: "Seznam úkolů s rychlými akcemi" },
+                { label: "Zakázky (v1.0)", href: "./index.html", desc: "Původní ukázková obrazovka" },
+              ].map((o) => h("a", {
+                key: o.href, href: o.href,
+                style: { display: "flex", flexDirection: "column", gap: 4, padding: "12px 14px", background: "var(--surface-raised)", border: "1px solid var(--border)", borderRadius: "var(--radius-xl)", textDecoration: "none", color: "var(--ink)" }
+              },
+                h("div", { style: { font: "600 14px/20px var(--font-body)", color: "var(--primary-text)" } }, o.label),
+                h("div", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)" } }, o.desc)
+              ))
+            )
+          )
+        ),
+
         // Footer
         h("footer", { style: { textAlign: "center", padding: "40px 0", color: "var(--ink-muted)", font: "400 12px/16px var(--font-body)" } },
           "System 21 · BIfactory · ", h(S.Kbd, null, "⌘K"), " kdykoliv pro paletu"

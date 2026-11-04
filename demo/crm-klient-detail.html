@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · Novákovi</title>
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  const PERSONS = [
+    { id: 1, icon: "user", title: "Jan Novák", subtitle: "Hlavní kontakt · 45 let", meta: [{ label: "Tel", value: "+420 602 123 456" }, { label: "Mail", value: "jan@novak.cz" }], accent: "primary" },
+    { id: 2, icon: "user", title: "Marie Nováková", subtitle: "Manželka · 42 let", meta: [{ label: "Tel", value: "+420 602 987 654" }] },
+    { id: 3, icon: "user", title: "Jana Nováková", subtitle: "Dcera · 18 let" },
+    { id: 4, icon: "user", title: "Petr Novák", subtitle: "Syn · 15 let" },
+  ];
+
+  const CONTRACTS = [
+    { id: 1, icon: "file", title: "Pojištění majetku", subtitle: "SM-2024-0117 · platná do 12/2027", meta: [{ label: "Pojistitel", value: "Allianz" }, { label: "Pojistné", value: "14 400 Kč / rok" }], tags: [{ label: "Majetek", tone: "neutral" }], accent: "success" },
+    { id: 2, icon: "file", title: "Úrazové pojištění (rodinné)", subtitle: "SM-2025-0233 · platná do 03/2028", meta: [{ label: "Pojistitel", value: "UNIQA" }, { label: "Pojistné", value: "7 200 Kč / rok" }], tags: [{ label: "Úraz", tone: "primary" }] },
+    { id: 3, icon: "file", title: "Autopojištění Škoda Octavia", subtitle: "SM-2026-0089 · platná do 10/2027", meta: [{ label: "Pojistitel", value: "ČPP" }, { label: "Pojistné", value: "18 600 Kč / rok" }], tags: [{ label: "Vozidlo", tone: "neutral" }], accent: "warning" },
+  ];
+
+  const RELS = [
+    { title: "Dokumenty", count: 12, items: [
+      { icon: "file", label: "Pojistná smlouva 2024", meta: "PDF" },
+      { icon: "file", label: "Úrazové pojištění", meta: "PDF" },
+      { icon: "image", label: "Foto majetku" },
+    ], action: { label: "Přidat dokument", icon: "plus", onClick: () => {} } },
+    { title: "Úkoly", count: 3, items: [
+      { icon: "tasks", label: "Zavolat ohledně obnovy", meta: "do 20. 11." },
+      { icon: "tasks", label: "Schůzka", meta: "20. 11." },
+    ] },
+    { title: "Nedávná aktivita", count: 8, items: [
+      { icon: "activity", label: "Jan Novák aktualizoval telefon", meta: "před 3 dny" },
+      { icon: "activity", label: "Podepsána smlouva SM-2026-0089", meta: "před týdnem" },
+    ] },
+  ];
+
+  const CRUMBS = [
+    { label: "CRM", href: "/crm" },
+    { label: "Klienti", href: "/crm/klienti" },
+    { label: "Novákovi", href: "/crm/klienti/novakovi" },
+  ];
+
+  function Page() {
+    const [tab, setTab] = React.useState("prehled");
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/crm/klienti" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS, onNavigate: (it, i) => { if (i === 1) window.location.href = "./crm-klienti.html"; } }),
+    },
+      e(S.PageHeader, {
+        title: "Novákovi",
+        description: "Rodina · VIP · 4 členové · aktivní",
+        actions: e(React.Fragment, null,
+          e(S.Button, { variant: "secondary", icon: "edit" }, "Upravit"),
+          e(S.Button, { icon: "plus" }, "Nová smlouva")
+        ),
+        tabs: e(S.Tabs, { value: tab, onChange: setTab, items: [
+          { value: "prehled", label: "Přehled" },
+          { value: "osoby", label: "Osoby", count: 4 },
+          { value: "smlouvy", label: "Smlouvy", count: 3 },
+          { value: "aktivita", label: "Aktivita" },
+          { value: "dokumenty", label: "Dokumenty", count: 12 },
+        ] })
+      }),
+      e(S.PageBody, null,
+        e("div", { style: { display: "grid", gridTemplateColumns: "1fr 320px", gap: "var(--space-5)", alignItems: "start" } },
+          e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-5)" } },
+            e(S.Section, { title: "Osoby v rodině" },
+              e("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-3)" } },
+                PERSONS.map((p) => e(S.EntityCard, { key: p.id, icon: p.icon, title: p.title, subtitle: p.subtitle, meta: p.meta, accent: p.accent, onClick: () => {} }))
+              )
+            ),
+            e(S.Section, { title: "Aktivní smlouvy" },
+              e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+                CONTRACTS.map((c) => e(S.EntityCard, { key: c.id, icon: c.icon, title: c.title, subtitle: c.subtitle, meta: c.meta, tags: c.tags, accent: c.accent, onClick: () => { window.location.href = "./dms-smlouva-detail.html"; } }))
+              )
+            )
+          ),
+          e(S.RelationsSidebar, { sections: RELS })
+        )
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>

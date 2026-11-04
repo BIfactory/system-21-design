@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · Úkoly</title>
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  const TASKS = [
+    { id: 1, title: "Zavolat klientovi Agro Slovácko ohledně obnovy smlouvy", assignee: "Pavel O.", deadline: "zítra", priority: "Vysoká", state: "in-progress" },
+    { id: 2, title: "Odeslat nabídku Hradecké strojírně", assignee: "Alena D.", deadline: "18. 11.", priority: "Střední", state: "offer" },
+    { id: 3, title: "Zkontrolovat scanning dokumentů z minulého týdne", assignee: "Tomáš N.", deadline: "20. 11.", priority: "Nízká", state: "draft" },
+    { id: 4, title: "Příprava schůzky s rodinou Novákovi", assignee: "Pavel O.", deadline: "15. 11.", priority: "Vysoká", state: "done" },
+    { id: 5, title: "Vyřídit pojistnou událost Dvořákových", assignee: "Alena D.", deadline: "12. 11.", priority: "Vysoká", state: "overdue" },
+    { id: 6, title: "Aktualizovat kontakty rodiny Procházkovi", assignee: "Tomáš N.", deadline: "25. 11.", priority: "Nízká", state: "draft" },
+  ];
+
+  const COLUMNS = [
+    { key: "title", label: "Úkol", sortable: true, width: "44%", render: (t) =>
+      e("div", null,
+        e("div", { className: "s21-cell-title" }, t.title),
+        e("div", { className: "s21-cell-meta" }, t.assignee + " · Priorita: " + t.priority)
+      )
+    },
+    { key: "deadline", label: "Deadline", align: "right", numeric: true, width: "16%" },
+    { key: "state", label: "Stav", width: "18%", render: (t) => e(S.WorkflowBadge, { state: t.state, fitCell: true }) },
+    { key: "actions", label: "", align: "center", width: "10%", render: (t) =>
+      e("span", { className: "s21-row-actions", "data-no-row-click": true },
+        e(S.Button, { size: "sm", iconOnly: true, icon: "check", variant: t.state === "done" ? "ghost" : "primary", "aria-label": "Hotovo", title: "Označit hotovo" }),
+        e(S.Button, { size: "sm", iconOnly: true, icon: "more", variant: "ghost", "aria-label": "Víc", title: "Akce" })
+      )
+    }
+  ];
+
+  const CRUMBS = [{ label: "Úkoly", href: "/ukoly" }];
+
+  function Page() {
+    const [tab, setTab] = React.useState("moje");
+    const [chip, setChip] = React.useState("all");
+    const [q, setQ] = React.useState("");
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/ukoly" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
+    },
+      e(S.PageHeader, {
+        title: "Úkoly",
+        description: "Co dnes dělat, co posunout, co zavřít",
+        actions: e(S.Button, { icon: "plus" }, "Nový úkol"),
+        tabs: e(S.Tabs, { value: tab, onChange: setTab, items: [
+          { value: "moje", label: "Moje", count: 4 },
+          { value: "delegovane", label: "Delegované", count: 7 },
+          { value: "vsechny", label: "Všechny", count: 24 },
+        ] })
+      }),
+      e(S.PageBody, null,
+        e(S.KpiRow, { cols: 4 },
+          e(S.StatTile, { label: "Dnes", value: "3", accent: "primary" }),
+          e(S.StatTile, { label: "Zítra", value: "2" }),
+          e(S.StatTile, { label: "Přes týden", value: "8" }),
+          e(S.StatTile, { label: "Po termínu", value: "1", accent: "danger" })
+        ),
+        e(S.ChipGroup, { value: chip, onChange: setChip, items: [
+          { value: "all", label: "Všechny priority", count: 24 },
+          { value: "vysoka", label: "Vysoká", count: 6 },
+          { value: "stredni", label: "Střední", count: 10 },
+          { value: "nizka", label: "Nízká", count: 8 },
+        ] }),
+        e(S.FilterBar, null,
+          e(S.SearchInput, { className: "s21-grow", value: q, onChange: setQ, placeholder: "Hledat úkol…" }),
+          e(S.Select, { placeholder: "Všichni zadavatelé", options: [{ value: "me", label: "Já" }, { value: "pavel", label: "Pavel" }, { value: "alena", label: "Alena" }] })
+        ),
+        e(S.DataTable, { columns: COLUMNS, rows: TASKS, onRowClick: () => {}, minWidth: 820 })
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · SM-2026-0117</title>
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  const FILES = [
+    { id: 1, name: "Smlouva o pojištění 2026.pdf", mimeType: "application/pdf", size: 243_200, uploadedBy: "Pavel O.", uploadedAt: "před 3 h" },
+    { id: 2, name: "Dodatek č. 1.pdf", mimeType: "application/pdf", size: 86_400, uploadedBy: "Pavel O.", uploadedAt: "před 5 dny" },
+    { id: 3, name: "Fotodokumentace majetku.jpg", mimeType: "image/jpeg", size: 2_480_000, uploadedBy: "Jan Novák", uploadedAt: "včera" },
+  ];
+  const COMMENTS = [
+    { id: 1, author: "Pavel Obdržálek", text: "Smlouva je připravená k podpisu. Klient souhlasil s cenou 14 400 Kč.", createdAt: "před 1 d", reactions: { "👍": 2 } },
+    { id: 2, author: "Alena Dvořáková", text: "Super. Podpis plánujeme na 20. 11. v kanceláři.", createdAt: "před 2 h" },
+  ];
+  const RELS = [
+    { title: "Klient", count: 1, items: [{ icon: "users", label: "Novákovi", href: "./crm-klient-detail.html" }] },
+    { title: "Další smlouvy", count: 2, items: [{ icon: "file", label: "Úrazové pojištění SM-2025-0233" }, { icon: "file", label: "Autopojištění SM-2026-0089" }] },
+    { title: "Úkoly", count: 1, items: [{ icon: "tasks", label: "Zavolat klientovi 19. 11.", meta: "zítra" }] },
+  ];
+  const CRUMBS = [
+    { label: "DMS", href: "/dms" },
+    { label: "Smlouvy", href: "/dms/smlouvy" },
+    { label: "SM-2026-0117 Pojištění majetku", href: "/dms/smlouvy/117" },
+  ];
+
+  function Page() {
+    const [tab, setTab] = React.useState("prehled");
+    const [comments, setComments] = React.useState(COMMENTS);
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/dms/smlouvy" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS, onNavigate: (it, i) => { if (i === 1) window.location.href = "./dms-smlouvy.html"; } }),
+    },
+      e(S.PageHeader, {
+        title: "SM-2026-0117 Pojištění majetku",
+        description: "Novákovi · Allianz · Pojistné 14 400 Kč / rok",
+        actions: e(React.Fragment, null,
+          e(S.WorkflowBadge, { state: "in-progress" }),
+          e(S.Button, { variant: "secondary", icon: "download" }, "Stáhnout"),
+          e(S.Button, { icon: "send" }, "Odeslat k podpisu")
+        ),
+        tabs: e(S.Tabs, { value: tab, onChange: setTab, items: [
+          { value: "prehled", label: "Přehled" },
+          { value: "komentare", label: "Komentáře", count: 2 },
+          { value: "historie", label: "Historie" },
+          { value: "soubory", label: "Soubory", count: 3 },
+        ] })
+      }),
+      e(S.PageBody, null,
+        e("div", { style: { display: "grid", gridTemplateColumns: "1fr 320px", gap: "var(--space-5)", alignItems: "start" } },
+          e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-5)" } },
+            e(S.Section, { title: "Údaje" },
+              e("dl", { className: "s21-entity__meta", style: { display: "grid", gridTemplateColumns: "max-content 1fr", gap: "4px 24px" } },
+                e("dt", null, "Pojistitel"), e("dd", null, "Allianz pojišťovna"),
+                e("dt", null, "Pojistník"), e("dd", null, "Jan Novák"),
+                e("dt", null, "Platnost"), e("dd", null, "12. 04. 2024 – 12. 04. 2027"),
+                e("dt", null, "Frekvence"), e("dd", null, "Ročně"),
+                e("dt", null, "Pojistné"), e("dd", null, "14 400 Kč"),
+                e("dt", null, "Objekt"), e("dd", null, "Rodinný dům, Zlín-Malenovice")
+              )
+            ),
+            e(S.Section, { title: "Soubory" },
+              e(S.AttachmentList, { items: FILES, onDownload: () => {} })
+            ),
+            e(S.Section, { title: "Komentáře" },
+              e(S.CommentThread, {
+                items: comments,
+                currentUser: { name: "Lubomír Hulín" },
+                onAdd: (text) => setComments([...comments, { id: Date.now(), author: "Lubomír Hulín", text, createdAt: "právě teď" }]),
+              })
+            )
+          ),
+          e(S.RelationsSidebar, { sections: RELS })
+        )
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>
