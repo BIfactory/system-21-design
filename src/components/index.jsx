@@ -1383,6 +1383,13 @@ const moduleNavSections = [
     ],
   },
   {
+    title: "Analýzy",
+    collapsible: true,
+    items: [
+      { href: "/reporty", label: "Reporty", icon: "bar-chart" },
+    ],
+  },
+  {
     title: "HR",
     collapsible: true,
     items: [

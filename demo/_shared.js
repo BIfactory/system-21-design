@@ -59,6 +59,7 @@
       "/zakazky/nova": "./predavaci-protokol.html",
       "/zakazky/131": "./zakazka-detail.html",
       "/zakazky/dokoncene": "./zakazky-dokoncene.html",
+      "/reporty": "./reporty.html",
       "/hr/pracovnici": "./hr-pracovnici.html",
       "/hr/dochazka": "./hr-dochazka.html",
       "/email": "./email.html",
