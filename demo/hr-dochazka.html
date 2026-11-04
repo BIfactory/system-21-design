@@ -75,7 +75,7 @@
     { id: 5, name: "Jana Svobodová", status: "Ještě nedorazila", since: "—", state: "none" },
   ];
 
-  const CRUMBS = [{ label: "HR", href: "/hr" }, { label: "Docházka", href: "/hr/dochazka" }];
+  const CRUMBS = [{ label: "Lidé", href: "/lide" }, { label: "Docházka", href: "/lide/dochazka" }];
 
   function Page() {
     const [today, setToday] = React.useState(TODAY_INITIAL);
@@ -113,7 +113,7 @@
     const overtime = 4;
 
     return e(S.AppShell, {
-      sidebar: e(D.DemoSidebar, { active: "/hr/dochazka" }),
+      sidebar: e(D.DemoSidebar, { active: "/lide/dochazka" }),
       topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
     },
       e(S.PageHeader, {

@@ -63,9 +63,9 @@
   ];
 
   const CRUMBS = [
-    { label: "CRM", href: "/crm" },
-    { label: "Klienti", href: "/crm/klienti" },
-    { label: CLIENT.name, href: "/crm/klienti/" + CLIENT.slug },
+    { label: "Obchod", href: "/obchod" },
+    { label: "Klienti", href: "/obchod/klienti" },
+    { label: CLIENT.name, href: "/obchod/klienti/" + CLIENT.slug },
   ];
 
   function Page() {
@@ -73,7 +73,7 @@
     const [note, setNote] = React.useState("Paní klientka má alergii — vstupní lékařská prohlídka proběhla už loni, výsledky jsou ve složce.\n\nJan si přeje pojistit chatu v Beskydech (TBD po návratu z dovolené v lednu 2027).\n\nPozor — Petr nastupuje za 2 roky na VŠ, zvážit studentské pojištění.");
 
     return e(S.AppShell, {
-      sidebar: e(D.DemoSidebar, { active: "/crm/klienti" }),
+      sidebar: e(D.DemoSidebar, { active: "/obchod/klienti" }),
       topbar: e(D.DemoTopBar, { crumbs: CRUMBS, onNavigate: (it, i) => { if (i === 1) window.location.href = "./crm-klienti.html"; } }),
     },
       e(S.PageHeader, {

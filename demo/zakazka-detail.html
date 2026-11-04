@@ -22,7 +22,8 @@
   .hero-metrics .m-ok { color: var(--success-text); }
   .hero-metrics .m-warn { color: var(--warning-text); }
   .hero-metrics .m-bad { color: var(--danger-text); }
-  .op-row { display: grid; grid-template-columns: 56px minmax(0, 1fr) 90px 80px 60px 110px 48px; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--border-subtle); }
+  .op-table { overflow-x: auto; }
+  .op-row { display: grid; grid-template-columns: 56px minmax(140px, 1fr) 90px 80px 60px 110px 48px; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--border-subtle); min-width: 620px; }
   .op-row:last-child { border-bottom: 0; }
   .op-row__hdr { background: var(--surface-muted); font: 500 11px/16px var(--font-mono); letter-spacing: .04em; text-transform: uppercase; color: var(--ink-muted); }
   .op-row__code { font: 500 11px/16px var(--font-mono); color: var(--ink-muted); }
@@ -33,7 +34,7 @@
   .op-pct.low { color: var(--success-text); }
   .op-pct.mid { color: var(--warning-text); }
   .op-pct.over { color: var(--danger-text); }
-  .mat-row { display: grid; grid-template-columns: 56px minmax(0, 1fr) 80px 80px 120px 48px; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--border-subtle); }
+  .mat-row { display: grid; grid-template-columns: 56px minmax(140px, 1fr) 80px 80px 120px 48px; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--border-subtle); min-width: 540px; }
   .mat-row:last-child { border-bottom: 0; }
   .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-3); }
   .summary-card { padding: var(--space-3); background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-xl); display: flex; flex-direction: column; gap: 6px; }
@@ -192,7 +193,7 @@
           ),
 
           e(S.Section, { title: "Operace", action: e(S.Button, { size: "sm", icon: "plus" }, "Nová operace") },
-            e("div", null,
+            e("div", { className: "op-table" },
               e("div", { className: "op-row op-row__hdr" },
                 e("span", null, "Op."), e("span", null, "Název · vlastník"),
                 e("span", { className: "hours" }, "Plán (h)"), e("span", { className: "hours" }, "Hotovo"),
@@ -224,7 +225,7 @@
           ),
 
           e(S.Section, { title: "Materiál", action: e(S.Button, { size: "sm", icon: "plus" }, "Přidat materiál") },
-            e("div", null,
+            e("div", { className: "op-table" },
               e("div", { className: "mat-row op-row__hdr" },
                 e("span", null, "Kód"), e("span", null, "Název"),
                 e("span", { className: "hours" }, "Plán"), e("span", { className: "hours" }, "Reálně"),

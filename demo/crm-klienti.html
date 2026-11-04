@@ -35,7 +35,7 @@
     { id: 8, slug: "hradecka", kind: "company", name: "Hradecká strojírna s.r.o.", members: 2, primaryContact: "Jan Vomáčka", city: "Hradec Králové", contracts: 6, lastContact: "20. 09. 2026", tags: ["B2B"], ico: "47283756" },
   ];
 
-  const CRUMBS = [{ label: "CRM", href: "/crm" }, { label: "Klienti", href: "/crm/klienti" }];
+  const CRUMBS = [{ label: "Obchod", href: "/obchod" }, { label: "Klienti", href: "/obchod/klienti" }];
 
   function Page() {
     const [tab, setTab] = React.useState("vsichni");
@@ -83,7 +83,7 @@
     ];
 
     return e(S.AppShell, {
-      sidebar: e(D.DemoSidebar, { active: "/crm/klienti" }),
+      sidebar: e(D.DemoSidebar, { active: "/obchod/klienti" }),
       topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
     },
       e(S.PageHeader, {
