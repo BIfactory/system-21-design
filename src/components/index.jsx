@@ -1349,8 +1349,16 @@ const moduleNavSections = [
   {
     items: [
       { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
-      { href: "/ukoly", label: "Úkoly", icon: "tasks" },
       { href: "/muj-plan", label: "Můj plán", icon: "calendar" },
+      { href: "/ukoly", label: "Úkoly", icon: "tasks" },
+    ],
+  },
+  {
+    title: "Obchod",
+    collapsible: true,
+    items: [
+      { href: "/zakazky", label: "Zakázky" },
+      { href: "/vykazovani", label: "Vykazování" },
     ],
   },
   {
@@ -1368,22 +1376,7 @@ const moduleNavSections = [
     items: [
       { href: "/dms/smlouvy", label: "Smlouvy" },
       { href: "/dms/dokumenty", label: "Dokumenty" },
-      { href: "/dms/automatizace", label: "Automatizace" },
-    ],
-  },
-  {
-    title: "Obchod",
-    collapsible: true,
-    items: [
-      { href: "/zakazky", label: "Zakázky" },
-      { href: "/zakazky/dokoncene", label: "Dokončené k fakturaci" },
-    ],
-  },
-  {
-    title: "Analýzy",
-    collapsible: true,
-    items: [
-      { href: "/reporty", label: "Reporty", icon: "bar-chart" },
+      { href: "/dms/automatizace", label: "Automatizace / AI" },
     ],
   },
   {

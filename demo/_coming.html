@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · Připravuje se</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  // module label derived from URL hash: #/crm/klienti -> "CRM › Klienti"
+  const hash = (location.hash || "").replace(/^#/, "");
+  const parts = hash.split("/").filter(Boolean);
+  const title = parts.length ? parts[parts.length - 1].replace(/-/g, " ") : "Modul";
+  const titleCs = title.charAt(0).toUpperCase() + title.slice(1);
+
+  function Page() {
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: hash || "/" }),
+      topbar: e(D.DemoTopBar, { crumbs: [{ label: titleCs, href: hash }] }),
+    },
+      e(S.PageHeader, { title: titleCs }),
+      e(S.PageBody, null,
+        e("div", { style: { display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh", padding: "var(--space-8)" } },
+          e(S.EmptyState, {
+            icon: "clock",
+            title: "Připravuje se",
+            description: "Tenhle modul právě přepisuju podle nového plánu. Mezitím se podívej na dashboard nebo showcase.",
+            action: e("div", { style: { display: "inline-flex", gap: "var(--space-2)" } },
+              e(S.Button, { variant: "secondary", icon: "home", onClick: () => window.location.href = "./showcase.html" }, "Showcase"),
+            )
+          })
+        )
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>
