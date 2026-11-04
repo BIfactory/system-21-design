@@ -22,7 +22,7 @@
 
   // Mapa URL → demo HTML stránka. Nedokončené moduly ukazují na _coming.html.
   const MAP = {
-    "/dashboard": "./_coming.html#/dashboard",
+    "/dashboard": "./dashboard.html",
     "/muj-plan": "./muj-plan.html",
     "/ukoly": "./_coming.html#/ukoly",
     "/zakazky": "./zakazky.html",

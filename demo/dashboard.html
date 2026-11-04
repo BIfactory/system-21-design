@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · Dashboard</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+<style>
+  .greeting { font: 800 28px/1.2 var(--font-display); color: var(--ink); letter-spacing: -.02em; }
+  .greeting__sub { font: 400 15px/22px var(--font-body); color: var(--ink-muted); margin-top: 4px; }
+
+  .gsearch { position: relative; max-width: 640px; }
+  .gsearch__input { width: 100%; padding: var(--space-3) var(--space-3) var(--space-3) 44px; background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-xl); font: 500 15px/22px var(--font-body); color: var(--ink); box-shadow: var(--elev-1); }
+  .gsearch__input:focus { outline: 2px solid var(--focus-ring); outline-offset: 2px; border-color: var(--primary); }
+  .gsearch__icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--ink-muted); pointer-events: none; }
+  .gsearch__results { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--elev-4); max-height: 420px; overflow-y: auto; z-index: 10; }
+  .gsearch__group { padding: var(--space-1); }
+  .gsearch__group + .gsearch__group { border-top: 1px solid var(--border-subtle); }
+  .gsearch__grouplabel { padding: var(--space-2) var(--space-2) var(--space-1); font: 500 10px/14px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); }
+  .gsearch__item { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-2); border-radius: var(--radius-md); cursor: pointer; color: var(--ink); text-decoration: none; }
+  .gsearch__item:hover { background: var(--surface-muted); }
+  .gsearch__itemmain { flex: 1; min-width: 0; }
+  .gsearch__itemtitle { font: 500 14px/20px var(--font-body); }
+  .gsearch__itemmeta { font: 400 12px/16px var(--font-body); color: var(--ink-muted); }
+
+  .diary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-4); }
+  @media (max-width: 1100px) { .diary-grid { grid-template-columns: 1fr; } }
+  .diary-section { background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-xl); overflow: hidden; }
+  .diary-section__head { display: flex; align-items: center; justify-content: space-between; padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border-subtle); }
+  .diary-section__title { font: 600 14px/20px var(--font-body); color: var(--ink); display: flex; align-items: center; gap: var(--space-2); }
+  .diary-section__count { padding: 2px 8px; background: var(--primary-soft); color: var(--primary-text); border-radius: var(--radius-full); font: 700 11px/16px var(--font-mono); }
+  .diary-section__count--warn { background: var(--warning-bg); color: var(--warning-text); }
+  .diary-section__count--danger { background: var(--danger-bg); color: var(--danger-text); }
+  .diary-section__link { font: 500 12px/16px var(--font-body); color: var(--primary-text); text-decoration: none; }
+  .diary-section__link:hover { text-decoration: underline; }
+  .diary-row { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-4); border-bottom: 1px solid var(--border-subtle); text-decoration: none; color: var(--ink); }
+  .diary-row:last-child { border-bottom: 0; }
+  .diary-row:hover { background: var(--surface-muted); }
+  .diary-row__ic { width: 28px; height: 28px; border-radius: var(--radius-full); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--surface-muted); color: var(--ink-muted); }
+  .diary-row__ic--primary { background: var(--primary-soft); color: var(--primary-text); }
+  .diary-row__ic--warning { background: var(--warning-bg); color: var(--warning-text); }
+  .diary-row__ic--danger { background: var(--danger-bg); color: var(--danger-text); }
+  .diary-row__main { flex: 1; min-width: 0; }
+  .diary-row__title { font: 500 14px/20px var(--font-body); }
+  .diary-row__meta { font: 400 12px/16px var(--font-body); color: var(--ink-muted); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  // Mock dataset consistent across modules
+  const STATS = {
+    rodiny: 92, firmy: 32, klientiTotal: 124,
+    smlouvyMonth: 3, smlouvyTotal: 208,
+    opportunities: 7,
+    ajaKontrola: 3,  // DMS review queue count (sladěno s Modul H)
+    nepodepsane: 2,
+    zakazkyLastMonth: 418000, zakazkyThisMonth: 487500,
+  };
+
+  // Greeting by hour
+  const hour = new Date().getHours();
+  const greet = hour < 10 ? "Dobré ráno" : hour < 17 ? "Dobrý den" : "Dobrý večer";
+
+  // Global search mock — index includes clients, contracts, orders
+  const SEARCH_INDEX = [
+    { type: "client", title: "Novákovi", meta: "Rodina · Zlín · 4 členové · 3 smlouvy", href: "./crm-klient-detail.html" },
+    { type: "client", title: "Dvořákovi", meta: "Rodina · Uherské Hradiště · 2 členové · 2 smlouvy", href: "./crm-klient-detail.html" },
+    { type: "client", title: "Moravia Steel a.s.", meta: "Firma · IČ 25812345 · 8 smluv", href: "./crm-klient-detail.html" },
+    { type: "client", title: "Agro Slovácko s.r.o.", meta: "Firma · IČ 28192740 · 4 smlouvy", href: "./crm-klient-detail.html" },
+    { type: "contract", title: "SM-2024-0117 Pojištění majetku", meta: "Allianz · Jan Novák · výročí 12. 04.", href: "./dms-smlouva-detail.html" },
+    { type: "contract", title: "SM-2025-0233 Úrazové pojištění", meta: "UNIQA · Jan Novák · výročí 03. 03.", href: "./dms-smlouva-detail.html" },
+    { type: "contract", title: "EL-2024-0045 Elektřina domácnost", meta: "ČEZ · Novákovi · konec fixace 30. 04. 2027", href: "./dms-smlouva-energie-detail.html" },
+    { type: "order", title: "ZAK-2026-0131 Napojení ERP → CRM", meta: "Agro Slovácko · v realizaci · 92 %", href: "./zakazka-detail.html" },
+    { type: "order", title: "ZAK-2026-0142 Reporting obchodu", meta: "Moravia Steel · nabídka · 184 000 Kč", href: "./zakazka-detail.html" },
+    { type: "case", title: "OP-2026-0045 Rozšíření úrazovky", meta: "Novákovi · v jednání (naše strana)", href: "./crm-pripady.html" },
+  ];
+
+  const TYPE_LABEL = { client: "Klienti", contract: "Smlouvy", order: "Zakázky", case: "Případy" };
+  const TYPE_ICON = { client: "users", contract: "file", order: "folder", case: "folder" };
+
+  const DIARY = {
+    aja: [
+      { title: "Allianz — potvrzení smlouvy ALZ-2026-12847", meta: "confidence 94 % · auto zpracováno, čeká potvrzení", icon: "sparkles", tone: "primary" },
+      { title: "ČPP — faktura autopojištění", meta: "confidence 71 % · vyžaduje ruční kontrolu", icon: "alert-triangle", tone: "warning" },
+      { title: "ČEZ — změna ceníku 2027", meta: "confidence 68 % · dotčené smlouvy TBD", icon: "alert-triangle", tone: "warning" },
+    ],
+    orders: [
+      { title: "ZAK-2026-0131 Napojení ERP → CRM", meta: "Agro Slovácko · plnění vzrostlo 80 % → 92 % · ⚠ po termínu", icon: "folder", tone: "danger" },
+      { title: "ZAK-2026-0142 Reporting obchodu", meta: "Moravia Steel · nabídka odeslána → čeká na vyjádření", icon: "folder", tone: "primary" },
+      { title: "ZAK-2026-0127 AI asistent pro zápisy", meta: "Obec Staré Město · dokončeno, k fakturaci", icon: "check", tone: "primary" },
+    ],
+    tasks: [
+      { title: "Zavolat Janu Novákovi o rozšíření úrazovky", meta: "deadline dnes · OP-2026-0045", icon: "phone", tone: "primary" },
+      { title: "Odeslat podklady pro Moravia Steel", meta: "deadline dnes · ZAK-2026-0142", icon: "send", tone: "primary" },
+      { title: "Příprava schůzky s Dvořákovi", meta: "deadline dnes · 14:00 kancelář", icon: "calendar", tone: "primary" },
+    ],
+    expiring: [
+      { title: "SM-2025-0198 Pojištění budovy", meta: "Hradecká strojírna · výročí 15. 01. 2027 · za 73 dnů", icon: "file", tone: "warning" },
+      { title: "PL-2024-0067 Plyn — výroba", meta: "Hradecká strojírna · konec fixace 15. 11. 2026 · za 11 dnů", icon: "file", tone: "danger" },
+      { title: "SM-2026-0117 Pojištění majetku", meta: "Novákovi · výročí 12. 04. 2027 · za 158 dnů", icon: "file", tone: "primary" },
+    ],
+  };
+
+  const CRUMBS = [{ label: "Dashboard", href: "/dashboard" }];
+  const fmt = (n) => n.toLocaleString("cs-CZ").replace(/,/g, " ");
+
+  function Page() {
+    const [search, setSearch] = React.useState("");
+    const [focused, setFocused] = React.useState(false);
+    const q = search.trim().toLowerCase();
+    const results = q.length >= 2 ? SEARCH_INDEX.filter((r) =>
+      (r.title + " " + r.meta).toLowerCase().includes(q)
+    ) : [];
+    const grouped = { client: [], contract: [], order: [], case: [] };
+    results.forEach((r) => grouped[r.type].push(r));
+
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/dashboard" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
+    },
+      e(S.PageBody, null,
+
+        // Greeting (Scénář 1 — personalizováno)
+        e("div", null,
+          e("h1", { className: "greeting" }, greet + ", Lubomíre"),
+          e("p", { className: "greeting__sub" }, "Dnes je úterý 4. listopadu 2026 · tento měsíc máš " + fmt(STATS.zakazkyThisMonth) + " Kč v zakázkách")
+        ),
+
+        // 6 KPI tiles ve striktním pořadí podle Poema Scénář 1
+        e(S.KpiRow, { cols: 6 },
+          e(S.StatTile, { label: "Klienti", value: String(STATS.klientiTotal), hint: "Rodiny " + STATS.rodiny + " · Firmy " + STATS.firmy, href: "./crm-klienti.html" }),
+          e(S.StatTile, { label: "Smlouvy", value: String(STATS.smlouvyTotal), hint: "Tento měsíc +" + STATS.smlouvyMonth, href: "./dms-smlouvy.html" }),
+          e(S.StatTile, { label: "Otevřené příležitosti", value: String(STATS.opportunities), href: "./crm-pripady.html" }),
+          e(S.StatTile, { label: "ÁJA kontrola", value: String(STATS.ajaKontrola), accent: STATS.ajaKontrola > 0 ? "warning" : undefined, href: "./dms-automatizace.html" }),
+          e(S.StatTile, { label: "Nepodepsané smlouvy", value: String(STATS.nepodepsane), accent: STATS.nepodepsane > 0 ? "danger" : undefined, href: "./dms-smlouvy.html" }),
+          e(S.StatTile, { label: "Objem zakázek", value: fmt(STATS.zakazkyThisMonth) + " Kč", hint: "Minulý měsíc " + fmt(STATS.zakazkyLastMonth) + " Kč" })
+        ),
+
+        // Global search (Scénář 1.3)
+        e("div", { className: "gsearch" },
+          e(S.Icon, { name: "search", size: 18, className: "gsearch__icon" }),
+          e("input", {
+            type: "search",
+            className: "gsearch__input",
+            placeholder: "Najdi klienta, smlouvu, zakázku… (i zkratkou pro rodinu)",
+            value: search,
+            onChange: (ev) => setSearch(ev.target.value),
+            onFocus: () => setFocused(true),
+            onBlur: () => setTimeout(() => setFocused(false), 200),
+          }),
+          focused && results.length > 0 && e("div", { className: "gsearch__results" },
+            ["client", "contract", "order", "case"].map((t) => grouped[t].length > 0 && e("div", { key: t, className: "gsearch__group" },
+              e("div", { className: "gsearch__grouplabel" }, TYPE_LABEL[t] + " (" + grouped[t].length + ")"),
+              grouped[t].slice(0, 5).map((r, i) => e("a", { key: i, href: r.href, className: "gsearch__item" },
+                e(S.Icon, { name: TYPE_ICON[t], size: 14 }),
+                e("div", { className: "gsearch__itemmain" },
+                  e("div", { className: "gsearch__itemtitle" }, r.title),
+                  e("div", { className: "gsearch__itemmeta" }, r.meta)
+                )
+              ))
+            ))
+          ),
+          focused && q.length >= 2 && results.length === 0 && e("div", { className: "gsearch__results" },
+            e("div", { style: { padding: "var(--space-4)", textAlign: "center", color: "var(--ink-muted)", font: "400 13px/18px var(--font-body)" } }, "Nic nenalezeno pro „" + search + "“")
+          )
+        ),
+
+        // Deník dne — 4 sub-bloky (Scénář 1.4)
+        e("div", null,
+          e("h2", { style: { font: "700 20px/28px var(--font-display)", color: "var(--ink)", margin: "0 0 var(--space-3) 0" } }, "Deník dne"),
+          e("div", { className: "diary-grid" },
+
+            // ÁJA kontrola
+            e("div", { className: "diary-section" },
+              e("div", { className: "diary-section__head" },
+                e("div", { className: "diary-section__title" },
+                  e(S.Icon, { name: "sparkles", size: 16 }),
+                  "ÁJA — čeká na kontrolu",
+                  e("span", { className: "diary-section__count diary-section__count--warn" }, DIARY.aja.length)
+                ),
+                e("a", { href: "./dms-automatizace.html", className: "diary-section__link" }, "Celá fronta →")
+              ),
+              DIARY.aja.map((it, i) => e("a", { key: i, href: "./dms-automatizace.html", className: "diary-row" },
+                e("span", { className: "diary-row__ic diary-row__ic--" + (it.tone || "") }, e(S.Icon, { name: it.icon, size: 14 })),
+                e("div", { className: "diary-row__main" },
+                  e("div", { className: "diary-row__title" }, it.title),
+                  e("div", { className: "diary-row__meta" }, it.meta)
+                )
+              ))
+            ),
+
+            // Zakázky
+            e("div", { className: "diary-section" },
+              e("div", { className: "diary-section__head" },
+                e("div", { className: "diary-section__title" },
+                  e(S.Icon, { name: "folder", size: 16 }),
+                  "Zakázky, které se pohnuly",
+                  e("span", { className: "diary-section__count" }, DIARY.orders.length)
+                ),
+                e("a", { href: "./zakazky.html", className: "diary-section__link" }, "Všechny zakázky →")
+              ),
+              DIARY.orders.map((it, i) => e("a", { key: i, href: "./zakazka-detail.html", className: "diary-row" },
+                e("span", { className: "diary-row__ic diary-row__ic--" + (it.tone || "") }, e(S.Icon, { name: it.icon, size: 14 })),
+                e("div", { className: "diary-row__main" },
+                  e("div", { className: "diary-row__title" }, it.title),
+                  e("div", { className: "diary-row__meta" }, it.meta)
+                )
+              ))
+            ),
+
+            // Úkoly
+            e("div", { className: "diary-section" },
+              e("div", { className: "diary-section__head" },
+                e("div", { className: "diary-section__title" },
+                  e(S.Icon, { name: "tasks", size: 16 }),
+                  "Úkoly s deadline dnes",
+                  e("span", { className: "diary-section__count" }, DIARY.tasks.length)
+                ),
+                e("a", { href: "./_coming.html#/ukoly", className: "diary-section__link" }, "Všechny úkoly →")
+              ),
+              DIARY.tasks.map((it, i) => e("div", { key: i, className: "diary-row", style: { cursor: "default" } },
+                e("span", { className: "diary-row__ic diary-row__ic--" + (it.tone || "") }, e(S.Icon, { name: it.icon, size: 14 })),
+                e("div", { className: "diary-row__main" },
+                  e("div", { className: "diary-row__title" }, it.title),
+                  e("div", { className: "diary-row__meta" }, it.meta)
+                ),
+                e(S.Button, { size: "sm", variant: "ghost", iconOnly: true, icon: "check", "aria-label": "Hotovo" })
+              ))
+            ),
+
+            // Expirace
+            e("div", { className: "diary-section" },
+              e("div", { className: "diary-section__head" },
+                e("div", { className: "diary-section__title" },
+                  e(S.Icon, { name: "clock", size: 16 }),
+                  "Expirace smluv do 180 dnů",
+                  e("span", { className: "diary-section__count diary-section__count--warn" }, DIARY.expiring.length)
+                ),
+                e("a", { href: "./dms-smlouvy.html", className: "diary-section__link" }, "Všechny smlouvy →")
+              ),
+              DIARY.expiring.map((it, i) => e("a", { key: i, href: "./dms-smlouva-detail.html", className: "diary-row" },
+                e("span", { className: "diary-row__ic diary-row__ic--" + (it.tone || "") }, e(S.Icon, { name: it.icon, size: 14 })),
+                e("div", { className: "diary-row__main" },
+                  e("div", { className: "diary-row__title" }, it.title),
+                  e("div", { className: "diary-row__meta" }, it.meta)
+                )
+              ))
+            )
+          )
+        )
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>
