@@ -1,13 +1,28 @@
 # System 21
 
-Design system pro aplikace BIfactory: tokeny (barvy, písmo, rozestupy), React komponenty a brand manuál. Pevná je **struktura** aplikace (levé menu, horní lišta s drobečky, hlavička stránky, tabulky, formuláře). Barvy a logo se mění s každým zákazníkem. Tato verze nese značku BIfactory.
+Design system pro aplikace BIfactory: tokeny (barvy, písmo, rozestupy), React komponenty a brand manuál. Pevná je **struktura** aplikace (levé menu, horní lišta s drobečky, hlavička stránky, tabulky, formuláře). Barvy a logo se mění s každým zákazníkem — od v2.0 přes multi-brand overlay v tokenech.
 
-- **Živý přehled (brand book s náhledy komponent):** artefakt „System 21“ v Claude, <https://claude.ai/artifact/Y29e25HvLxXsQB4tN7M2im> (je potřeba ho nasdílet)
+- **Živý přehled (brand book s náhledy komponent):** artefakt „System 21" v Claude, <https://claude.ai/artifact/Y29e25HvLxXsQB4tN7M2im> (je potřeba ho nasdílet)
 - **Pravidla použití:** [`docs/brand-manual.md`](docs/brand-manual.md). Začni tady.
-- **Ukázková obrazovka (Zakázky):** [`demo/index.html`](demo/index.html) (`npm run demo` → <http://localhost:3000/demo/>)
-- **Showcase všech komponent:** [`demo/showcase.html`](demo/showcase.html) — hero, buttons, forms, feedback, overlays, timeline, sparkline, ⌘K palette. Toggle light/dark.
+- **Ukázkové obrazovky:** `npm run demo` → <http://localhost:3000/demo/>
+  - [`demo/showcase.html`](demo/showcase.html) — katalog komponent + přepínač brandu (`BrandToggle`) a tmavého režimu (`ThemeToggle`) + odkazy na ukázkové obrazovky
+  - [`demo/dashboard.html`](demo/dashboard.html) — ModuleHome (KPI + QuickActions + ActivityFeed + diář dne)
+  - [`demo/crm-klienti.html`](demo/crm-klienti.html) · [`demo/crm-klient-detail.html`](demo/crm-klient-detail.html)
+  - [`demo/dms-smlouvy.html`](demo/dms-smlouvy.html) · [`demo/dms-smlouva-detail.html`](demo/dms-smlouva-detail.html)
+  - [`demo/ukoly.html`](demo/ukoly.html)
+  - [`demo/index.html`](demo/index.html) — původní obrazovka Zakázky (v1.0)
 - **Token galerie:** [`docs/tokens.html`](docs/tokens.html) — barvy, typo, prostor, radius, elevace, motion, blur.
+- **Změny v2.0 (demo-ready):** [`CHANGELOG.md`](CHANGELOG.md); plán v [`docs/superpowers/plans/2026-11-04-library-ready-for-demo.md`](docs/superpowers/plans/2026-11-04-library-ready-for-demo.md).
 - **Noční změny (v1.1):** [`NIGHT_PLAN.md`](NIGHT_PLAN.md) a průběh v [`docs/night-log.md`](docs/night-log.md).
+
+## Komponenty v2.0 (demo-ready)
+
+Nad v1.1 katalogem (33 komponent) přibyly v2.0:
+
+- **Multi-brand:** `useBrand`, `BrandToggle` + `moduleNavSections` (defaultní sidebar sekce se všemi moduly backendu System 21: Dashboard, Úkoly, CRM, DMS, Obchod, HR, Komunikace, Intranet).
+- **Dashboard widgety:** `KpiRow` (grid pro `StatTile`), `ActivityFeed` (deník dne), `QuickActions` (mřížka akcí), `ModuleHome` (layout template pro home modulu).
+- **Datové primitives:** `EntityCard` (univerzální karta záznamu), `RelationsSidebar` (pravý sloupec s propojenými záznamy), `WorkflowBadge` (stav workflow s enum mapou).
+- **Interakce:** `CommentThread` (diskuse s replies + reakcemi + add form), `AttachmentList` (soubory s meta + download/remove).
 
 ## Co je v repozitáři
 

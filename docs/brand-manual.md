@@ -114,6 +114,51 @@ Mobilní verze vychází z Polepim Manageru, kde je vyladěná na denní práci 
 - Patička menu nese `PoweredBy`: „Powered by“ v mono verzálkách a vedle symbol databáze s názvem **BIfactory** (Manrope 800, bílá) v jemně zeleném rámečku. Je u všech implementací, i zákaznických, a odkazuje na bifactory.cz.
 - Název systému „System 21“ se píše vždy s mezerou a na jednom řádku (nezalamuje se).
 
+## Multi-brand (2026-11-04)
+
+Knihovna rozlišuje **brandové tokeny** (co se mění pro zákazníka) a **systémové tokeny** (nikdy per customer). Brand se přepíná atributem `data-brand="<id>"` na `<html>`. Default (BIfactory) je v `:root`, ostatní brandy jsou overlay v `tokens.css`.
+
+**Brandové tokeny** (všechny definovat v novém brandu): `primary`, `primary-hover`, `primary-active`, `primary-soft`, `primary-glow`, `primary-glow-strong`, `primary-text`, `on-primary`, `accent`, `on-accent`, `focus-ring`, `shine`, `ink`, `ink-muted`, `black`, `sidebar-bg`, `sidebar-hover`, `sidebar-border`, `sidebar-text`, `sidebar-active-bg`, `sidebar-active-text`, `brand-name`, `brand-subtitle`, `brand-logo-url`, `font-display`, `font-body`, `font-mono`.
+
+**Systémové tokeny** (zůstávají): spacing, radius, elevation, motion, blur, state colors (success/danger/warning), typography scale.
+
+**Hranice souborů:** brand overlay vzniká z `tokens.json → tokens.css` (přes `scripts/tokens-to-css.py`); dark mode zůstává v `src/components/bundle.css`. Pokud nový brand potřebuje vlastní dark variantu (např. tmavší sidebar), přidá se do `bundle.css` selektor `[data-brand="<id>"][data-theme="dark"]` hned za `[data-theme="dark"]`.
+
+**Runtime přepínač:** `useBrand()` hook + `<BrandToggle />` komponenta (ikonka palety v topbaru). V ukázkách demo stránek se renderuje, v zákaznickém repu typicky ne.
+
+## Jak udělat nového zákazníka
+
+10-minutový proces:
+
+1. **Zvol základní barvy** — primární, případně sidebar. Zbytek jde většinou odvodit.
+2. **Přidej theme do `tokens/tokens.json`** v sekci `brand.themes[]`:
+   ```json
+   {
+     "id": "zakaznik-x",
+     "name": "Zákazník X",
+     "tokens": [
+       { "name": "primary", "value": "#<hex>", "usage": "…" },
+       { "name": "primary-hover", "value": "#<hex>" }
+     ]
+   }
+   ```
+3. **Spusť `npm run tokens`** — `tokens.css` se regeneruje s novým `[data-brand="zakaznik-x"]` blokem.
+4. **Ověř kontrast:**
+   - Text na `primary` (přes `on-primary`) ≥ 4.5:1.
+   - `focus-ring` ≥ 3:1 na `surface` i na `sidebar-bg`.
+   - Nástroj: WebAIM Contrast Checker nebo Chrome DevTools accessibility.
+5. **Pokud zákazník potřebuje dark variantu** — přidej do `src/components/bundle.css` za existující `[data-theme="dark"]` nový blok `[data-brand="zakaznik-x"][data-theme="dark"]` s dark overlay (typicky svítivější primary-text, tmavší sidebar-bg).
+6. **Zaregistruj brand v `useBrand`** — rozšiř konstantu `BRANDS` v `src/components/index.jsx` o nový objekt `{ id: "zakaznik-x", name: "Zákazník X" }`. Volitelné — v zákaznickém repu se `BrandToggle` nerenderuje.
+7. **Spusť `npm run build`** → `dist/system21.{css,js,d.ts}` aktualizované.
+8. **V customer GUI repo (např. `system21-zakaznik-x-gui`):**
+   - `git submodule update --remote packages/design` — stáhne aktuální knihovnu.
+   - V `app/layout.tsx` nastav `document.documentElement.setAttribute("data-brand", "zakaznik-x")` v bootstrap scriptu.
+   - V `Sidebar.brand` dej vlastní logo (`assets/logos/<customer>.png`).
+   - Pokud zákazník má vlastní fonty, přidej jejich `@import` do `app/globals.css` a změň `--font-display/body/mono`.
+9. **Ověř** otevřením `demo/showcase.html` lokálně a přepínáním brandu v `BrandToggle` — všechny obrazovky musí v novém brandu fungovat bez degradace.
+
+**Pozor:** `accent` (Spark Yellow) zůstává napříč brandy — je to systémový akcent pro upozornění, ne brand barva. Pokud zákazník explicitně chce jiný accent, zdokumentuj to v brand tokens.
+
 ## Nezahrnuto
 
 Tyto části zdrojové aplikace se do systému nepřenášely:

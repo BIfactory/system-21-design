@@ -1,5 +1,55 @@
 # Changelog
 
+## v2.0 — 2026-11-04 (demo-ready — příprava pro `system21-demo-gui`)
+
+Knihovna povýšena ze „katalog komponent + 1 demo obrazovka" na **plně připravenou šablonu pro univerzální demo**. Cíl: budoucí demo aplikace `BIfactory/system21-demo-gui` vznikne převážně skládáním z knihovny, ne psaním nových komponent.
+
+### Přidáno
+
+**Multi-brand tokeny:**
+
+- `tokens.json → brand.themes[]` — sekce s brand tokeny per theme. `scripts/tokens-to-css.py` generuje `[data-brand="<id>"]` overlay.
+- Druhý ukázkový brand **`demo-alt`** (modrá) pro průběžné testování, že přebarvování funguje bez bugů (žádná „zelená záře" na modrém brandu).
+- `[data-brand="demo-alt"][data-theme="dark"]` overlay v `bundle.css` — všechny 4 kombinace (bifactory-light/dark, demo-alt-light/dark) fungují.
+
+**Nové komponenty (10):**
+
+- `useBrand()` + `<BrandToggle />` — mirror `useTheme/ThemeToggle`, `localStorage("system21-brand")`.
+- `moduleNavSections` — defaultní sidebar sekce se všemi moduly backendu System 21 (Dashboard, Úkoly, Můj plán, CRM/{Klienti, Osoby, Obchodní případy}, DMS/{Smlouvy, Dokumenty, Automatizace}, Obchod/Zakázky, HR/{Pracovníci, Docházka}, Komunikace/{Email, Zprávy}, Intranet/{Nástěnka, KB}).
+- `<KpiRow cols?>` — responsive grid wrapper pro `StatTile`.
+- `<ActivityFeed items>` — vertikální feed s avatarem/ikonou, relativním časem, empty state.
+- `<QuickActions actions cols?>` — mřížka tlačítek s ikonou, badge, href/onClick.
+- `<EntityCard icon title subtitle meta tags actions onClick accent>` — univerzální karta záznamu.
+- `<WorkflowBadge state label?>` — tenký wrapper nad `Badge` se stavovým enum (`draft | offer | negotiation | in-progress | win | loss | done | blocked | overdue`) a CS labely.
+- `<RelationsSidebar sections>` — pravý sloupec na detail stránkách s propojenými záznamy.
+- `<ModuleHome title description kpis quickActions activity diary>` — layout template pro home stránky modulů.
+- `<CommentThread items onAdd currentUser>` — diskuse s replies (1 úroveň), reakcemi, add form.
+- `<AttachmentList items onDownload? onRemove? compact?>` — seznam souborů s mime-icon, meta a akcemi.
+
+**Nová ikona:** `palette` (pro `BrandToggle`).
+
+**6 ukázkových obrazovek v `demo/`:**
+
+- `dashboard.html` — ModuleHome (KPI + QuickActions + ActivityFeed + diář dne).
+- `crm-klienti.html` + `crm-klient-detail.html` — seznam klientů + detail rodiny s EntityCard grid + RelationsSidebar.
+- `dms-smlouvy.html` + `dms-smlouva-detail.html` — seznam smluv s WorkflowBadge + detail s AttachmentList + CommentThread + RelationsSidebar.
+- `ukoly.html` — seznam úkolů s rychlými akcemi.
+- `demo/_shared.js` — reusable AppShell bootstrap (DemoSidebar s moduleNavSections, DemoTopBar s BrandToggle + ThemeToggle).
+
+**Dokumentace:**
+
+- `docs/brand-manual.md` — nová sekce „Multi-brand" + 10-minutový proces „Jak udělat nového zákazníka".
+- `docs/superpowers/specs/2026-11-04-library-ready-for-demo-design.md` — design doc iniciativy.
+- `docs/superpowers/plans/2026-11-04-library-ready-for-demo.md` — implementation plan (6 fází A–F).
+
+### Zpětná kompatibilita
+
+**Žádný existující export, třída nebo token nebyl odstraněn ani přejmenován.** Poema (git submodule `packages/design`) může `git submodule update` kdykoli — rozbije se jen pokud by si naimportovala něco nového, co ještě nepoužívá.
+
+**Hranice souborů:** brand overlay v `tokens.css` (generovaný), dark mode v `bundle.css` (ručně). Dokumentováno v brand manuálu.
+
+---
+
 ## v1.2 — 2026-09-20 (Olaf inspirace — Fáze N)
 
 Přenos 5 nejlepších vzorů z produkční mobilní aplikace `bifactory/olaf/apps/web` do design systému:
