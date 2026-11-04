@@ -85,6 +85,24 @@
     const [logHours, setLogHours] = React.useState("2");
     const [logNote, setLogNote] = React.useState("");
     const [cancelOpen, setCancelOpen] = React.useState(false);
+    const [aiOpen, setAiOpen] = React.useState(false);
+    const [aiMessages, setAiMessages] = React.useState([]);
+    const [aiLoading, setAiLoading] = React.useState(false);
+    const sendAI = (text) => {
+      const id = Date.now();
+      setAiMessages((prev) => [...prev, { id, role: "user", content: text }]);
+      setAiLoading(true);
+      setTimeout(() => {
+        const map = {
+          "Shrň stav této zakázky": "ZAK-2026-0131 je v realizaci (41 %). Vykázáno 34 h z 50 odhadovaných. OP-07 Mapování dat zpožděno o 2 dny. Deadline 10. 12. je ohrožen — doporučuji buď posunout, nebo přidat zdroj na OP-07.",
+          "Co mi zbývá udělat": "Zbývá: OP-09 Testy integrace (8 h), dokončit OP-07 (4 h), dokončit OP-10 Dokumentace (2 h). Celkem ~14 h práce. Při aktuálním tempu 4 h/den to zabere 4 pracovní dny.",
+          "Napiš odpověď klientovi": "Pokud mi dáš krátký kontext (co klient chce slyšet / na co odpovídáš), pomohu ti sestavit odpověď. Nebo mi napiš sám text a já ho přepíšu formálněji.",
+        };
+        const response = map[text] || "Rozumím. Pracuji na tom…";
+        setAiMessages((prev) => [...prev, { id: id + 1, role: "assistant", content: response }]);
+        setAiLoading(false);
+      }, 900);
+    };
     const [data, setData] = React.useState({
       klient: "Agro Slovácko s.r.o.",
       deadline: "2026-12-10",
@@ -211,6 +229,27 @@
             { label: "Přesunout", icon: "folder", onClick: () => {} },
             { label: "Smazat", icon: "trash", variant: "danger", onClick: () => {} },
           ]
+        }),
+        // AI floating button + AIPanel
+        e("button", {
+          type: "button",
+          onClick: () => setAiOpen(true),
+          style: { position: "fixed", bottom: "var(--space-5)", right: "var(--space-5)", width: 56, height: 56, borderRadius: "var(--radius-full)", background: "linear-gradient(135deg, #8b5cf6, #6366f1, #06b6d4)", color: "white", border: 0, boxShadow: "var(--elev-5)", cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center", zIndex: 40 },
+          "aria-label": "Otevřít AI asistentku",
+          title: "AI asistentka"
+        }, e(S.Icon, { name: "sparkles", size: 24 })),
+        e(S.AIPanel, {
+          open: aiOpen,
+          onClose: () => setAiOpen(false),
+          context: { label: "Pracuji s:", value: "ZAK-2026-0131 Napojení ERP → CRM" },
+          suggestedPrompts: [
+            { label: "Shrň stav této zakázky", prompt: "Shrň stav této zakázky", icon: "sparkles" },
+            { label: "Co mi zbývá udělat", prompt: "Co mi zbývá udělat", icon: "tasks" },
+            { label: "Napiš odpověď klientovi", prompt: "Napiš odpověď klientovi", icon: "chat" },
+          ],
+          messages: aiMessages,
+          onSend: sendAI,
+          loading: aiLoading,
         })
       )
     );

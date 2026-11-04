@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>System 21 · Automatizace</title>
+<title>System 21 · AI asistentka</title>
 <link rel="stylesheet" href="../tokens/tokens.css">
 <link rel="stylesheet" href="../dist/system21.css">
 <script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
@@ -17,25 +17,126 @@
 <script>
 (() => {
   const S = window.S21, D = window.S21Demo, e = React.createElement;
-  const CRUMBS = [{ label: "DMS", href: "/dms" }, { label: "Automatizace", href: "/dms/automatizace" }];
+
+  const RULES = [
+    { id: 1, code: "RULE-01", name: "Rozpoznat typ dokumentu", trigger: "Při nahrání PDF", action: "Zařadit do kategorie (smlouva / faktura / škoda)", state: "in-progress", runs: 847, success: "98 %" },
+    { id: 2, code: "RULE-02", name: "Extrahovat údaje ze smlouvy", trigger: "Rozpoznaná smlouva", action: "Vyplnit pojistitel, pojistník, datum, pojistné", state: "in-progress", runs: 412, success: "94 %" },
+    { id: 3, code: "RULE-03", name: "Napárovat na klienta", trigger: "Extrahované údaje", action: "Najít rodinu nebo firmu podle IČ / RČ / jména", state: "in-progress", runs: 412, success: "92 %" },
+    { id: 4, code: "RULE-04", name: "Upozornit na expiraci", trigger: "30 dnů před expirací", action: "Vytvořit úkol + poznámku v aktivitě", state: "in-progress", runs: 24, success: "100 %" },
+    { id: 5, code: "RULE-05", name: "Navrhnout další kroky", trigger: "Při uzavření nabídky", action: "Doporučit upsell nebo follow-up produkt", state: "draft", runs: 0, success: "—" },
+  ];
+
+  const RULE_COLUMNS = [
+    { key: "code", label: "Pravidlo", width: "12%", render: (r) => e("span", { className: "s21-cell-code" }, r.code) },
+    { key: "name", label: "Název", sortable: true, width: "26%", render: (r) =>
+      e("div", null,
+        e("div", { className: "s21-cell-title" }, r.name),
+        e("div", { className: "s21-cell-meta" }, r.action)
+      )
+    },
+    { key: "trigger", label: "Spouštěč", width: "22%" },
+    { key: "runs", label: "Spuštění", align: "right", numeric: true, width: "10%" },
+    { key: "success", label: "Úspěšnost", align: "right", numeric: true, width: "12%" },
+    { key: "state", label: "Stav", width: "12%", render: (r) => e(S.WorkflowBadge, { state: r.state, fitCell: true }) },
+    { key: "actions", label: "", align: "center", width: "6%", render: () =>
+      e(S.Button, { size: "sm", iconOnly: true, icon: "more", variant: "ghost", "aria-label": "Víc", title: "Víc" })
+    }
+  ];
+
+  const SUGGESTIONS = [
+    { id: 1, title: "4 dokumenty čekají na kontrolu", description: "AI rozpoznala typ a vyplnila údaje, ale úspěšnost pod 90 %. Potvrď prosím přiřazení ke klientům.", confidence: 87 },
+    { id: 2, title: "Vytvořit pravidlo pro Allianz dokumenty", description: "Posledních 30 dnů jsi ručně kategorizoval 12 Allianz faktur stejným způsobem. Chceš z toho udělat pravidlo?", confidence: 94 },
+    { id: 3, title: "Expirace: Novákovi, pojištění majetku", description: "Expirace za 28 dnů. Doporučuji zavolat klientovi s předstihem — Pavel se v posledním kontaktu zmínil o rozšíření pojištění.", confidence: 100 },
+  ];
+
+  const CRUMBS = [{ label: "DMS", href: "/dms" }, { label: "Automatizace / AI", href: "/dms/automatizace" }];
+
   function Page() {
+    const [tab, setTab] = React.useState("prehled");
+    const [open, setOpen] = React.useState(false);
+    const [messages, setMessages] = React.useState([]);
+    const [loading, setLoading] = React.useState(false);
+    const [dismissed, setDismissed] = React.useState({});
+
+    const send = (text) => {
+      const id = Date.now();
+      setMessages((prev) => [...prev, { id, role: "user", content: text }]);
+      setLoading(true);
+      setTimeout(() => {
+        const map = {
+          "Shrň aktivitu za tento týden": "Tento týden zpracováno 42 dokumentů (38 smluv, 3 faktury, 1 škoda). Úspěšnost 94 %. Nejvíc času strávila RULE-02 (extrakce ze smluv) — doporučuji zkontrolovat template Allianz.",
+          "Které smlouvy expirují do měsíce": "Expirace v příštích 30 dnech: Novákovi — pojištění majetku (28 dnů), Hradecká strojírna — pojištění budovy (22 dnů), Procházkovi — živnostenské (14 dnů). Chceš, abych vytvořila follow-up úkoly?",
+          "Pomoc s novým pravidlem": "Rád. Jaký typ dokumentu chceš automatizovat a co s ním má AI udělat? Můžeš mi říct příklad nebo mi ukázat 2–3 nedávné případy a já z nich pravidlo navrhnu.",
+        };
+        const response = map[text] || "Rozumím. Pracuji na tom — dej mi chvíli…";
+        setMessages((prev) => [...prev, { id: id + 1, role: "assistant", content: response }]);
+        setLoading(false);
+      }, 900);
+    };
+
     return e(S.AppShell, {
       sidebar: e(D.DemoSidebar, { active: "/dms/automatizace" }),
       topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
     },
-      e(S.PageHeader, { title: "Automatizace", description: "AI pravidla pro zpracování příchozích dokumentů" }),
+      e(S.PageHeader, {
+        title: "AI asistentka",
+        description: "Automatizace zpracování dokumentů a chat s AI o tvojí praxi",
+        actions: e(React.Fragment, null,
+          e(S.Button, { variant: "secondary", icon: "settings" }, "Nastavení AI"),
+          e(S.Button, { icon: "sparkles", onClick: () => setOpen(true) }, "Otevřít asistentku")
+        ),
+        tabs: e(S.Tabs, { value: tab, onChange: setTab, items: [
+          { value: "prehled", label: "Přehled" },
+          { value: "pravidla", label: "Pravidla", count: RULES.length },
+          { value: "beh", label: "Historie běhů" },
+        ] })
+      }),
       e(S.PageBody, null,
-        e("div", { style: { display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh", padding: "var(--space-8)" } },
-          e(S.EmptyState, {
-            icon: "sparkles",
-            title: "Automatizace — brzy k dispozici",
-            description: "Tenhle modul System 21 je součástí platformy, ale v tomhle demu zatím není klikatelný. V Poema GUI a dalších zákaznických aplikacích se napojí přes API na backend `system21-test`.",
-            action: e(S.Button, { variant: "secondary", icon: "home", onClick: () => window.location.href = "./dashboard.html" }, "Zpět na dashboard")
-          })
-        )
+        e(S.KpiRow, { cols: 4 },
+          e(S.StatTile, { label: "Aktivní pravidla", value: "4", accent: "primary" }),
+          e(S.StatTile, { label: "Zpracováno dokumentů", value: "1 695", hint: "celkem" }),
+          e(S.StatTile, { label: "Úspěšnost", value: "94 %", accent: "success" }),
+          e(S.StatTile, { label: "Čeká na kontrolu", value: "4", accent: "warning" })
+        ),
+        e(S.Section, { title: "Doporučení od AI" },
+          e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+            SUGGESTIONS.map((s) => e(S.AISuggestion, {
+              key: s.id,
+              title: s.title,
+              description: s.description,
+              confidence: s.confidence,
+              dismissed: dismissed[s.id],
+              onDismiss: () => setDismissed((d) => ({ ...d, [s.id]: true })),
+              actions: e(React.Fragment, null,
+                e(S.Button, { size: "sm", icon: "check" }, "Potvrdit"),
+                e(S.Button, { size: "sm", variant: "ghost" }, "Zobrazit detail")
+              )
+            }))
+          )
+        ),
+        e(S.Section, {
+          title: "Pravidla automatizace",
+          action: e(S.Button, { size: "sm", icon: "plus" }, "Nové pravidlo")
+        },
+          e(S.DataTable, { columns: RULE_COLUMNS, rows: RULES, onRowClick: () => {}, minWidth: 980 })
+        ),
+        e(S.AIPanel, {
+          open,
+          onClose: () => setOpen(false),
+          context: { label: "Kontext:", value: "DMS Automatizace" },
+          suggestedPrompts: [
+            { label: "Shrň aktivitu za tento týden", prompt: "Shrň aktivitu za tento týden", icon: "sparkles" },
+            { label: "Které smlouvy expirují do měsíce", prompt: "Které smlouvy expirují do měsíce", icon: "clock" },
+            { label: "Pomoc s novým pravidlem", prompt: "Pomoc s novým pravidlem", icon: "wand" },
+          ],
+          messages,
+          onSend: send,
+          loading,
+        })
       )
     );
   }
+
   ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
 })();
 </script>

@@ -14,7 +14,7 @@ export type IconName =
   | "alert-circle" | "alert-triangle" | "info" | "help-circle"
   | "sparkles" | "zap" | "activity" | "trending-up" | "trending-down" | "bar-chart" | "pie-chart"
   | "sun" | "moon" | "play" | "pause" | "arrow-repeat" | "cloud" | "save"
-  | "palette";
+  | "palette" | "chat" | "wand";
 
 export interface IconProps { name: IconName; size?: number; strokeWidth?: number; className?: string; title?: string }
 export declare function Icon(p: IconProps): JSX.Element;
@@ -417,6 +417,46 @@ export interface SalesFunnelProps {
   className?: string;
 }
 export declare function SalesFunnel(p: SalesFunnelProps): JSX.Element;
+
+/* — AI features (polepim/M, 2026-11-04) — */
+export interface AIBadgeProps { tone?: "info" | "success" | "warning"; children?: ReactNode; className?: string }
+export declare function AIBadge(p: AIBadgeProps): JSX.Element;
+
+export interface AISuggestionProps {
+  title: ReactNode;
+  description?: ReactNode;
+  confidence?: number;
+  actions?: ReactNode;
+  dismissed?: boolean;
+  onDismiss?: () => void;
+  className?: string;
+}
+export declare function AISuggestion(p: AISuggestionProps): JSX.Element | null;
+
+export interface AIInputHelperProps {
+  value: string;
+  onSelect?: (text: string) => void;
+  variants?: string[];
+  onGenerate?: (current: string) => Promise<string[]>;
+  label?: string;
+  className?: string;
+}
+export declare function AIInputHelper(p: AIInputHelperProps): JSX.Element;
+
+export interface AIMessage { id: string | number; role: "user" | "assistant"; content: ReactNode; timestamp?: string }
+export interface AIPrompt { label: string; prompt: string; icon?: IconName }
+export interface AIPanelProps {
+  open: boolean;
+  onClose?: () => void;
+  title?: ReactNode;
+  context?: { label: ReactNode; value: ReactNode };
+  suggestedPrompts?: AIPrompt[];
+  messages?: AIMessage[];
+  onSend?: (prompt: string) => void;
+  loading?: boolean;
+  className?: string;
+}
+export declare function AIPanel(p: AIPanelProps): JSX.Element | null;
 
 /* — Fáze H components — */
 export interface DrawerProps { open: boolean; onClose?: () => void; side?: "left" | "right" | "top" | "bottom"; size?: number | string; title?: ReactNode; description?: ReactNode; footer?: ReactNode; children?: ReactNode; className?: string }

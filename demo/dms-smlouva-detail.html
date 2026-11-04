@@ -130,7 +130,21 @@
               e(S.Input, { value: sendTo, onChange: setSendTo, type: "email" })
             ),
             e(S.Field, { label: "Zpráva" },
-              e(S.Textarea, { value: sendNote, onChange: setSendNote, rows: 3 })
+              e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-2)" } },
+                e(S.Textarea, { value: sendNote, onChange: setSendNote, rows: 4 }),
+                e("div", { style: { display: "flex", justifyContent: "flex-end" } },
+                  e(S.AIInputHelper, {
+                    value: sendNote,
+                    onSelect: setSendNote,
+                    label: "Vylepšit s AI",
+                    onGenerate: () => new Promise((res) => setTimeout(() => res([
+                      "Dobrý den, zasílám smlouvu k podpisu. V případě dotazů jsem k dispozici. S pozdravem Pavel",
+                      "Dobrý den, posílám vám připravenou smlouvu. Prosím, dejte vědět, jestli všechno odpovídá domluvě. S pozdravem Pavel Obdržálek",
+                      "Dobrý den, smlouvu máme hotovou — v příloze. Pokud by bylo co upravit, dejte vědět. Děkuji, Pavel",
+                    ]), 700))
+                  })
+                )
+              )
             )
           )
         ),

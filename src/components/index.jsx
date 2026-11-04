@@ -94,6 +94,8 @@ const PATHS = {
   cloud: <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />,
   save: <><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></>,
   palette: <><circle cx="13.5" cy="6.5" r=".9" fill="currentColor" stroke="none" /><circle cx="17.5" cy="10.5" r=".9" fill="currentColor" stroke="none" /><circle cx="8.5" cy="7.5" r=".9" fill="currentColor" stroke="none" /><circle cx="6.5" cy="12.5" r=".9" fill="currentColor" stroke="none" /><path d="M12 22a10 10 0 1 1 0-20c5.5 0 10 3.9 10 8.7 0 3.3-2.7 6-6 6h-2.5c-.8 0-1.5.7-1.5 1.5 0 .5.2.9.5 1.2.3.3.5.7.5 1.1 0 .8-.6 1.5-1.5 1.5z" /></>,
+  chat: <><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></>,
+  wand: <><path d="M15 4V2M15 16v-2M8 9h2M20 9h2M17.8 11.8 19 13M15 9h0M17.8 6.2 19 5M3 21l9-9M12.2 6.2 11 5" /></>,
 };
 
 function Icon({ name, size = 18, strokeWidth = 2, className, title }) {
@@ -2194,6 +2196,184 @@ function SalesFunnel({ stages = [], value, onChange, title, className }) {
   );
 }
 
+/* ───────────── AI Features (NEW — polepim/M) ─────────────
+   AI patterns: chat panel, inline suggestion, input helper, generated badge.
+   Všechny mock — žádný reálný AI backend v této knihovně. */
+
+function AIBadge({ tone = "info", children = "AI", className }) {
+  return (
+    <span className={cx("s21-aib", `s21-aib--${tone}`, className)}>
+      <Icon name="sparkles" size={11} />
+      <span>{children}</span>
+    </span>
+  );
+}
+
+function AISuggestion({ title, description, confidence, actions, dismissed, onDismiss, className }) {
+  if (dismissed) return null;
+  return (
+    <div className={cx("s21-aisug", className)} role="group" aria-label="AI návrh">
+      <div className="s21-aisug__icon" aria-hidden="true"><Icon name="sparkles" size={16} /></div>
+      <div className="s21-aisug__body">
+        <div className="s21-aisug__head">
+          <div className="s21-aisug__title">{title}</div>
+          <AIBadge>AI</AIBadge>
+          {confidence != null && <span className="s21-aisug__conf" title={`AI důvěra: ${confidence}%`}>{confidence}%</span>}
+        </div>
+        {description && <div className="s21-aisug__desc">{description}</div>}
+        {actions && <div className="s21-aisug__actions">{actions}</div>}
+      </div>
+      {typeof onDismiss === "function" && (
+        <button type="button" className="s21-aisug__close" onClick={onDismiss} aria-label="Zavřít návrh" title="Zavřít">
+          <Icon name="x" size={14} />
+        </button>
+      )}
+    </div>
+  );
+}
+
+function AIInputHelper({ value, onSelect, variants, onGenerate, label = "Vylepšit s AI", className }) {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [options, setOptions] = useState(variants || []);
+  const wrapRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e) => { if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false); };
+    const onKey = (e) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("mousedown", onDoc); document.removeEventListener("keydown", onKey); };
+  }, [open]);
+
+  const generate = async () => {
+    setLoading(true);
+    try {
+      let next = variants || [];
+      if (typeof onGenerate === "function") next = await onGenerate(value) || [];
+      setOptions(next);
+    } finally { setLoading(false); }
+  };
+
+  const toggle = () => {
+    if (!open && options.length === 0) generate();
+    setOpen((v) => !v);
+  };
+
+  return (
+    <div ref={wrapRef} className={cx("s21-aih", className)}>
+      <button type="button" className="s21-aih__trigger" onClick={toggle} aria-expanded={open} aria-label={label} title={label}>
+        <Icon name="sparkles" size={14} />
+        <span>{label}</span>
+      </button>
+      {open && (
+        <div className="s21-aih__pop" role="dialog" aria-label="Varianty z AI">
+          <div className="s21-aih__head">
+            <AIBadge>AI</AIBadge>
+            <span>Vyber variantu nebo si nech vygenerovat další</span>
+          </div>
+          <ul className="s21-aih__list">
+            {loading && <li className="s21-aih__loading">Generuji varianty…</li>}
+            {!loading && options.length === 0 && <li className="s21-aih__loading">Žádné varianty. Klikni Regenerovat.</li>}
+            {!loading && options.map((opt, i) => (
+              <li key={i} className="s21-aih__item">
+                <div className="s21-aih__text">{opt}</div>
+                <Button size="sm" variant="secondary" onClick={() => { onSelect && onSelect(opt); setOpen(false); }}>Použít</Button>
+              </li>
+            ))}
+          </ul>
+          <div className="s21-aih__foot">
+            <Button size="sm" variant="ghost" icon="refresh" onClick={generate} disabled={loading}>Regenerovat</Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AIPanel({ open, onClose, title = "AI asistentka", context, suggestedPrompts, messages = [], onSend, loading, className }) {
+  const [input, setInput] = useState("");
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => { if (e.key === "Escape") onClose && onClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [messages, loading]);
+
+  const submit = (text) => {
+    const t = (text || input).trim();
+    if (!t || loading) return;
+    onSend && onSend(t);
+    setInput("");
+  };
+
+  if (!open) return null;
+  return (
+    <>
+      <div className="s21-aip__backdrop" onClick={() => onClose && onClose()} aria-hidden="true" />
+      <aside className={cx("s21-aip", className)} role="complementary" aria-label={title}>
+        <header className="s21-aip__head">
+          <div className="s21-aip__titles">
+            <div className="s21-aip__title"><Icon name="sparkles" size={16} />{title}</div>
+            {context && <div className="s21-aip__context"><span>{context.label}</span> <strong>{context.value}</strong></div>}
+          </div>
+          <button type="button" className="s21-aip__close" aria-label="Zavřít AI panel" onClick={() => onClose && onClose()}><Icon name="x" size={18} /></button>
+        </header>
+        <div className="s21-aip__body" ref={scrollRef}>
+          {messages.length === 0 && suggestedPrompts && suggestedPrompts.length > 0 && (
+            <div className="s21-aip__empty">
+              <div className="s21-aip__emptytitle">Čím můžu pomoct?</div>
+              <div className="s21-aip__prompts">
+                {suggestedPrompts.map((p, i) => (
+                  <button key={i} type="button" className="s21-aip__prompt" onClick={() => submit(p.prompt)}>
+                    <Icon name={p.icon || "sparkles"} size={14} />
+                    <span>{p.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          {messages.map((m) => (
+            <div key={m.id} className={cx("s21-aip__msg", `s21-aip__msg--${m.role}`)}>
+              <div className="s21-aip__bubble">
+                {m.role === "assistant" && <Icon name="sparkles" size={12} className="s21-aip__msgicon" />}
+                <div>{m.content}</div>
+              </div>
+              {m.timestamp && <div className="s21-aip__time">{m.timestamp}</div>}
+            </div>
+          ))}
+          {loading && (
+            <div className="s21-aip__msg s21-aip__msg--assistant">
+              <div className="s21-aip__bubble s21-aip__bubble--loading">
+                <Icon name="sparkles" size={12} />
+                <span className="s21-aip__dots"><span></span><span></span><span></span></span>
+              </div>
+            </div>
+          )}
+        </div>
+        <footer className="s21-aip__foot">
+          <textarea
+            className="s21-aip__input"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit(); } }}
+            placeholder="Napiš zprávu… (Enter odešle, Shift+Enter nový řádek)"
+            rows={2}
+          />
+          <Button icon="send" onClick={() => submit()} disabled={!input.trim() || loading}>Odeslat</Button>
+        </footer>
+      </aside>
+    </>
+  );
+}
+
 /* ───────────── Theme (NEW — Fáze E) ───────────── */
 function getInitialTheme() {
   if (typeof window === "undefined") return "light";
@@ -2324,6 +2504,7 @@ export {
   InlineEditor, QuickActionModal,
   SearchSelect, FileUploadZone, FormWizard,
   BulkActionBar, SalesFunnel,
+  AIBadge, AISuggestion, AIInputHelper, AIPanel,
   Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
   InputGroup, Textarea, FileDrop,
   BottomNav, useScrollDirection,
@@ -2346,6 +2527,7 @@ if (typeof window !== "undefined") {
   InlineEditor, QuickActionModal,
   SearchSelect, FileUploadZone, FormWizard,
   BulkActionBar, SalesFunnel,
+  AIBadge, AISuggestion, AIInputHelper, AIPanel,
   Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
   InputGroup, Textarea, FileDrop,
   BottomNav, useScrollDirection,
