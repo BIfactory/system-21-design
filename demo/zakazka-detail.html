@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · ZAK-2026-0131</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+<style>
+  .op-row { display: grid; grid-template-columns: 60px 1fr 100px 100px 120px 60px; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--border-subtle); font: inherit; }
+  .op-row:last-child { border-bottom: 0; }
+  .op-row__code { font: 500 11px/16px var(--font-mono); color: var(--ink-muted); }
+  .op-row__name { font: 500 14px/20px var(--font-body); }
+  .op-row__meta { font: 400 12px/16px var(--font-body); color: var(--ink-muted); }
+  .hours { font-variant-numeric: tabular-nums; }
+  .ver-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: var(--radius-full); background: var(--primary-soft); color: var(--primary-text); font: 500 11px/16px var(--font-mono); letter-spacing: .04em; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  // ─── mock data ─────────────────────────────────────────────────────
+  const OPS_V1 = [
+    { id: 1, code: "OP-01", name: "Workshop s klientem", owner: "Pavel O.", planned: 4, done: 4, state: "done" },
+    { id: 2, code: "OP-02", name: "Analýza požadavků", owner: "Pavel O.", planned: 16, done: 16, state: "done" },
+    { id: 3, code: "OP-03", name: "Mapování dat z CRM", owner: "Pavel O.", planned: 12, done: 8, state: "in-progress" },
+    { id: 4, code: "OP-04", name: "Setup pipeline", owner: "Alena D.", planned: 6, done: 4, state: "in-progress" },
+    { id: 5, code: "OP-05", name: "Testy integrace", owner: "Tomáš N.", planned: 8, done: 0, state: "draft" },
+    { id: 6, code: "OP-06", name: "Dokumentace", owner: "Pavel O.", planned: 4, done: 2, state: "in-progress" },
+  ];
+  const MATS = [
+    { id: 1, code: "M-01", name: "Postgres cluster — 3 měsíce", unit: "ks", qty: 1, price: 12000 },
+    { id: 2, code: "M-02", name: "SSL certifikát (DigiCert)", unit: "ks", qty: 1, price: 3500 },
+  ];
+
+  const WORKLOG = [
+    { id: 1, kind: "work", when: "dnes 10:42", who: "Pavel O.", title: "OP-03 Mapování dat", meta: "2:30 h · Rozpracováno" },
+    { id: 2, kind: "material", when: "dnes 09:15", who: "Alena D.", title: "M-01 Postgres cluster", meta: "1 ks · 12 000 Kč" },
+    { id: 3, kind: "work", when: "včera 16:00", who: "Pavel O.", title: "OP-03 Mapování dat", meta: "4:00 h" },
+    { id: 4, kind: "work", when: "včera 11:20", who: "Alena D.", title: "OP-04 Setup pipeline", meta: "2:00 h" },
+    { id: 5, kind: "adhoc", when: "pondělí 14:00", who: "Pavel O.", title: "Doprava — Zlín", meta: "transport · 450 Kč" },
+    { id: 6, kind: "work", when: "pondělí 09:00", who: "Pavel O.", title: "OP-02 Analýza požadavků", meta: "6:00 h · Hotovo" },
+  ];
+
+  const COMMENTS = [
+    { id: 1, author: "Pavel Obdržálek", text: "Klient potvrdil scope. Pokračujeme podle V1 plánu.", createdAt: "před 2 d" },
+    { id: 2, author: "Alena Dvořáková", text: "Schválila jsem rozpočet. Můžeme pokračovat s OP-04.", createdAt: "před 1 d" },
+    { id: 3, author: "Tomáš Novák", text: "Příprava testovacího prostředí hotová.", createdAt: "před 3 h" },
+  ];
+
+  const FILES = [
+    { id: 1, name: "Zadání od klienta.pdf", mimeType: "application/pdf", size: 280000, uploadedBy: "Pavel O.", uploadedAt: "před týdnem" },
+    { id: 2, name: "Pipeline diagram.png", mimeType: "image/png", size: 1240000, uploadedBy: "Alena D.", uploadedAt: "před 3 dny" },
+    { id: 3, name: "Rozpočet.xlsx", mimeType: "application/vnd.ms-excel", size: 62000, uploadedBy: "Alena D.", uploadedAt: "před 2 dny" },
+  ];
+
+  const CRUMBS = [
+    { label: "Zakázky", href: "/zakazky" },
+    { label: "ZAK-2026-0131 Napojení ERP → CRM", href: "/zakazky/131" },
+  ];
+
+  // Metrics
+  const totalPlanned = OPS_V1.reduce((s, o) => s + o.planned, 0);
+  const totalDone = OPS_V1.reduce((s, o) => s + o.done, 0);
+  const completion = Math.round((totalDone / totalPlanned) * 100);
+  const totalMat = MATS.reduce((s, m) => s + m.price * m.qty, 0);
+  const fmt = (n) => n.toLocaleString("cs-CZ").replace(/,/g, " ");
+
+  function Page() {
+    const [tab, setTab] = React.useState("plan");
+    const [comments, setComments] = React.useState(COMMENTS);
+    const [logOpen, setLogOpen] = React.useState(false);
+    const [logHours, setLogHours] = React.useState("2");
+    const [logNote, setLogNote] = React.useState("");
+    const [selectedOp, setSelectedOp] = React.useState(null);
+
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/zakazky" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS, onNavigate: (it, i) => { if (i === 0) window.location.href = "./zakazky.html"; } }),
+    },
+      e(S.PageHeader, {
+        title: "ZAK-2026-0131 Napojení ERP → CRM",
+        description: "Agro Slovácko · Pavel Obdržálek · Plnění " + completion + " % · Deadline 10. 11. 2026 ⚠",
+        actions: e(React.Fragment, null,
+          e(S.Button, { variant: "secondary", icon: "clock", onClick: () => { setSelectedOp(null); setLogOpen(true); } }, "Vykázat"),
+          e(S.DropdownMenu, {
+            trigger: e(S.Button, { variant: "secondary", iconOnly: true, icon: "more", "aria-label": "Další akce" })
+          }, ({ close }) => e(React.Fragment, null,
+            e("button", { type: "button", role: "menuitem", className: "s21-dd__item s21-dd__item--btn", onClick: () => { close(); } },
+              e("span", { className: "s21-dd__itemmain" }, e(S.Icon, { name: "edit", size: 14 }), "Upravit zakázku")
+            ),
+            e("button", { type: "button", role: "menuitem", className: "s21-dd__item s21-dd__item--btn", onClick: () => { close(); } },
+              e("span", { className: "s21-dd__itemmain" }, e(S.Icon, { name: "copy", size: 14 }), "Duplikovat")
+            ),
+            e("button", { type: "button", role: "menuitem", className: "s21-dd__item s21-dd__item--btn", onClick: () => { close(); } },
+              e("span", { className: "s21-dd__itemmain" }, e(S.Icon, { name: "trash", size: 14 }), "Zrušit zakázku")
+            )
+          ))
+        ),
+        tabs: e(S.Tabs, { value: tab, onChange: setTab, items: [
+          { value: "plan", label: "Plán" },
+          { value: "realizace", label: "Realizace", count: WORKLOG.length },
+          { value: "nastenka", label: "Nástěnka", count: comments.length },
+          { value: "dokumenty", label: "Dokumenty", count: FILES.length },
+          { value: "fotky", label: "Fotky" },
+        ] })
+      }),
+      e(S.PageBody, null,
+
+        // ───── PLÁN ───────────────────────────────────────────────
+        tab === "plan" && e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-4)" } },
+          e("div", { style: { display: "flex", alignItems: "center", gap: "var(--space-2)" } },
+            e("span", { className: "ver-pill" }, "V1 — Aktivní"),
+            e(S.Button, { size: "sm", variant: "ghost", icon: "plus" }, "Nová verze")
+          ),
+          e(S.Section, { title: "Operace", action: e(S.Button, { size: "sm", icon: "plus" }, "Nová operace") },
+            e("div", null,
+              e("div", { className: "op-row", style: { fontWeight: 600, background: "var(--surface-muted)", borderBottom: "1px solid var(--border)" } },
+                e("span", { className: "op-row__code" }, "Op."),
+                e("span", null, "Název"),
+                e("span", { className: "hours", style: { textAlign: "right" } }, "Plán"),
+                e("span", { className: "hours", style: { textAlign: "right" } }, "Hotovo"),
+                e("span", null, "Stav"),
+                e("span", null, "")
+              ),
+              OPS_V1.map((o) => e("div", { key: o.id, className: "op-row" },
+                e("span", { className: "op-row__code" }, o.code),
+                e("div", null,
+                  e("div", { className: "op-row__name" }, o.name),
+                  e("div", { className: "op-row__meta" }, o.owner)
+                ),
+                e("span", { className: "hours", style: { textAlign: "right" } }, o.planned + " h"),
+                e("span", { className: "hours", style: { textAlign: "right", color: o.done === o.planned ? "var(--success-text)" : o.done > o.planned ? "var(--danger-text)" : "var(--ink)" } }, o.done + " h"),
+                e(S.WorkflowBadge, { state: o.state, fitCell: true }),
+                e("span", { className: "s21-row-actions", "data-no-row-click": true },
+                  e(S.Button, { size: "sm", iconOnly: true, icon: "clock", variant: "ghost", "aria-label": "Vykázat", title: "Vykázat", onClick: () => { setSelectedOp(o); setLogOpen(true); } })
+                )
+              )),
+              e("div", { className: "op-row", style: { fontWeight: 600, background: "var(--surface-muted)", borderTop: "1px solid var(--border)" } },
+                e("span", null, ""),
+                e("span", null, "Celkem"),
+                e("span", { className: "hours", style: { textAlign: "right" } }, totalPlanned + " h"),
+                e("span", { className: "hours", style: { textAlign: "right" } }, totalDone + " h"),
+                e("span", null, completion + " %"),
+                e("span", null, "")
+              )
+            )
+          ),
+
+          e(S.Section, { title: "Materiál a ad-hoc", action: e(S.Button, { size: "sm", icon: "plus" }, "Přidat") },
+            e("div", null,
+              MATS.map((m) => e("div", { key: m.id, className: "op-row", style: { gridTemplateColumns: "60px 1fr 100px 140px 60px" } },
+                e("span", { className: "op-row__code" }, m.code),
+                e("div", null,
+                  e("div", { className: "op-row__name" }, m.name),
+                  e("div", { className: "op-row__meta" }, "Materiál")
+                ),
+                e("span", { className: "hours", style: { textAlign: "right" } }, m.qty + " " + m.unit),
+                e("span", { className: "hours", style: { textAlign: "right" } }, fmt(m.price * m.qty) + " Kč"),
+                e("span", { className: "s21-row-actions", "data-no-row-click": true },
+                  e(S.Button, { size: "sm", iconOnly: true, icon: "more", variant: "ghost", "aria-label": "Akce" })
+                )
+              )),
+              e("div", { className: "op-row", style: { gridTemplateColumns: "60px 1fr 100px 140px 60px", fontWeight: 600, background: "var(--surface-muted)" } },
+                e("span", null, ""),
+                e("span", null, "Materiál celkem"),
+                e("span", null, ""),
+                e("span", { style: { textAlign: "right" } }, fmt(totalMat) + " Kč"),
+                e("span", null, "")
+              )
+            )
+          ),
+
+          e(S.Section, { title: "Souhrn" },
+            e("dl", { className: "s21-entity__meta", style: { display: "grid", gridTemplateColumns: "max-content 1fr", gap: "4px 24px" } },
+              e("dt", null, "Práce (plán)"), e("dd", null, totalPlanned + " h × průměrná sazba 800 Kč = ", fmt(totalPlanned * 800), " Kč"),
+              e("dt", null, "Materiál"), e("dd", null, fmt(totalMat) + " Kč"),
+              e("dt", null, "Ad-hoc"), e("dd", null, "450 Kč"),
+              e("dt", null, "Celkem"), e("dd", null, e("strong", null, fmt(totalPlanned * 800 + totalMat + 450) + " Kč")),
+              e("dt", null, "Cena pro klienta"), e("dd", null, e("strong", null, "312 000 Kč")),
+              e("dt", null, "Marže"), e("dd", null, e("span", { style: { color: "var(--danger-text)", fontWeight: 600 } }, "−4 %"))
+            )
+          )
+        ),
+
+        // ───── REALIZACE ──────────────────────────────────────────
+        tab === "realizace" && e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-4)" } },
+          e(S.KpiRow, { cols: 4 },
+            e(S.StatTile, { label: "Vykázáno", value: String(totalDone), unit: "h" }),
+            e(S.StatTile, { label: "Plán", value: String(totalPlanned), unit: "h" }),
+            e(S.StatTile, { label: "Plnění", value: completion + " %", accent: completion > 100 ? "danger" : undefined }),
+            e(S.StatTile, { label: "Záznamů", value: String(WORKLOG.length) })
+          ),
+          e(S.Section, { title: "Časová osa (práce · materiál · ad-hoc)" },
+            e("ul", { style: { listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "var(--space-2)" } },
+              WORKLOG.map((w) => e("li", { key: w.id,
+                style: {
+                  display: "flex", alignItems: "flex-start", gap: "var(--space-3)",
+                  padding: "var(--space-2) var(--space-3)",
+                  background: "var(--surface-raised)", border: "1px solid var(--border-subtle)",
+                  borderRadius: "var(--radius-lg)"
+                }
+              },
+                e("span", {
+                  style: { flexShrink: 0, width: 28, height: 28, borderRadius: "var(--radius-full)",
+                    background: w.kind === "work" ? "var(--primary-soft)" : w.kind === "material" ? "var(--warning-bg)" : "var(--surface-muted)",
+                    color: w.kind === "work" ? "var(--primary-text)" : w.kind === "material" ? "var(--warning-text)" : "var(--ink-muted)",
+                    display: "inline-flex", alignItems: "center", justifyContent: "center" }
+                },
+                  e(S.Icon, { name: w.kind === "work" ? "clock" : w.kind === "material" ? "folder" : "credit-card", size: 14 })
+                ),
+                e("div", { style: { flex: 1, minWidth: 0 } },
+                  e("div", { style: { font: "500 14px/20px var(--font-body)", color: "var(--ink)" } }, w.title),
+                  e("div", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)" } }, w.who, " · ", w.meta, " · ", w.when)
+                ),
+                e(S.Button, { size: "sm", iconOnly: true, icon: "trash", variant: "ghost", "aria-label": "Smazat záznam", title: "Smazat" })
+              ))
+            )
+          )
+        ),
+
+        // ───── NÁSTĚNKA ───────────────────────────────────────────
+        tab === "nastenka" && e(S.Section, { title: "Nástěnka a komentáře" },
+          e(S.CommentThread, {
+            items: comments,
+            currentUser: { name: "Lubomír Hulín" },
+            onAdd: (text) => setComments([...comments, { id: Date.now(), author: "Lubomír Hulín", text, createdAt: "právě teď" }]),
+          })
+        ),
+
+        // ───── DOKUMENTY ──────────────────────────────────────────
+        tab === "dokumenty" && e(S.Section, { title: "Dokumenty" },
+          e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+            e(S.FileUploadZone, { onFiles: () => new Promise((r) => setTimeout(r, 600)), accept: ".pdf,.jpg,.png,.docx,.xlsx", maxSize: 10 * 1024 * 1024 }),
+            e(S.AttachmentList, { items: FILES, onDownload: () => {}, onRemove: () => {} })
+          )
+        ),
+
+        // ───── FOTKY ──────────────────────────────────────────────
+        tab === "fotky" && e(S.Section, { title: "Fotky" },
+          e(S.EmptyState, { icon: "image", title: "Žádné fotky",
+            description: "Fotografie z realizace zatím nejsou. Nahraj je v záložce Dokumenty nebo dole.",
+            action: e(S.Button, { icon: "upload" }, "Nahrát fotky") })
+        ),
+
+        // ───── Vykazat modal ──────────────────────────────────────
+        e(S.QuickActionModal, {
+          open: logOpen, onClose: () => setLogOpen(false),
+          title: "Vykázat hodiny",
+          description: selectedOp ? (selectedOp.code + " · " + selectedOp.name) : "ZAK-2026-0131 (bez operace)",
+          icon: "clock",
+          footer: e(React.Fragment, null,
+            e(S.Button, { variant: "secondary", onClick: () => setLogOpen(false) }, "Zrušit"),
+            e(S.Button, { icon: "check", onClick: () => setLogOpen(false) }, "Uložit")
+          )
+        },
+          e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+            e(S.Field, { label: "Počet hodin" },
+              e(S.Input, { value: logHours, onChange: setLogHours, type: "number", placeholder: "např. 2" })
+            ),
+            e(S.Field, { label: "Datum" },
+              e(S.Input, { type: "date", value: new Date().toISOString().slice(0,10), onChange: () => {} })
+            ),
+            e(S.Field, { label: "Poznámka" },
+              e(S.Textarea, { value: logNote, onChange: setLogNote, placeholder: "Volitelně — co jsi dnes udělal?" })
+            )
+          )
+        )
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · Zakázky</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+<style>
+  .pct { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .pct.low { color: var(--success-text); }
+  .pct.mid { color: var(--warning-text); }
+  .pct.high { color: var(--danger-text); }
+  .dl-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: var(--radius-full); font: 500 11px/16px var(--font-mono); letter-spacing: .04em; }
+  .dl-badge.ok { background: var(--surface-muted); color: var(--ink-muted); }
+  .dl-badge.soon { background: var(--warning-bg); color: var(--warning-text); }
+  .dl-badge.over { background: var(--danger-bg); color: var(--danger-text); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  // ─── mock data ─────────────────────────────────────────────────────
+  // polepim: internal_status = new | quoted | ready | in_progress | done | delivered | cancelled
+  const ORDERS = [
+    { id: 1, code: "ZAK-2026-0142", name: "Reporting obchodu — pilot", client: "Moravia Steel a.s.", type: "Vývoj", status: "quoted", stateLabel: "Nabídka", created: "12. 05. 2026", deadline: "28. 11. 2026", price: 184000, margin: "+32 %", marginPos: true, progress: 68, pipeline: true },
+    { id: 2, code: "ZAK-2026-0139", name: "Automatizace výkazů práce", client: "Hradecká strojírna", type: "Vývoj", status: "in_progress", stateLabel: "Realizace", created: "03. 05. 2026", deadline: "15. 12. 2026", price: 96500, margin: "+24 %", marginPos: true, progress: 42 },
+    { id: 3, code: "ZAK-2026-0131", name: "Napojení ERP → CRM", client: "Agro Slovácko", type: "Integrace", status: "in_progress", stateLabel: "Realizace", created: "22. 04. 2026", deadline: "10. 11. 2026", price: 312000, margin: "−4 %", marginPos: false, progress: 92, overdue: true },
+    { id: 4, code: "ZAK-2026-0127", name: "AI asistent pro zápisy z porad", client: "Obec Staré Město", type: "AI", status: "done", stateLabel: "Hotovo", created: "15. 04. 2026", deadline: "—", price: 48000, margin: "+41 %", marginPos: true, progress: 100 },
+    { id: 5, code: "ZAK-2026-0126", name: "Audit CRM dat", client: "Moravia Steel a.s.", type: "Konzultace", status: "done", stateLabel: "Hotovo", created: "10. 04. 2026", deadline: "—", price: 27500, margin: "+28 %", marginPos: true, progress: 100 },
+    { id: 6, code: "ZAK-2026-0122", name: "Školení týmu v Notion", client: "Hradecká strojírna", type: "Školení", status: "done", stateLabel: "Hotovo", created: "02. 04. 2026", deadline: "—", price: 16000, margin: "+52 %", marginPos: true, progress: 100 },
+    { id: 7, code: "ZAK-2026-0118", name: "Import historie z Raynet", client: "Agro Slovácko", type: "Integrace", status: "in_progress", stateLabel: "Realizace", created: "28. 03. 2026", deadline: "25. 11. 2026", price: 36000, margin: "+12 %", marginPos: true, progress: 80 },
+    { id: 8, code: "ZAK-2026-0115", name: "Poptávka — portál pro klienty", client: "Procházkovi s.r.o.", type: "Vývoj", status: "new", stateLabel: "Nová", created: "20. 03. 2026", deadline: "—", price: 0, margin: "—", marginPos: true, progress: 0, pipeline: true },
+    { id: 9, code: "ZAK-2026-0109", name: "Dashboard pro management", client: "Moravia Steel a.s.", type: "Vývoj", status: "delivered", stateLabel: "Fakturováno", created: "10. 03. 2026", deadline: "—", price: 63000, margin: "+36 %", marginPos: true, progress: 100 },
+    { id: 10, code: "ZAK-2026-0098", name: "Konzultace migrace", client: "Procházkovi s.r.o.", type: "Konzultace", status: "cancelled", stateLabel: "Zrušeno", created: "25. 02. 2026", deadline: "—", price: 13000, margin: "—", marginPos: true, progress: 40 },
+  ];
+
+  const FUNNEL = [
+    { id: "new", label: "Nové", count: ORDERS.filter((o) => o.status === "new").length, color: "var(--ink-muted)" },
+    { id: "quoted", label: "Nabídka", count: ORDERS.filter((o) => o.status === "quoted").length, color: "var(--primary)" },
+    { id: "in_progress", label: "Realizace", count: ORDERS.filter((o) => o.status === "in_progress").length, color: "#d97706" },
+    { id: "done", label: "Hotovo", count: ORDERS.filter((o) => o.status === "done").length, color: "var(--success-solid)" },
+    { id: "delivered", label: "Fakturováno", count: ORDERS.filter((o) => o.status === "delivered").length, color: "var(--primary-text)" },
+  ];
+
+  const fmt = (n) => n.toLocaleString("cs-CZ").replace(/,/g, " ");
+  const pctCls = (p) => p >= 95 ? "high" : p >= 80 ? "mid" : "low";
+
+  // Deadline: "15. 12. 2026" → days diff from today
+  function daysTo(dl) {
+    if (!dl || dl === "—") return null;
+    const [d, m, y] = dl.split(".").map((s) => parseInt(s.trim(), 10));
+    const date = new Date(y, m - 1, d);
+    return Math.round((date - new Date()) / (1000 * 60 * 60 * 24));
+  }
+  function DeadlineBadge({ dl, overdue }) {
+    const days = daysTo(dl);
+    if (days === null) return e("span", { className: "s21-cell-meta" }, "—");
+    if (days < 0 || overdue) return e("span", { className: "dl-badge over" }, "⚠ Po termínu");
+    if (days <= 7) return e("span", { className: "dl-badge soon" }, "za " + days + " dnů");
+    return e("span", { className: "dl-badge ok" }, dl);
+  }
+
+  // ─── columns ───────────────────────────────────────────────────────
+  const COLUMNS = [
+    { key: "name", label: "Zakázka", sortable: true, width: "32%", render: (o) =>
+      e("div", null,
+        e("div", { style: { display: "flex", alignItems: "center", gap: 6 } },
+          e("span", { className: "s21-cell-title" }, o.name),
+          o.overdue && e("span", { className: "dl-badge over" }, "⚠")
+        ),
+        e("div", { className: "s21-cell-meta" },
+          e("span", { className: "s21-cell-code" }, o.code), " · ", o.client, " · ", o.type
+        )
+      )
+    },
+    { key: "status", label: "Stav", width: "12%", render: (o) => {
+      const tone = o.status === "done" || o.status === "delivered" ? "success"
+        : o.status === "in_progress" ? "primary"
+        : o.status === "cancelled" ? "neutral"
+        : o.status === "new" ? "neutral"
+        : "primary";
+      return e(S.Badge, { tone, fitCell: true }, o.stateLabel);
+    } },
+    { key: "deadline", label: "Deadline", width: "14%", render: (o) => e(DeadlineBadge, { dl: o.deadline, overdue: o.overdue }) },
+    { key: "progress", label: "Plnění", align: "right", numeric: true, width: "10%", render: (o) =>
+      e("span", { className: "pct " + pctCls(o.progress) }, o.progress + " %")
+    },
+    { key: "price", label: "Cena", align: "right", numeric: true, width: "14%", render: (o) =>
+      e("span", { style: { fontVariantNumeric: "tabular-nums" } }, o.price ? fmt(o.price) + " Kč" : "—")
+    },
+    { key: "margin", label: "Marže", align: "right", numeric: true, width: "10%", render: (o) =>
+      e("span", { style: { color: o.marginPos ? "var(--success-text)" : "var(--danger-text)", fontWeight: 500, fontVariantNumeric: "tabular-nums" } }, o.margin)
+    },
+    { key: "actions", label: "", align: "center", width: "8%", render: (o) =>
+      e("span", { className: "s21-row-actions", "data-no-row-click": true },
+        e(S.Button, { size: "sm", iconOnly: true, icon: "clock", variant: "ghost", "aria-label": "Vykázat hodiny", title: "Vykázat hodiny", onClick: (ev) => { ev.stopPropagation(); window.location.href = "./_coming.html#/vykazovani"; } }),
+        e(S.Button, { size: "sm", iconOnly: true, icon: "more", variant: "ghost", "aria-label": "Více akcí", title: "Více akcí" })
+      )
+    }
+  ];
+
+  // Mobile card row
+  function OrderCard({ o }) {
+    return e("article", {
+      style: {
+        padding: "var(--space-3)", background: "var(--surface-raised)",
+        border: "1px solid var(--border)", borderRadius: "var(--radius-xl)",
+        display: "flex", flexDirection: "column", gap: "var(--space-2)",
+        cursor: "pointer"
+      },
+      onClick: () => window.location.href = "./zakazka-detail.html"
+    },
+      e("div", { style: { display: "flex", alignItems: "baseline", gap: "var(--space-2)" } },
+        e("span", { style: { flex: 1, font: "600 15px/20px var(--font-body)" } }, o.name),
+        e(S.Badge, { tone: o.status === "done" ? "success" : o.status === "in_progress" ? "primary" : "neutral", fitCell: true }, o.stateLabel)
+      ),
+      e("div", { style: { font: "400 13px/18px var(--font-body)", color: "var(--ink-muted)" } },
+        e("span", { className: "s21-cell-code" }, o.code), " · ", o.client
+      ),
+      e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", gap: "var(--space-2)", font: "500 13px/18px var(--font-body)" } },
+        e(DeadlineBadge, { dl: o.deadline, overdue: o.overdue }),
+        e("span", { className: "pct " + pctCls(o.progress) }, o.progress + " %"),
+        e("span", { style: { fontVariantNumeric: "tabular-nums" } }, o.price ? fmt(o.price) + " Kč" : "—")
+      )
+    );
+  }
+
+  const CRUMBS = [{ label: "Zakázky", href: "/zakazky" }];
+
+  function Page() {
+    const [tab, setTab] = React.useState("aktivni");
+    const [chip, setChip] = React.useState("all");
+    const [stage, setStage] = React.useState(null);
+    const [q, setQ] = React.useState("");
+
+    const activeOrders = ORDERS.filter((o) => o.status !== "delivered" && o.status !== "cancelled");
+    const invoiceReady = ORDERS.filter((o) => o.status === "done");
+
+    let rows = tab === "aktivni" ? activeOrders : tab === "fakturaci" ? invoiceReady : ORDERS;
+
+    if (chip === "pipeline") rows = rows.filter((o) => o.pipeline || o.status === "new" || o.status === "quoted");
+    else if (chip === "vyroba") rows = rows.filter((o) => o.status === "in_progress");
+    else if (chip === "overdue") rows = rows.filter((o) => o.overdue);
+
+    if (stage) rows = rows.filter((o) => o.status === stage);
+
+    if (q) rows = rows.filter((o) => (o.name + " " + o.client + " " + o.code).toLowerCase().includes(q.toLowerCase()));
+
+    const totalValue = activeOrders.reduce((sum, o) => sum + (o.price || 0), 0);
+
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/zakazky" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
+    },
+      e(S.PageHeader, {
+        title: "Zakázky",
+        description: "Přehled všech zakázek a jejich stavu",
+        actions: e(S.Button, { icon: "plus", onClick: () => window.location.href = "./zakazka-nova.html" }, "Nová zakázka"),
+        tabs: e(S.Tabs, { value: tab, onChange: setTab, items: [
+          { value: "aktivni", label: "Aktivní", count: activeOrders.length },
+          { value: "fakturaci", label: "Dokončené k fakturaci", count: invoiceReady.length },
+          { value: "vsechny", label: "Všechny", count: ORDERS.length },
+        ] })
+      }),
+      e(S.PageBody, null,
+        e(S.KpiRow, { cols: 4 },
+          e(S.StatTile, { label: "Aktivní", value: String(activeOrders.length) }),
+          e(S.StatTile, { label: "V realizaci", value: String(ORDERS.filter(o => o.status === "in_progress").length) }),
+          e(S.StatTile, { label: "Po termínu", value: String(ORDERS.filter(o => o.overdue).length), accent: ORDERS.some(o => o.overdue) ? "danger" : undefined }),
+          e(S.StatTile, { label: "Hodnota aktivních", value: fmt(totalValue), unit: "Kč", big: true })
+        ),
+
+        e(S.SalesFunnel, { title: "Pipeline", stages: FUNNEL, value: stage, onChange: setStage }),
+
+        e(S.ChipGroup, { value: chip, onChange: setChip, items: [
+          { value: "all", label: "Vše", count: rows.length },
+          { value: "pipeline", label: "Sales pipeline" },
+          { value: "vyroba", label: "Výhra ve výrobě" },
+          { value: "overdue", label: "Po termínu" },
+        ] }),
+
+        e(S.FilterBar, null,
+          e(S.SearchInput, { className: "s21-grow", value: q, onChange: setQ, placeholder: "Hledat název, klient, číslo…" }),
+          e(S.Select, { placeholder: "Všichni klienti", options: [
+            { value: "moravia", label: "Moravia Steel" },
+            { value: "agro", label: "Agro Slovácko" },
+            { value: "hradecka", label: "Hradecká strojírna" },
+            { value: "prochazkovi", label: "Procházkovi" },
+          ] }),
+          e(S.Select, { placeholder: "Všechny typy", options: [
+            { value: "vyvoj", label: "Vývoj" },
+            { value: "integ", label: "Integrace" },
+            { value: "konz", label: "Konzultace" },
+            { value: "ai", label: "AI" },
+          ] })
+        ),
+
+        e(S.DataTable, {
+          columns: COLUMNS, rows, minWidth: 980,
+          onRowClick: () => window.location.href = "./zakazka-detail.html",
+          renderCard: (o) => e(OrderCard, { o, key: o.id })
+        })
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>
