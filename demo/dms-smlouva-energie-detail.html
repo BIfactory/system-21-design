@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · EL-2024-0045</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+<style>
+  .hero-strip { display: flex; gap: var(--space-4); flex-wrap: wrap; margin-top: var(--space-2); font: 500 13px/18px var(--font-body); color: var(--ink-muted); }
+  .hero-strip strong { color: var(--ink); font-weight: 700; }
+  .hero-strip .warn { color: var(--warning-text); }
+  .fields-grid { display: grid; grid-template-columns: max-content 1fr; gap: 10px 32px; font: 400 14px/22px var(--font-body); }
+  .fields-grid dt { color: var(--ink-muted); font: 500 11px/16px var(--font-mono); letter-spacing: .04em; text-transform: uppercase; align-self: center; }
+  .fields-grid dd { margin: 0; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .meter-card { padding: var(--space-3); background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-xl); }
+  .meter-card__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-2); }
+  .meter-card__code { font: 600 14px/20px var(--font-mono); color: var(--primary-text); }
+  .meter-fields { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; font: 400 13px/18px var(--font-body); }
+  .meter-fields dt { color: var(--ink-muted); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+  .meter-fields dd { margin: 0; font-variant-numeric: tabular-nums; }
+  .fix-banner { padding: var(--space-3); background: var(--warning-bg); border: 1px solid var(--warning-text); border-left-width: 4px; border-radius: var(--radius-lg); color: var(--warning-text); display: flex; align-items: center; gap: var(--space-2); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  // Energy smlouva — Poema features.md Scénář 4.2b, jiné schema než insurance
+  const CONTRACT = {
+    code: "EL-2024-0045",
+    komodita: "elektřina",
+    product: "Elektřina — domácnost",
+    supplier: "ČEZ Prodej a.s.",
+    customer: "Jan Novák", customerBirth: "720514/1234",
+    client: "Novákovi", clientKind: "family",
+    portal: "✓ přístup zřízen — cez.cz/muj-cez",
+    email: "jan@novak.cz",
+    locationName: "RD Lipová",
+    address: "Lipová 123, 760 01 Zlín",
+    signedAt: "2024-04-28",
+    validFrom: "2024-05-01",
+    validTo: "2027-04-30",
+    indefinite: false,
+    termLength: "36 měsíců",
+    tariff: "D 02d — nízký tarif",
+    priceList: "ČEZ MůjProud 2024",
+    fixEnd: "2027-04-30",
+    noticeDeadline: "2027-01-31",
+    state: "active", stateLabel: "Aktivní",
+    docLink: "Smlouva_EL-2024-0045.pdf",
+    priceListLink: "Cenik_CEZ_MujProud_2024.pdf",
+    expectedKwh: 4800,
+    daysToFixEnd: 158,
+  };
+
+  const METERS = [
+    {
+      id: 1, code: "EL-M-001",
+      ean: "859182400012456789",
+      address: "Lipová 123, 760 01 Zlín",
+      customerSince: "01. 05. 2024",
+      distributor: "EG.D a.s.",
+      tariff: "D 02d",
+      category: "Dvoutarifová sazba",
+      hasFVE: false,
+      expectedKwh: 4800,
+    },
+  ];
+
+  const REPLACEMENTS = [
+    { time: "01. 05. 2024", title: "Nová smlouva EL-2024-0045", description: "Přechod z E.ON (Bonus Senior) na ČEZ (MůjProud 2024). Důvod: snížení ceny o 12 %.", current: true },
+    { time: "15. 05. 2021", title: "Smlouva E-2021-0088 (E.ON)", description: "Tarif Bonus Senior, cena 4,80 Kč/kWh, konec fixace 30. 04. 2024.", current: false },
+    { time: "01. 05. 2018", title: "Smlouva E-2018-0012 (ČEZ)", description: "Původní základní tarif, bez fixace.", current: false },
+  ];
+
+  const FILES = [
+    { id: 1, name: "Smlouva_EL-2024-0045.pdf", mimeType: "application/pdf", size: 320000, uploadedBy: "Pavel O.", uploadedAt: "01. 05. 2024" },
+    { id: 2, name: "Cenik_CEZ_MujProud_2024.pdf", mimeType: "application/pdf", size: 180000, uploadedBy: "ČEZ (auto)", uploadedAt: "01. 05. 2024" },
+    { id: 3, name: "Plna_moc.pdf", mimeType: "application/pdf", size: 86400, uploadedBy: "Jan Novák", uploadedAt: "28. 04. 2024" },
+    { id: 4, name: "Faktura_2024_H1.pdf", mimeType: "application/pdf", size: 140000, uploadedBy: "ČEZ (auto)", uploadedAt: "15. 07. 2024" },
+  ];
+
+  const CRUMBS = [
+    { label: "DMS", href: "/dms" },
+    { label: "Smlouvy", href: "/dms/smlouvy" },
+    { label: CONTRACT.code + " " + CONTRACT.product, href: "/dms/smlouvy/el-45" },
+  ];
+
+  const fmt = (n) => n.toLocaleString("cs-CZ").replace(/,/g, " ");
+
+  function Page() {
+    const [tab, setTab] = React.useState("prehled");
+
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/dms/smlouvy" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS, onNavigate: (it, i) => { if (i === 1) window.location.href = "./dms-smlouvy.html"; } }),
+    },
+      e(S.PageHeader, {
+        title: CONTRACT.code + " · " + CONTRACT.product,
+        description: CONTRACT.supplier + " · zákazník " + CONTRACT.customer + " · " + CONTRACT.locationName,
+        actions: e(React.Fragment, null,
+          e(S.Badge, { tone: "success", fitCell: true }, CONTRACT.stateLabel),
+          e(S.Button, { variant: "secondary", icon: "download" }, "Stáhnout smlouvu"),
+          e(S.Button, { icon: "send" }, "Fixace — kontaktovat klienta"),
+          e(S.DropdownMenu, {
+            trigger: e(S.Button, { variant: "secondary", iconOnly: true, icon: "more", "aria-label": "Další akce" })
+          }, ({ close }) => e(React.Fragment, null,
+            e("button", { type: "button", role: "menuitem", className: "s21-dd__item s21-dd__item--btn", onClick: () => close() },
+              e("span", { className: "s21-dd__itemmain" }, e(S.Icon, { name: "plus", size: 14 }), "Přidat odběrné místo")
+            ),
+            e("button", { type: "button", role: "menuitem", className: "s21-dd__item s21-dd__item--btn", onClick: () => close() },
+              e("span", { className: "s21-dd__itemmain" }, e(S.Icon, { name: "refresh", size: 14 }), "Porovnat s novou nabídkou")
+            ),
+            e("button", { type: "button", role: "menuitem", className: "s21-dd__item s21-dd__item--btn", onClick: () => close() },
+              e("span", { className: "s21-dd__itemmain" }, e(S.Icon, { name: "copy", size: 14 }), "Nahradit novou smlouvou")
+            ),
+            e("button", { type: "button", role: "menuitem", className: "s21-dd__item s21-dd__item--btn", onClick: () => close() },
+              e("span", { className: "s21-dd__itemmain" }, e(S.Icon, { name: "x", size: 14 }), "Ukončit smlouvu")
+            )
+          ))
+        ),
+        tabs: e(S.Tabs, { value: tab, onChange: setTab, items: [
+          { value: "prehled", label: "Přehled" },
+          { value: "mesta", label: "Odběrná místa", count: METERS.length },
+          { value: "historie", label: "Historie smluv", count: REPLACEMENTS.length },
+          { value: "dokumenty", label: "Dokumenty", count: FILES.length },
+        ] })
+      }),
+      e(S.PageBody, null,
+
+        // Hero strip metrics
+        e("div", { className: "hero-strip" },
+          e("span", null, "Konec fixace: ", e("strong", { className: CONTRACT.daysToFixEnd <= 90 ? "warn" : "" }, "30. 04. 2027 · za " + CONTRACT.daysToFixEnd + " dnů")),
+          e("span", null, "Platnost: ", e("strong", null, "01. 05. 2024 – 30. 04. 2027")),
+          e("span", null, "Tarif: ", e("strong", null, CONTRACT.tariff)),
+          e("span", null, "Předpokládaná roční spotřeba: ", e("strong", null, fmt(CONTRACT.expectedKwh) + " kWh"))
+        ),
+
+        // Fix end warning
+        CONTRACT.daysToFixEnd <= 180 && e("div", { className: "fix-banner", style: { marginTop: "var(--space-4)" } },
+          e(S.Icon, { name: "alert-triangle", size: 16 }),
+          e("div", null,
+            e("strong", null, "Konec fixace za " + CONTRACT.daysToFixEnd + " dnů "),
+            "— připravit porovnání cen s konkurencí, výpovědní lhůta do ",
+            e("strong", null, CONTRACT.noticeDeadline), "."
+          )
+        ),
+
+        // ───── PŘEHLED ────────────────────────────────────────────
+        tab === "prehled" && e("div", { style: { display: "grid", gridTemplateColumns: "1fr 320px", gap: "var(--space-5)", alignItems: "start", marginTop: "var(--space-4)" } },
+          e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-4)" } },
+
+            e(S.Section, { title: "Údaje o smlouvě" },
+              e("dl", { className: "fields-grid" },
+                e("dt", null, "Dodavatel"), e("dd", null, CONTRACT.supplier),
+                e("dt", null, "Zákazník"), e("dd", null, CONTRACT.customer, " · ", e("span", { className: "s21-cell-code" }, CONTRACT.customerBirth)),
+                e("dt", null, "E-mail"), e("dd", null, CONTRACT.email),
+                e("dt", null, "Zákaznický portál"), e("dd", null, CONTRACT.portal),
+                e("dt", null, "Odběrné místo"), e("dd", null, CONTRACT.locationName + " · " + CONTRACT.address),
+                e("dt", null, "Komodita"), e("dd", null, CONTRACT.komodita)
+              )
+            ),
+
+            e(S.Section, { title: "Údaje o smlouvě energie" },
+              e("dl", { className: "fields-grid" },
+                e("dt", null, "Datum podpisu"), e("dd", null, "28. 04. 2024"),
+                e("dt", null, "Počátek"), e("dd", null, "01. 05. 2024"),
+                e("dt", null, "Konec platnosti"), e("dd", null, CONTRACT.indefinite ? "doba neurčitá" : "30. 04. 2027"),
+                e("dt", null, "Doba"), e("dd", null, CONTRACT.indefinite ? "neurčitá" : "určitá · " + CONTRACT.termLength),
+                e("dt", null, "Tarif"), e("dd", null, CONTRACT.tariff),
+                e("dt", null, "Ceník"), e("dd", null, CONTRACT.priceList),
+                e("dt", null, "Konec fixace / ceníku"), e("dd", null,
+                  e("span", { style: { display: "inline-flex", alignItems: "center", gap: 8 } },
+                    "30. 04. 2027",
+                    e("span", { style: { font: "500 11px/14px var(--font-mono)", color: "var(--ink-muted)" } }, "(zadáno ručně)")
+                  )
+                ),
+                e("dt", null, "Deadline výpovědi"), e("dd", null, CONTRACT.noticeDeadline, " (3 měsíce před)")
+              )
+            ),
+
+            e(S.Section, { title: "Dokumenty smlouvy" },
+              e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-2)" } },
+                e("a", { href: "#", style: { display: "inline-flex", alignItems: "center", gap: 8, padding: "var(--space-2) var(--space-3)", background: "var(--primary-soft)", border: "1px solid var(--primary)", borderRadius: "var(--radius-lg)", color: "var(--primary-text)", textDecoration: "none", fontWeight: 500 } },
+                  e(S.Icon, { name: "file", size: 16 }), "Finální smlouva: ", CONTRACT.docLink
+                ),
+                e("a", { href: "#", style: { display: "inline-flex", alignItems: "center", gap: 8, padding: "var(--space-2) var(--space-3)", background: "var(--surface-raised)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", color: "var(--ink)", textDecoration: "none", fontWeight: 500 } },
+                  e(S.Icon, { name: "file", size: 16 }), "Ceník dodavatele: ", CONTRACT.priceListLink
+                )
+              )
+            )
+          ),
+
+          // Right sidebar
+          e(S.RelationsSidebar, { sections: [
+            { title: "Klient", count: 1, items: [{ icon: "users", label: CONTRACT.client, meta: "rodina · 4 členové", href: "./crm-klient-detail.html" }] },
+            { title: "Zákazník", count: 1, items: [{ icon: "user", label: CONTRACT.customer, meta: CONTRACT.customerBirth }] },
+            { title: "Odběrná místa", count: METERS.length, items: METERS.map((m) => ({ icon: "home", label: m.code, meta: m.address })), action: { label: "Přidat OM", icon: "plus", onClick: () => {} } },
+            { title: "Historie smluv", count: REPLACEMENTS.length, items: REPLACEMENTS.slice(1).map((r) => ({ icon: "folder", label: r.title.split(" ")[0] + " " + r.title.split(" ")[1], meta: r.time })) },
+          ] })
+        ),
+
+        // ───── ODBĚRNÁ MÍSTA ──────────────────────────────────────
+        tab === "mesta" && e(S.Section, { title: "Odběrná místa", action: e(S.Button, { size: "sm", icon: "plus" }, "Přidat místo") },
+          e("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(360px, 1fr))", gap: "var(--space-3)" } },
+            METERS.map((m) => e("div", { key: m.id, className: "meter-card" },
+              e("div", { className: "meter-card__head" },
+                e("div", null,
+                  e("div", { className: "meter-card__code" }, m.code),
+                  e("div", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)" } }, m.address)
+                ),
+                e(S.Button, { size: "sm", iconOnly: true, icon: "edit", variant: "ghost", "aria-label": "Upravit" })
+              ),
+              e("dl", { className: "meter-fields" },
+                e("dt", null, "EAN"), e("dd", null, e("span", { className: "s21-cell-code" }, m.ean)),
+                e("dt", null, "Klientem od"), e("dd", null, m.customerSince),
+                e("dt", null, "Distributor"), e("dd", null, m.distributor),
+                e("dt", null, "Sazba / kategorie"), e("dd", null, m.tariff, " · ", m.category),
+                e("dt", null, "FVE"), e("dd", null, m.hasFVE ? "Ano" : "Ne"),
+                e("dt", null, "Předpokládaná spotřeba"), e("dd", null, fmt(m.expectedKwh), " kWh/rok")
+              )
+            ))
+          )
+        ),
+
+        // ───── HISTORIE SMLUV ─────────────────────────────────────
+        tab === "historie" && e(S.Section, { title: "Historie smluv pro toto odběrné místo", action: e(S.Button, { size: "sm", variant: "secondary", icon: "refresh" }, "Porovnat s novou") },
+          e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+            REPLACEMENTS.map((r, i) => e("div", { key: i,
+              style: {
+                display: "flex", gap: "var(--space-3)",
+                padding: "var(--space-3)",
+                background: r.current ? "var(--primary-soft)" : "var(--surface-raised)",
+                border: "1px solid " + (r.current ? "var(--primary)" : "var(--border)"),
+                borderLeft: "3px solid " + (r.current ? "var(--primary)" : "var(--border-strong)"),
+                borderRadius: "var(--radius-lg)"
+              }
+            },
+              e("div", { style: { flexShrink: 0, width: 36, height: 36, borderRadius: "var(--radius-full)", background: r.current ? "var(--primary)" : "var(--surface-muted)", color: r.current ? "var(--on-primary)" : "var(--ink-muted)", display: "inline-flex", alignItems: "center", justifyContent: "center" } },
+                e(S.Icon, { name: r.current ? "check" : "folder", size: 16 })
+              ),
+              e("div", { style: { flex: 1 } },
+                e("div", { style: { display: "flex", alignItems: "baseline", gap: "var(--space-2)" } },
+                  e("span", { style: { font: "500 11px/16px var(--font-mono)", color: "var(--primary-text)" } }, r.time),
+                  r.current && e(S.Badge, { tone: "success", fitCell: true }, "Aktuální")
+                ),
+                e("div", { style: { font: "600 14px/20px var(--font-body)", marginTop: 2 } }, r.title),
+                e("div", { style: { font: "400 13px/18px var(--font-body)", color: "var(--ink-muted)", marginTop: 4 } }, r.description)
+              )
+            ))
+          )
+        ),
+
+        // ───── DOKUMENTY ──────────────────────────────────────────
+        tab === "dokumenty" && e(S.Section, { title: "Dokumenty" },
+          e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+            e(S.FileUploadZone, { onFiles: () => new Promise((r) => setTimeout(r, 600)), accept: ".pdf,.jpg,.png,.docx", maxSize: 10 * 1024 * 1024 }),
+            e(S.AttachmentList, { items: FILES, onDownload: () => {}, onRemove: () => {} })
+          )
+        )
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>

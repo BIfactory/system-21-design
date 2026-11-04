@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · SM-2024-0117</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+<style>
+  .hero-strip { display: flex; gap: var(--space-4); flex-wrap: wrap; margin-top: var(--space-2); font: 500 13px/18px var(--font-body); color: var(--ink-muted); }
+  .hero-strip strong { color: var(--ink); font-weight: 700; }
+  .hero-strip .warn { color: var(--warning-text); }
+  .hero-strip .ok { color: var(--success-text); }
+  .fields-grid { display: grid; grid-template-columns: max-content 1fr; gap: 10px 32px; font: 400 14px/22px var(--font-body); }
+  .fields-grid dt { color: var(--ink-muted); font: 500 11px/16px var(--font-mono); letter-spacing: .04em; text-transform: uppercase; align-self: center; }
+  .fields-grid dd { margin: 0; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .note-area { width: 100%; min-height: 140px; padding: var(--space-3); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); font: 400 14px/22px var(--font-body); color: var(--ink); resize: vertical; }
+  .note-area:focus { outline: 2px solid var(--focus-ring); outline-offset: -2px; border-color: transparent; }
+  .history-item { position: relative; padding-left: 24px; padding-bottom: var(--space-3); }
+  .history-item::before { content: ""; position: absolute; left: 8px; top: 8px; width: 8px; height: 8px; background: var(--primary); border-radius: 50%; }
+  .history-item::after { content: ""; position: absolute; left: 11px; top: 16px; bottom: 0; width: 2px; background: var(--border-subtle); }
+  .history-item:last-child::after { display: none; }
+  .anniv-banner { padding: var(--space-3); background: var(--warning-bg); border: 1px solid var(--warning-text); border-left-width: 4px; border-radius: var(--radius-lg); color: var(--warning-text); display: flex; align-items: center; gap: var(--space-2); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  // Insurance smlouva — všechna pole z Poema features.md Scénář 4.1
+  const CONTRACT = {
+    code: "SM-2024-0117",
+    product: "Pojištění majetku — rodinný dům",
+    insurer: "Allianz pojišťovna",
+    pojistnik: "Jan Novák", pojistnikBirth: "720514/1234",
+    client: "Novákovi", clientKind: "family",
+    pres: "Pavel Obdržálek",
+    objekt: "Rodinný dům, Lipová 123, 760 01 Zlín",
+    validFrom: "12. 04. 2024",
+    validTo: "12. 04. 2027",
+    anniversary: "12. 04.",
+    daysToAnniv: 158,
+    deadline: "12. 02. 2027 (výpovědní lhůta)",
+    premiumInitial: 14400,
+    premium: 14400,
+    frequency: "ročně",
+    state: "active",
+    docLink: "Smlouva_SM-2024-0117.pdf",
+    priceListLink: "Cenik_Allianz_2024.pdf",
+  };
+
+  const HISTORY = [
+    { time: "15. 09. 2026", title: "Dodatek č. 1 — rozšíření o akvárium", description: "Přidáno pojištění technických zařízení, pojistné beze změny.", who: "Pavel O." },
+    { time: "12. 04. 2025", title: "Výročí smlouvy — bez změn", description: "Pravidelná kontrola, klient si přeje pokračovat.", who: "Pavel O." },
+    { time: "12. 04. 2024", title: "Smlouva podepsaná", description: "Pojištění majetku — rodinný dům. Platnost 3 roky, pojistné 14 400 Kč/rok.", who: "Pavel O." },
+  ];
+
+  const LINKED_TASKS = [
+    { id: 1, label: "Zavolat klientovi 30 dnů před výročím", meta: "do 12. 03. 2027", icon: "tasks" },
+    { id: 2, label: "Zkontrolovat pojistnou částku vs. odhad", meta: "do 15. 02. 2027", icon: "tasks" },
+  ];
+
+  const FILES = [
+    { id: 1, name: "Smlouva_SM-2024-0117.pdf", mimeType: "application/pdf", size: 240000, uploadedBy: "Pavel O.", uploadedAt: "12. 04. 2024" },
+    { id: 2, name: "Dodatek_c1.pdf", mimeType: "application/pdf", size: 86400, uploadedBy: "Pavel O.", uploadedAt: "15. 09. 2026" },
+    { id: 3, name: "Cenik_Allianz_2024.pdf", mimeType: "application/pdf", size: 180000, uploadedBy: "Allianz (auto)", uploadedAt: "12. 04. 2024" },
+    { id: 4, name: "Foto_RD_predni.jpg", mimeType: "image/jpeg", size: 2400000, uploadedBy: "Jan Novák", uploadedAt: "12. 04. 2024" },
+    { id: 5, name: "Foto_RD_zadni.jpg", mimeType: "image/jpeg", size: 1800000, uploadedBy: "Jan Novák", uploadedAt: "12. 04. 2024" },
+  ];
+
+  const CRUMBS = [
+    { label: "DMS", href: "/dms" },
+    { label: "Smlouvy", href: "/dms/smlouvy" },
+    { label: CONTRACT.code + " " + CONTRACT.product, href: "/dms/smlouvy/117" },
+  ];
+
+  const fmt = (n) => n.toLocaleString("cs-CZ").replace(/,/g, " ");
+
+  function Page() {
+    const [tab, setTab] = React.useState("prehled");
+    const [note, setNote] = React.useState("Klient si přeje pokračovat při výročí.\n\nPozor: letos žádáme o přehodnocení pojistné částky — majetek byl rekonstruován, aktuální hodnota je cca 8,5 mil. Kč.\n\nKlient preferuje platbu jednou ročně, bankovní převod.");
+    const [premium, setPremium] = React.useState(CONTRACT.premium);
+    const [frequency, setFrequency] = React.useState("rocne");
+
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/dms/smlouvy" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS, onNavigate: (it, i) => { if (i === 1) window.location.href = "./dms-smlouvy.html"; } }),
+    },
+      e(S.PageHeader, {
+        title: CONTRACT.code + " · " + CONTRACT.product,
+        description: CONTRACT.insurer + " · pojistník " + CONTRACT.pojistnik + " · přes " + CONTRACT.pres,
+        actions: e(React.Fragment, null,
+          e(S.Badge, { tone: "success", fitCell: true }, "Aktivní"),
+          e(S.Button, { variant: "secondary", icon: "download" }, "Stáhnout smlouvu"),
+          e(S.Button, { icon: "send" }, "Výročí — kontaktovat klienta"),
+          e(S.DropdownMenu, {
+            trigger: e(S.Button, { variant: "secondary", iconOnly: true, icon: "more", "aria-label": "Další akce" })
+          }, ({ close }) => e(React.Fragment, null,
+            e("button", { type: "button", role: "menuitem", className: "s21-dd__item s21-dd__item--btn", onClick: () => close() },
+              e("span", { className: "s21-dd__itemmain" }, e(S.Icon, { name: "plus", size: 14 }), "Dodatek")
+            ),
+            e("button", { type: "button", role: "menuitem", className: "s21-dd__item s21-dd__item--btn", onClick: () => close() },
+              e("span", { className: "s21-dd__itemmain" }, e(S.Icon, { name: "refresh", size: 14 }), "Přepočítat pojistné")
+            ),
+            e("button", { type: "button", role: "menuitem", className: "s21-dd__item s21-dd__item--btn", onClick: () => close() },
+              e("span", { className: "s21-dd__itemmain" }, e(S.Icon, { name: "copy", size: 14 }), "Nahradit novou smlouvou")
+            ),
+            e("button", { type: "button", role: "menuitem", className: "s21-dd__item s21-dd__item--btn", onClick: () => close() },
+              e("span", { className: "s21-dd__itemmain" }, e(S.Icon, { name: "x", size: 14 }), "Ukončit smlouvu")
+            )
+          ))
+        ),
+        tabs: e(S.Tabs, { value: tab, onChange: setTab, items: [
+          { value: "prehled", label: "Přehled" },
+          { value: "historie", label: "Historie", count: HISTORY.length },
+          { value: "ukoly", label: "Úkoly", count: LINKED_TASKS.length },
+          { value: "dokumenty", label: "Dokumenty", count: FILES.length },
+        ] })
+      }),
+      e(S.PageBody, null,
+
+        // Hero strip metrics
+        e("div", { className: "hero-strip" },
+          e("span", null, "Výročí: ", e("strong", { className: CONTRACT.daysToAnniv <= 30 ? "warn" : "" }, CONTRACT.anniversary + " · za " + CONTRACT.daysToAnniv + " dnů")),
+          e("span", null, "Platnost: ", e("strong", null, CONTRACT.validFrom + " – " + CONTRACT.validTo)),
+          e("span", null, "Pojistné: ", e("strong", null, fmt(premium) + " Kč / rok")),
+          e("span", null, "Frekvence: ", e("strong", null, frequency === "rocne" ? "Ročně" : "Měsíčně"))
+        ),
+
+        // Expiring warning banner if soon
+        CONTRACT.daysToAnniv <= 90 && e("div", { className: "anniv-banner", style: { marginTop: "var(--space-4)" } },
+          e(S.Icon, { name: "alert-triangle", size: 16 }),
+          e("div", null,
+            e("strong", null, "Výročí za " + CONTRACT.daysToAnniv + " dnů "),
+            "— doporučujeme zkontaktovat klienta nejpozději 30 dnů před výročím. Deadline výpovědi: ", CONTRACT.deadline, "."
+          )
+        ),
+
+        // ───── PŘEHLED ────────────────────────────────────────────
+        tab === "prehled" && e("div", { style: { display: "grid", gridTemplateColumns: "1fr 320px", gap: "var(--space-5)", alignItems: "start", marginTop: "var(--space-4)" } },
+          e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-4)" } },
+
+            e(S.Section, { title: "Údaje o smlouvě" },
+              e("dl", { className: "fields-grid" },
+                e("dt", null, "Pojistník"), e("dd", null, CONTRACT.pojistnik, " · ", e("span", { className: "s21-cell-code" }, CONTRACT.pojistnikBirth)),
+                e("dt", null, "Produkt"), e("dd", null, CONTRACT.product),
+                e("dt", null, "Pojišťovna"), e("dd", null, CONTRACT.insurer),
+                e("dt", null, "Zprostředkoval"), e("dd", null, CONTRACT.pres),
+                e("dt", null, "Objekt pojištění"), e("dd", null, CONTRACT.objekt),
+                e("dt", null, "Počátek"), e("dd", null, CONTRACT.validFrom),
+                e("dt", null, "Konec platnosti"), e("dd", null, CONTRACT.validTo),
+                e("dt", null, "Výročí"), e("dd", null,
+                  e("span", { style: { display: "inline-flex", alignItems: "center", gap: 8 } },
+                    CONTRACT.anniversary,
+                    e("span", { style: { font: "500 11px/14px var(--font-mono)", color: "var(--ink-muted)" } }, "(zadáno ručně)")
+                  )
+                ),
+                e("dt", null, "Deadline výpovědi"), e("dd", null, CONTRACT.deadline),
+                e("dt", null, "Pojistné (při sjednání)"), e("dd", null, fmt(CONTRACT.premiumInitial), " Kč"),
+                e("dt", null, "Pojistné (aktuální)"), e("dd", null,
+                  e(S.InlineEditor, { value: String(premium), type: "number", onSave: (v) => setPremium(parseInt(v, 10) || premium), label: "pojistné" }),
+                  " Kč / rok"
+                ),
+                e("dt", null, "Frekvence placení"), e("dd", null,
+                  e(S.InlineEditor, { value: frequency, type: "select", onSave: setFrequency, label: "frekvence",
+                    options: [{ value: "rocne", label: "Ročně" }, { value: "pololetne", label: "Pololetně" }, { value: "ctvrtletne", label: "Čtvrtletně" }, { value: "mesicne", label: "Měsíčně" }],
+                    display: (v) => ({ rocne: "Ročně", pololetne: "Pololetně", ctvrtletne: "Čtvrtletně", mesicne: "Měsíčně" }[v] || v)
+                  })
+                ),
+                e("dt", null, "Lhůtní pojistné"), e("dd", null, fmt(Math.round(premium / (frequency === "rocne" ? 1 : frequency === "pololetne" ? 2 : frequency === "ctvrtletne" ? 4 : 12))), " Kč")
+              )
+            ),
+
+            e(S.Section, { title: "Poznámka" },
+              e("textarea", { className: "note-area", value: note, onChange: (ev) => setNote(ev.target.value), placeholder: "Volné textové pole bez omezení délky…" }),
+              e("div", { style: { marginTop: "var(--space-1)", font: "400 11px/14px var(--font-body)", color: "var(--ink-subtle)", textAlign: "right" } }, note.length + " znaků")
+            ),
+
+            e(S.Section, { title: "Dokumenty smlouvy" },
+              e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-2)" } },
+                e("a", { href: "#", style: { display: "inline-flex", alignItems: "center", gap: 8, padding: "var(--space-2) var(--space-3)", background: "var(--primary-soft)", border: "1px solid var(--primary)", borderRadius: "var(--radius-lg)", color: "var(--primary-text)", textDecoration: "none", fontWeight: 500 } },
+                  e(S.Icon, { name: "file", size: 16 }), "Finální smlouva: ", CONTRACT.docLink
+                ),
+                e("a", { href: "#", style: { display: "inline-flex", alignItems: "center", gap: 8, padding: "var(--space-2) var(--space-3)", background: "var(--surface-raised)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", color: "var(--ink)", textDecoration: "none", fontWeight: 500 } },
+                  e(S.Icon, { name: "file", size: 16 }), "Ceník pojišťovny: ", CONTRACT.priceListLink
+                )
+              )
+            )
+          ),
+
+          // Right sidebar
+          e(S.RelationsSidebar, { sections: [
+            { title: "Klient", count: 1, items: [{ icon: "users", label: CONTRACT.client, meta: "rodina · 4 členové", href: "./crm-klient-detail.html" }] },
+            { title: "Pojistník", count: 1, items: [{ icon: "user", label: CONTRACT.pojistnik, meta: CONTRACT.pojistnikBirth }] },
+            { title: "Linkované úkoly", count: LINKED_TASKS.length, items: LINKED_TASKS.map((t) => ({ icon: t.icon, label: t.label, meta: t.meta })), action: { label: "Nový úkol", icon: "plus", onClick: () => {} } },
+            { title: "Ostatní smlouvy klienta", count: 2, items: [
+              { icon: "file", label: "SM-2025-0233 Úrazové pojištění" },
+              { icon: "file", label: "SM-2026-0089 Autopojištění Octavia" }
+            ] },
+          ] })
+        ),
+
+        // ───── HISTORIE ───────────────────────────────────────────
+        tab === "historie" && e(S.Section, { title: "Historie smlouvy" },
+          e("div", null,
+            HISTORY.map((h, i) => e("div", { key: i, className: "history-item" },
+              e("div", { style: { font: "500 11px/16px var(--font-mono)", color: "var(--primary-text)" } }, h.time),
+              e("div", { style: { font: "600 14px/20px var(--font-body)", marginTop: 2 } }, h.title),
+              e("div", { style: { font: "400 13px/18px var(--font-body)", color: "var(--ink-muted)", marginTop: 4 } }, h.description),
+              e("div", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-subtle)", marginTop: 4 } }, h.who)
+            ))
+          )
+        ),
+
+        // ───── ÚKOLY ──────────────────────────────────────────────
+        tab === "ukoly" && e(S.Section, { title: "Linkované úkoly", action: e(S.Button, { size: "sm", icon: "plus" }, "Nový úkol") },
+          e("ul", { style: { listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "var(--space-2)" } },
+            LINKED_TASKS.map((t) => e("li", { key: t.id, style: { display: "flex", alignItems: "center", gap: "var(--space-3)", padding: "var(--space-3)", background: "var(--surface-raised)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)" } },
+              e(S.Icon, { name: t.icon, size: 16 }),
+              e("div", { style: { flex: 1 } },
+                e("div", { style: { font: "500 14px/20px var(--font-body)" } }, t.label),
+                e("div", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)" } }, t.meta)
+              ),
+              e(S.Button, { size: "sm", iconOnly: true, icon: "check", variant: "ghost", "aria-label": "Označit hotové" })
+            ))
+          )
+        ),
+
+        // ───── DOKUMENTY ──────────────────────────────────────────
+        tab === "dokumenty" && e(S.Section, { title: "Dokumenty" },
+          e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+            e(S.FileUploadZone, { onFiles: () => new Promise((r) => setTimeout(r, 600)), accept: ".pdf,.jpg,.png,.docx", maxSize: 10 * 1024 * 1024 }),
+            e(S.AttachmentList, { items: FILES, onDownload: () => {}, onRemove: () => {} })
+          )
+        )
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>

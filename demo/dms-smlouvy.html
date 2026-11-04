@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · DMS Smlouvy</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+<style>
+  .anniv-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: var(--radius-full); font: 500 11px/16px var(--font-mono); letter-spacing: .04em; white-space: nowrap; }
+  .anniv-badge.urgent { background: var(--danger-bg); color: var(--danger-text); font-weight: 600; }
+  .anniv-badge.soon { background: var(--warning-bg); color: var(--warning-text); }
+  .anniv-badge.ok { background: var(--surface-muted); color: var(--ink-muted); }
+  .komodita { display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; border-radius: var(--radius-sm); font: 500 10px/14px var(--font-mono); letter-spacing: .04em; text-transform: uppercase; }
+  .komodita.pojisteni { background: var(--primary-soft); color: var(--primary-text); }
+  .komodita.elektr { background: color-mix(in srgb, #f59e0b 20%, var(--surface)); color: #b45309; }
+  .komodita.plyn { background: color-mix(in srgb, #3b82f6 18%, var(--surface)); color: #1e40af; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  // Poema features.md Scénář 4 — insurance + energy, dvě schema.
+  // PK = pojistník/zákazník + číslo smlouvy. Výročí (anniversary) je
+  // CENTRÁLNÍ tříděcí osa. Dodatek NEMĚNÍ výročí.
+  //
+  // Dates ISO for correct sorting, display je CZ.
+  const today = new Date();
+
+  const CONTRACTS = [
+    // Insurance
+    { id: 1, komodita: "pojisteni", kind: "insurance",
+      code: "SM-2024-0117", product: "Pojištění majetku — rodinný dům",
+      insurer: "Allianz", pojistnik: "Jan Novák", client: "Novákovi",
+      pres: "Pavel Obdržálek", validFrom: "2024-04-12", validTo: "2027-04-12",
+      anniversary: "04-12", premium: 14400, frequency: "ročně",
+      state: "active" },
+    { id: 2, komodita: "pojisteni", kind: "insurance",
+      code: "SM-2025-0233", product: "Úrazové pojištění (rodinné)",
+      insurer: "UNIQA", pojistnik: "Jan Novák", client: "Novákovi",
+      pres: "Pavel Obdržálek", validFrom: "2025-03-03", validTo: "2028-03-03",
+      anniversary: "03-03", premium: 7200, frequency: "ročně", state: "active" },
+    { id: 3, komodita: "pojisteni", kind: "insurance",
+      code: "SM-2026-0089", product: "Autopojištění Škoda Octavia",
+      insurer: "ČPP", pojistnik: "Marie Nováková", client: "Novákovi",
+      pres: "Pavel Obdržálek", validFrom: "2026-10-10", validTo: "2027-10-10",
+      anniversary: "10-10", premium: 18600, frequency: "ročně", state: "active" },
+    { id: 4, komodita: "pojisteni", kind: "insurance",
+      code: "SM-2026-0141", product: "Pojištění budovy — firemní",
+      insurer: "Allianz", pojistnik: "Moravia Steel a.s.", client: "Moravia Steel a.s.",
+      pres: "Pavel Obdržálek", validFrom: "2026-12-01", validTo: "2027-12-01",
+      anniversary: "12-01", premium: 124000, frequency: "ročně", state: "pending_signature" },
+    { id: 5, komodita: "pojisteni", kind: "insurance",
+      code: "SM-2025-0198", product: "Pojištění budovy",
+      insurer: "Generali", pojistnik: "Hradecká strojírna s.r.o.", client: "Hradecká strojírna",
+      pres: "Alena Dvořáková", validFrom: "2024-01-15", validTo: "2026-01-15",
+      anniversary: "01-15", premium: 48000, frequency: "ročně", state: "expiring" },
+    { id: 6, komodita: "pojisteni", kind: "insurance",
+      code: "SM-2026-0151", product: "Živnostenské pojištění",
+      insurer: "ČPP", pojistnik: "Tomáš Procházka", client: "Procházkovi s.r.o.",
+      pres: "Alena Dvořáková", validFrom: "—", validTo: "—",
+      anniversary: null, premium: 8400, frequency: "ročně", state: "pending_signature" },
+    // Energy
+    { id: 7, komodita: "elektr", kind: "energy",
+      code: "EL-2024-0045", product: "Elektřina — domácnost",
+      insurer: "ČEZ", pojistnik: "Novákovi", client: "Novákovi",
+      pres: "Pavel Obdržálek", validFrom: "2024-05-01", validTo: "2027-04-30",
+      anniversary: "04-30", premium: 42000, frequency: "ročně", state: "active",
+      meters: 1, fixEnd: "2027-04-30" },
+    { id: 8, komodita: "elektr", kind: "energy",
+      code: "EL-2025-0012", product: "Elektřina — podnikání",
+      insurer: "innogy", pojistnik: "Agro Slovácko s.r.o.", client: "Agro Slovácko",
+      pres: "Alena Dvořáková", validFrom: "2025-07-01", validTo: "2026-12-31",
+      anniversary: "12-31", premium: 186000, frequency: "měsíčně", state: "active",
+      meters: 3, fixEnd: "2026-12-31" },
+    { id: 9, komodita: "plyn", kind: "energy",
+      code: "PL-2024-0023", product: "Plyn — domácnost",
+      insurer: "innogy", pojistnik: "Dvořákovi", client: "Dvořákovi",
+      pres: "Pavel Obdržálek", validFrom: "2024-10-01", validTo: "—",
+      anniversary: "09-30", premium: 24000, frequency: "ročně", state: "active",
+      meters: 1, fixEnd: null, indefinite: true },
+    { id: 10, komodita: "plyn", kind: "energy",
+      code: "PL-2024-0067", product: "Plyn — výroba",
+      insurer: "ČEZ", pojistnik: "Hradecká strojírna s.r.o.", client: "Hradecká strojírna",
+      pres: "Alena Dvořáková", validFrom: "2024-07-15", validTo: "2026-11-15",
+      anniversary: "11-15", premium: 96000, frequency: "měsíčně", state: "expiring",
+      meters: 2, fixEnd: "2026-11-15" },
+    // Inactive
+    { id: 11, komodita: "pojisteni", kind: "insurance",
+      code: "SM-2023-0044", product: "Pojištění auta — stará",
+      insurer: "Kooperativa", pojistnik: "Jan Novák", client: "Novákovi",
+      pres: "Pavel Obdržálek", validFrom: "2023-01-10", validTo: "2026-01-10",
+      anniversary: null, premium: 15000, frequency: "ročně", state: "replaced",
+      replacedBy: "SM-2026-0089" },
+  ];
+
+  // Calc days to anniversary (closest in future)
+  function daysToAnniv(c) {
+    if (!c.anniversary || c.state === "replaced") return null;
+    const [mm, dd] = c.anniversary.split("-").map((s) => parseInt(s, 10));
+    const yearNow = today.getFullYear();
+    let next = new Date(yearNow, mm - 1, dd);
+    if (next < today) next = new Date(yearNow + 1, mm - 1, dd);
+    return Math.round((next - today) / (1000 * 60 * 60 * 24));
+  }
+
+  function AnnivBadge({ c }) {
+    const days = daysToAnniv(c);
+    if (days === null) return e("span", { className: "s21-cell-meta" }, "—");
+    const cls = days <= 30 ? "urgent" : days <= 90 ? "soon" : "ok";
+    const prefix = days <= 30 ? "⚠ " : "";
+    return e("span", { className: "anniv-badge " + cls }, prefix + "za " + days + " dnů");
+  }
+
+  function KomoditaBadge({ k }) {
+    const map = { pojisteni: "Pojištění", elektr: "Elektřina", plyn: "Plyn" };
+    return e("span", { className: "komodita " + k }, map[k] || k);
+  }
+
+  const fmt = (n) => n.toLocaleString("cs-CZ").replace(/,/g, " ");
+  const stateLabel = {
+    active: { label: "Aktivní", tone: "success" },
+    pending_signature: { label: "Čeká na podpis", tone: "warning" },
+    expiring: { label: "Vyprší brzy", tone: "danger" },
+    replaced: { label: "Nahrazena", tone: "neutral" },
+    inactive: { label: "Neaktivní", tone: "neutral" },
+  };
+
+  // CZ date display helper
+  function fmtDate(iso) {
+    if (!iso || iso === "—") return "—";
+    const d = new Date(iso);
+    return d.toLocaleDateString("cs-CZ");
+  }
+
+  // Add computed anniv days + sort column
+  const enriched = CONTRACTS.map((c) => ({ ...c, _days: daysToAnniv(c) }));
+
+  const CRUMBS = [{ label: "DMS", href: "/dms" }, { label: "Smlouvy", href: "/dms/smlouvy" }];
+
+  const COLUMNS = [
+    { key: "code", label: "Číslo", sortable: true, width: "10%", render: (c) =>
+      e("span", { className: "s21-cell-code" }, c.code)
+    },
+    { key: "product", label: "Smlouva", sortable: true, width: "28%", render: (c) =>
+      e("div", null,
+        e("div", { style: { display: "flex", alignItems: "center", gap: 6 } },
+          e(KomoditaBadge, { k: c.komodita }),
+          e("span", { className: "s21-cell-title" }, c.product)
+        ),
+        e("div", { className: "s21-cell-meta" }, c.insurer, " · pojistník ", c.pojistnik, " · přes ", c.pres)
+      )
+    },
+    { key: "client", label: "Klient", width: "14%" },
+    { key: "_days", label: "Výročí / Fixace", sortable: true, width: "14%", render: (c) =>
+      e("div", null,
+        e(AnnivBadge, { c }),
+        c.anniversary && e("div", { className: "s21-cell-meta", style: { marginTop: 2 } }, c.anniversary.replace("-", ". ") + ".")
+      )
+    },
+    { key: "validTo", label: "Platnost do", width: "10%", render: (c) =>
+      c.indefinite ? e("span", { className: "s21-cell-meta" }, "doba neurčitá") : e("span", null, fmtDate(c.validTo))
+    },
+    { key: "premium", label: "Pojistné / cena", align: "right", numeric: true, width: "12%", render: (c) =>
+      e("div", null,
+        e("div", { style: { fontWeight: 500, fontVariantNumeric: "tabular-nums" } }, fmt(c.premium), " Kč"),
+        e("div", { className: "s21-cell-meta" }, c.frequency)
+      )
+    },
+    { key: "state", label: "Stav", width: "8%", render: (c) => {
+      const s = stateLabel[c.state] || stateLabel.active;
+      return e(S.Badge, { tone: s.tone, fitCell: true }, s.label);
+    } },
+    { key: "actions", label: "", align: "center", width: "4%", render: () =>
+      e(S.Button, { size: "sm", iconOnly: true, icon: "more", variant: "ghost", "aria-label": "Akce" })
+    }
+  ];
+
+  function Page() {
+    const [tab, setTab] = React.useState("active");
+    const [komodita, setKomodita] = React.useState("");
+    const [q, setQ] = React.useState("");
+    // Default sort: podle _days ascending (nejbližší výročí nahoře)
+    const [sort, setSort] = React.useState({ key: "_days", dir: "asc" });
+
+    const active = enriched.filter((c) => c.state === "active" || c.state === "expiring");
+    const pending = enriched.filter((c) => c.state === "pending_signature");
+    const expiring = enriched.filter((c) => c.state === "expiring");
+    const inactive = enriched.filter((c) => c.state === "replaced" || c.state === "inactive");
+
+    let rows = tab === "active" ? active
+      : tab === "pending" ? pending
+      : tab === "expiring" ? expiring
+      : tab === "inactive" ? inactive
+      : enriched;
+    if (komodita) rows = rows.filter((c) => c.komodita === komodita);
+    if (q) rows = rows.filter((c) => (c.code + " " + c.product + " " + c.insurer + " " + c.pojistnik + " " + c.client).toLowerCase().includes(q.toLowerCase()));
+    rows = [...rows].sort((a, b) => {
+      const av = a[sort.key], bv = b[sort.key];
+      if (av == null) return 1; if (bv == null) return -1;
+      if (typeof av === "number") return sort.dir === "asc" ? av - bv : bv - av;
+      return sort.dir === "asc" ? String(av).localeCompare(bv) : String(bv).localeCompare(av);
+    });
+
+    const expiringCount = expiring.length;
+    const pendingCount = pending.length;
+    const totalPremium = active.reduce((s, c) => s + c.premium, 0);
+
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/dms/smlouvy" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
+    },
+      e(S.PageHeader, {
+        title: "Smlouvy",
+        description: "Pojistné a energetické smlouvy · tříděno podle nejbližšího výročí / konce fixace",
+        actions: e(React.Fragment, null,
+          e(S.Button, { variant: "secondary", icon: "upload" }, "Importovat"),
+          e(S.Button, { icon: "plus" }, "Nová smlouva")
+        ),
+        tabs: e(S.Tabs, { value: tab, onChange: setTab, items: [
+          { value: "active", label: "Aktivní", count: active.length },
+          { value: "pending", label: "Čeká na podpis", count: pendingCount },
+          { value: "expiring", label: "Vyprší brzy", count: expiringCount },
+          { value: "inactive", label: "Neaktivní", count: inactive.length },
+          { value: "all", label: "Všechny", count: enriched.length },
+        ] })
+      }),
+      e(S.PageBody, null,
+        e(S.KpiRow, { cols: 4 },
+          e(S.StatTile, { label: "Aktivních smluv", value: String(active.length) }),
+          e(S.StatTile, { label: "Čeká na podpis", value: String(pendingCount), accent: pendingCount > 0 ? "warning" : undefined }),
+          e(S.StatTile, { label: "Vyprší do 90 dnů", value: String(enriched.filter((c) => c._days != null && c._days <= 90).length), accent: "warning" }),
+          e(S.StatTile, { label: "Pojistné / cena ročně", value: fmt(totalPremium), unit: "Kč", big: true })
+        ),
+
+        e(S.ChipGroup, { value: komodita, onChange: setKomodita, items: [
+          { value: "", label: "Všechny komodity" },
+          { value: "pojisteni", label: "Pojištění", count: enriched.filter((c) => c.komodita === "pojisteni").length },
+          { value: "elektr", label: "Elektřina", count: enriched.filter((c) => c.komodita === "elektr").length },
+          { value: "plyn", label: "Plyn", count: enriched.filter((c) => c.komodita === "plyn").length },
+        ] }),
+
+        e(S.FilterBar, null,
+          e(S.SearchInput, { className: "s21-grow", value: q, onChange: setQ, placeholder: "Hledat číslo, produkt, pojistník, pojišťovna…" }),
+          e(S.Select, { placeholder: "Všechny pojišťovny/dodavatelé", options: [
+            { value: "allianz", label: "Allianz" }, { value: "uniqa", label: "UNIQA" }, { value: "cpp", label: "ČPP" },
+            { value: "generali", label: "Generali" }, { value: "cez", label: "ČEZ" }, { value: "innogy", label: "innogy" },
+          ] }),
+          e(S.Select, { placeholder: "Všichni klienti", options: [
+            { value: "novakovi", label: "Novákovi" }, { value: "dvorakovi", label: "Dvořákovi" },
+            { value: "moravia", label: "Moravia Steel" }, { value: "agro", label: "Agro Slovácko" },
+            { value: "hradecka", label: "Hradecká strojírna" },
+          ] })
+        ),
+
+        e(S.DataTable, {
+          columns: COLUMNS, rows, minWidth: 1100,
+          sort, onSort: (k, d) => setSort({ key: k, dir: d }),
+          onRowClick: (c) => window.location.href = c.kind === "energy" ? "./dms-smlouva-energie-detail.html" : "./dms-smlouva-detail.html"
+        })
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>

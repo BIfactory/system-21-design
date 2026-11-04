@@ -32,7 +32,7 @@
     "/obchod/klienti": "./crm-klienti.html",
     "/obchod/osoby": "./crm-osoby.html",
     "/obchod/pripady": "./crm-pripady.html",
-    "/dms/smlouvy": "./_coming.html#/dms/smlouvy",
+    "/dms/smlouvy": "./dms-smlouvy.html",
     "/dms/dokumenty": "./_coming.html#/dms/dokumenty",
     "/dms/automatizace": "./_coming.html#/dms/automatizace",
     "/lide/pracovnici": "./hr-pracovnici.html",
