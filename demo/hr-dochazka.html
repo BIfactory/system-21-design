@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>System 21 · HR Docházka</title>
+<title>System 21 · Docházka</title>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="../tokens/tokens.css">
 <link rel="stylesheet" href="../dist/system21.css">
@@ -12,6 +12,24 @@
 <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="../dist/system21.js"></script>
 <script src="./_shared.js"></script>
+<style>
+  .punch-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-2); }
+  .punch-btn { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: var(--space-3); min-height: 84px; background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-xl); color: var(--ink); cursor: pointer; font: 500 13px/18px var(--font-body); transition: all .15s var(--motion-ease-out); }
+  .punch-btn:hover { background: var(--surface-muted); border-color: var(--border-strong); transform: translateY(-1px); }
+  .punch-btn:active { transform: translateY(0); }
+  .punch-btn.is-primary { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
+  .punch-btn.is-primary:hover { background: var(--primary-hover); }
+  .punch-btn.is-suggested { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+  .punch-btn__ic { width: 28px; height: 28px; border-radius: var(--radius-full); display: inline-flex; align-items: center; justify-content: center; background: var(--primary-soft); color: var(--primary-text); }
+  .punch-btn.is-primary .punch-btn__ic { background: color-mix(in srgb, var(--on-primary) 15%, transparent); color: var(--on-primary); }
+  .gps-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: var(--radius-full); font: 500 11px/16px var(--font-mono); letter-spacing: .04em; }
+  .gps-ok { background: var(--success-bg); color: var(--success-text); }
+  .gps-out { background: var(--warning-bg); color: var(--warning-text); }
+  .balance-bar { position: relative; height: 24px; border-radius: var(--radius-full); overflow: hidden; background: var(--surface-muted); display: flex; }
+  .balance-seg { height: 100%; }
+  .balance-seg--approved { background: var(--success-solid); }
+  .balance-seg--pending { background: var(--warning-text); }
+</style>
 </head>
 <body>
 <div id="root"></div>
@@ -19,93 +37,253 @@
 (() => {
   const S = window.S21, D = window.S21Demo, e = React.createElement;
 
-  // Mock: aktuální týden 17.-23. 11. 2026
-  const WEEK = [
-    { date: "Po 17. 11.", arrive: "08:12", leave: "17:03", pause: "0:45", total: "8:06", state: "ok" },
-    { date: "Út 18. 11.", arrive: "08:04", leave: "16:48", pause: "0:30", total: "8:14", state: "ok" },
-    { date: "St 19. 11.", arrive: "08:21", leave: "17:16", pause: "0:45", total: "8:10", state: "ok" },
-    { date: "Čt 20. 11.", arrive: "09:00", leave: "18:30", pause: "0:30", total: "9:00", state: "overtime" },
-    { date: "Pá 21. 11.", arrive: "—", leave: "—", pause: "—", total: "—", state: "vacation" },
-    { date: "So 22. 11.", arrive: "—", leave: "—", pause: "—", total: "—", state: "weekend" },
-    { date: "Ne 23. 11.", arrive: "—", leave: "—", pause: "—", total: "—", state: "weekend" },
-  ];
-
-  const STATE_LABELS = {
-    ok: { label: "Odpracováno", tone: "success" },
-    overtime: { label: "Přesčas", tone: "primary" },
-    vacation: { label: "Dovolená", tone: "warning" },
-    weekend: { label: "Víkend", tone: "neutral" },
-    sick: { label: "Nemoc", tone: "danger" },
+  // ─── Punch types ───────────────────────────────────────────────────
+  const PUNCH_TYPES = {
+    arrival: { label: "Příchod", icon: "arrow-right", next: "departure" },
+    departure: { label: "Odchod", icon: "arrow-left", next: "arrival" },
+    lunch_out: { label: "Oběd — pryč", icon: "arrow-up-right", next: "lunch_in" },
+    lunch_in: { label: "Oběd — zpět", icon: "arrow-down", next: "departure" },
+    doctor_out: { label: "Doktor — pryč", icon: "heart", next: "doctor_in" },
+    doctor_in: { label: "Doktor — zpět", icon: "check", next: "departure" },
+    trip_out: { label: "Služební — pryč", icon: "map-pin", next: "trip_in" },
+    trip_in: { label: "Služební — zpět", icon: "home", next: "departure" },
   };
 
-  const TEAM = [
-    { id: 1, name: "Pavel Obdržálek", today: "přítomen od 08:04", total: "38:24", vacation: 12 },
-    { id: 2, name: "Alena Dvořáková", today: "přítomna od 08:30", total: "36:12", vacation: 5 },
-    { id: 3, name: "Tomáš Novák", today: "home office", total: "40:18", vacation: 8 },
-    { id: 4, name: "Marek Krejčí", today: "nepřítomen (dovolená)", total: "28:00", vacation: 2 },
-    { id: 5, name: "Eva Horáková", today: "externě", total: "—", vacation: "—" },
+  // Mock state — poslední byl arrival (08:12)
+  const TODAY_INITIAL = [
+    { id: 1, type: "arrival", time: "08:12", gpsOk: true },
   ];
 
-  const COLUMNS = [
-    { key: "date", label: "Den", width: "18%", render: (d) => e("span", { className: "s21-cell-code", style: { fontSize: 13 } }, d.date) },
-    { key: "arrive", label: "Příchod", align: "right", numeric: true, width: "14%" },
-    { key: "leave", label: "Odchod", align: "right", numeric: true, width: "14%" },
-    { key: "pause", label: "Přestávka", align: "right", numeric: true, width: "14%" },
-    { key: "total", label: "Odpracováno", align: "right", numeric: true, width: "16%", render: (d) => e("strong", null, d.total) },
-    { key: "state", label: "Stav", width: "18%", render: (d) => {
-      const s = STATE_LABELS[d.state] || STATE_LABELS.ok;
-      return e(S.Badge, { tone: s.tone, fitCell: true }, s.label);
-    } },
-    { key: "actions", label: "", align: "center", width: "6%", render: () =>
-      e(S.Button, { size: "sm", iconOnly: true, icon: "edit", variant: "ghost", "aria-label": "Upravit", title: "Upravit" })
-    }
+  // Vacation data
+  const VACATION_TOTAL = 25;
+  const VACATION_APPROVED = 11;
+  const VACATION_PENDING = 2;
+  const VACATION_REMAINING = VACATION_TOTAL - VACATION_APPROVED - VACATION_PENDING;
+
+  const REQUESTS_INITIAL = [
+    { id: 1, from: "2026-11-24", to: "2026-11-28", days: 5, type: "dovolená", status: "pending", reason: "Rodinná dovolená" },
+    { id: 2, from: "2026-12-23", to: "2026-12-31", days: 7, type: "dovolená", status: "pending", reason: "Vánoční prázdniny" },
+    { id: 3, from: "2026-10-14", to: "2026-10-14", days: 1, type: "nemocenská", status: "approved", reason: "Chřipka" },
+    { id: 4, from: "2026-09-02", to: "2026-09-06", days: 5, type: "dovolená", status: "approved", reason: "" },
+  ];
+
+  const TEAM_TODAY = [
+    { id: 1, name: "Lubomír Hulín", status: "V kanceláři", since: "08:12", state: "ok" },
+    { id: 2, name: "Pavel Obdržálek", status: "Na schůzce u klienta", since: "09:30", state: "trip" },
+    { id: 3, name: "Alena Dvořáková", status: "Home office", since: "09:00", state: "home" },
+    { id: 4, name: "Tomáš Novák", status: "Dovolená do 21. 11.", since: "—", state: "vacation" },
+    { id: 5, name: "Jana Svobodová", status: "Ještě nedorazila", since: "—", state: "none" },
   ];
 
   const CRUMBS = [{ label: "HR", href: "/hr" }, { label: "Docházka", href: "/hr/dochazka" }];
 
   function Page() {
-    const [tab, setTab] = React.useState("tyden");
+    const [today, setToday] = React.useState(TODAY_INITIAL);
+    const [requests, setRequests] = React.useState(REQUESTS_INITIAL);
+    const [gpsInside, setGpsInside] = React.useState(true);
+    const [outReason, setOutReason] = React.useState("");
+
+    // Vacation request form
+    const [vFrom, setVFrom] = React.useState("");
+    const [vTo, setVTo] = React.useState("");
+    const [vType, setVType] = React.useState("dovolená");
+    const [vReason, setVReason] = React.useState("");
+
+    const lastPunch = today.length > 0 ? today[today.length - 1].type : "departure";
+    const suggested = PUNCH_TYPES[lastPunch]?.next || "arrival";
+
+    const doPunch = (type) => {
+      const now = new Date();
+      const time = now.getHours().toString().padStart(2, "0") + ":" + now.getMinutes().toString().padStart(2, "0");
+      setToday([...today, { id: Date.now(), type, time, gpsOk: gpsInside, reason: !gpsInside ? outReason : null }]);
+      setOutReason("");
+    };
+    const deletePunch = (id) => setToday(today.filter((p) => p.id !== id));
+
+    const submitVacation = () => {
+      if (!vFrom || !vTo) return;
+      const days = Math.max(1, Math.round((new Date(vTo) - new Date(vFrom)) / (1000 * 60 * 60 * 24)) + 1);
+      setRequests([{ id: Date.now(), from: vFrom, to: vTo, days, type: vType, status: "pending", reason: vReason }, ...requests]);
+      setVFrom(""); setVTo(""); setVReason("");
+    };
+
+    // Monthly stats (mock)
+    const hoursThisMonth = 136;
+    const hoursFond = 168;
+    const overtime = 4;
+
     return e(S.AppShell, {
       sidebar: e(D.DemoSidebar, { active: "/hr/dochazka" }),
       topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
     },
       e(S.PageHeader, {
         title: "Docházka",
-        description: "Pracovní doba, dovolená, nemoc · aktuální týden 17.–23. 11. 2026",
-        actions: e(React.Fragment, null,
-          e(S.Button, { variant: "secondary", icon: "calendar" }, "Žádost o dovolenou"),
-          e(S.Button, { icon: "play" }, "Zapnout přihlášení")
-        ),
-        tabs: e(S.Tabs, { value: tab, onChange: setTab, items: [
-          { value: "tyden", label: "Aktuální týden" },
-          { value: "mesic", label: "Měsíc" },
-          { value: "rok", label: "Rok" },
-          { value: "tym", label: "Tým" },
-        ] })
+        description: "Pracovní doba, dovolená, nemocenská"
       }),
       e(S.PageBody, null,
+
+        // ───── KPI row ────────────────────────────────────────────
         e(S.KpiRow, { cols: 4 },
-          e(S.StatTile, { label: "Odpracováno tento týden", value: "33:30", unit: "h", accent: "primary" }),
-          e(S.StatTile, { label: "Fond týdne", value: "40:00", unit: "h" }),
-          e(S.StatTile, { label: "Přesčas", value: "1:00", unit: "h", accent: "warning" }),
-          e(S.StatTile, { label: "Zbývá dovolené", value: "12", unit: "dnů", accent: "success" })
+          e(S.StatTile, { label: "Dnes odpracováno", value: "4:32", unit: "h" }),
+          e(S.StatTile, { label: "Tento měsíc", value: hoursThisMonth.toString(), unit: "h", hint: "fond " + hoursFond + " h" }),
+          e(S.StatTile, { label: "Přesčas", value: overtime.toString(), unit: "h", accent: overtime > 0 ? "warning" : undefined }),
+          e(S.StatTile, { label: "Zbývá dovolené", value: VACATION_REMAINING.toString(), unit: "dní" })
         ),
-        e(S.Section, { title: "Tento týden" },
-          e(S.DataTable, { columns: COLUMNS, rows: WEEK, minWidth: 820 })
+
+        // ───── 2 sloupce: Punch + Vacation ─────────────────────────
+        e("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-4)", alignItems: "start", marginTop: "var(--space-4)" } },
+
+          // Levý — Punch
+          e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-4)" } },
+
+            e(S.Section, {
+              title: "Odbavit",
+              action: e("span", { className: "gps-badge " + (gpsInside ? "gps-ok" : "gps-out") },
+                e(S.Icon, { name: "map-pin", size: 12 }),
+                gpsInside ? "V kanceláři" : "Mimo lokalitu"
+              )
+            },
+              e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+                // GPS toggle (mock — pro demo lze přepnout)
+                e("label", { style: { display: "inline-flex", alignItems: "center", gap: "var(--space-2)", font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)" } },
+                  e(S.Checkbox, { checked: gpsInside, onChange: setGpsInside, label: "GPS: V kanceláři (demo přepínač)" })
+                ),
+
+                !gpsInside && e(S.Field, { label: "Důvod mimo lokalitu" },
+                  e(S.Input, { value: outReason, onChange: setOutReason, placeholder: "např. Schůzka u klienta" })
+                ),
+
+                e("div", { className: "punch-grid" },
+                  Object.entries(PUNCH_TYPES).slice(0, 4).map(([key, p]) => e("button", {
+                    key, type: "button",
+                    className: "punch-btn" + (key === suggested ? " is-suggested is-primary" : ""),
+                    onClick: () => doPunch(key)
+                  },
+                    e("span", { className: "punch-btn__ic" }, e(S.Icon, { name: p.icon, size: 16 })),
+                    e("span", null, p.label),
+                    key === suggested && e("span", { style: { font: "500 10px/14px var(--font-mono)", letterSpacing: ".04em", opacity: .85 } }, "doporučené")
+                  ))
+                ),
+
+                e("details", { style: { marginTop: "var(--space-2)" } },
+                  e("summary", { style: { cursor: "pointer", font: "500 13px/18px var(--font-body)", color: "var(--primary-text)" } }, "Více typů (oběd · doktor · služební)"),
+                  e("div", { className: "punch-grid", style: { marginTop: "var(--space-2)" } },
+                    Object.entries(PUNCH_TYPES).slice(4).map(([key, p]) => e("button", {
+                      key, type: "button",
+                      className: "punch-btn" + (key === suggested ? " is-suggested" : ""),
+                      onClick: () => doPunch(key)
+                    },
+                      e("span", { className: "punch-btn__ic" }, e(S.Icon, { name: p.icon, size: 16 })),
+                      e("span", null, p.label)
+                    ))
+                  )
+                )
+              )
+            ),
+
+            e(S.Section, { title: "Dnes" },
+              today.length === 0
+                ? e(S.EmptyState, { icon: "clock", title: "Dnes žádný záznam", description: "Odbav příchod kliknutím nahoře." })
+                : e("ul", { style: { listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "var(--space-2)" } },
+                    today.map((p) => e("li", { key: p.id,
+                      style: { display: "flex", alignItems: "center", gap: "var(--space-3)", padding: "var(--space-2) var(--space-3)", background: "var(--surface-raised)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-lg)" }
+                    },
+                      e("span", { style: { font: "500 11px/16px var(--font-mono)", color: "var(--primary-text)", minWidth: 50 } }, p.time),
+                      e("span", { style: { flex: 1, font: "500 14px/20px var(--font-body)" } }, PUNCH_TYPES[p.type]?.label || p.type),
+                      !p.gpsOk && e("span", { className: "gps-badge gps-out" }, "⚠ " + (p.reason || "Mimo lokalitu")),
+                      p.gpsOk && e("span", { className: "gps-badge gps-ok" }, "V kanceláři"),
+                      e(S.Button, { size: "sm", iconOnly: true, icon: "trash", variant: "ghost", "aria-label": "Smazat záznam", title: "Smazat (jen dnešní)", onClick: () => deletePunch(p.id) })
+                    ))
+                  )
+            )
+          ),
+
+          // Pravý — Vacation
+          e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-4)" } },
+
+            e(S.Section, { title: "Dovolená 2026" },
+              e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+                e("div", null,
+                  e("div", { style: { display: "flex", justifyContent: "space-between", font: "500 13px/18px var(--font-body)", marginBottom: "var(--space-2)" } },
+                    e("span", null, "Z " + VACATION_TOTAL + " dnů:"),
+                    e("span", { style: { color: "var(--ink-muted)" } }, "zbývá ", e("strong", { style: { color: "var(--ink)" } }, VACATION_REMAINING + " dnů"))
+                  ),
+                  e("div", { className: "balance-bar" },
+                    e("span", { className: "balance-seg balance-seg--approved", style: { width: (VACATION_APPROVED / VACATION_TOTAL * 100) + "%" }, title: VACATION_APPROVED + " schválených" }),
+                    e("span", { className: "balance-seg balance-seg--pending", style: { width: (VACATION_PENDING / VACATION_TOTAL * 100) + "%" }, title: VACATION_PENDING + " čeká na schválení" })
+                  ),
+                  e("div", { style: { display: "flex", gap: "var(--space-3)", font: "400 11px/16px var(--font-body)", color: "var(--ink-muted)", marginTop: "var(--space-1)" } },
+                    e("span", null, "● ", e("span", { style: { color: "var(--success-text)" } }, VACATION_APPROVED + " schváleno")),
+                    e("span", null, "● ", e("span", { style: { color: "var(--warning-text)" } }, VACATION_PENDING + " čeká")),
+                    e("span", null, "● ", e("span", { style: { color: "var(--ink)" } }, VACATION_REMAINING + " zbývá"))
+                  )
+                ),
+                e(S.Button, { variant: "secondary", icon: "download" }, "Stáhnout měsíční PDF")
+              )
+            ),
+
+            e(S.Section, { title: "Nová žádost o dovolenou" },
+              e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+                e("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-3)" } },
+                  e(S.Field, { label: "Od" },
+                    e(S.Input, { type: "date", value: vFrom, onChange: setVFrom })
+                  ),
+                  e(S.Field, { label: "Do" },
+                    e(S.Input, { type: "date", value: vTo, onChange: setVTo })
+                  )
+                ),
+                e(S.Field, { label: "Typ" },
+                  e(S.Select, { value: vType, onChange: setVType, options: [
+                    { value: "dovolená", label: "Dovolená" },
+                    { value: "nemocenská", label: "Nemocenská" },
+                    { value: "neplacené", label: "Neplacené volno" },
+                    { value: "ošetřovné", label: "Ošetřovné" },
+                  ] })
+                ),
+                e(S.Field, { label: "Důvod (volitelné)" },
+                  e(S.Input, { value: vReason, onChange: setVReason, placeholder: "Volitelně krátce" })
+                ),
+                e("div", { style: { display: "flex", justifyContent: "flex-end" } },
+                  e(S.Button, { icon: "send", onClick: submitVacation, disabled: !vFrom || !vTo }, "Odeslat žádost")
+                )
+              )
+            ),
+
+            e(S.Section, { title: "Moje žádosti" },
+              e("ul", { style: { listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "var(--space-2)" } },
+                requests.map((r) => e("li", { key: r.id,
+                  style: { display: "flex", alignItems: "flex-start", gap: "var(--space-3)", padding: "var(--space-2) var(--space-3)", background: "var(--surface-raised)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-lg)" }
+                },
+                  e("div", { style: { flex: 1, minWidth: 0 } },
+                    e("div", { style: { font: "500 14px/20px var(--font-body)" } }, r.type.charAt(0).toUpperCase() + r.type.slice(1), " · ", r.days, " dnů"),
+                    e("div", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)" } }, r.from, " – ", r.to, r.reason ? " · " + r.reason : "")
+                  ),
+                  e(S.Badge, { tone: r.status === "approved" ? "success" : r.status === "rejected" ? "danger" : "warning", fitCell: true },
+                    r.status === "approved" ? "Schváleno" : r.status === "rejected" ? "Zamítnuto" : "Čeká"
+                  )
+                ))
+              )
+            )
+          )
         ),
+
+        // ───── Tým právě teď ──────────────────────────────────────
         e(S.Section, { title: "Tým právě teď" },
-          e("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "var(--space-3)" } },
-            TEAM.map((p) => e(S.EntityCard, {
-              key: p.id,
-              icon: "user",
-              title: p.name,
-              subtitle: p.today,
-              meta: [
-                { label: "Měsíčně", value: p.total },
-                { label: "Dovolená zbývá", value: p.vacation + (typeof p.vacation === "number" ? " dnů" : "") },
-              ],
-              onClick: () => {}
-            }))
+          e("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "var(--space-3)" } },
+            TEAM_TODAY.map((p) => e("div", { key: p.id,
+              style: {
+                display: "flex", alignItems: "center", gap: "var(--space-3)",
+                padding: "var(--space-3)", background: "var(--surface-raised)",
+                border: "1px solid var(--border)", borderRadius: "var(--radius-xl)"
+              }
+            },
+              e(S.Avatar, { name: p.name, size: 36 }),
+              e("div", { style: { flex: 1, minWidth: 0 } },
+                e("div", { style: { font: "500 14px/20px var(--font-body)" } }, p.name),
+                e("div", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)" } }, p.status),
+                p.since !== "—" && e("div", { style: { font: "500 11px/16px var(--font-mono)", color: "var(--primary-text)" } }, "od ", p.since)
+              )
+            ))
           )
         )
       )
