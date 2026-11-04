@@ -12,6 +12,22 @@
 <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="../dist/system21.js"></script>
 <script src="./_shared.js"></script>
+<style>
+  .post { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4); background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--elev-1); }
+  .post--pinned { background: linear-gradient(135deg, var(--primary-soft) 0%, var(--surface-raised) 50%); border-color: color-mix(in srgb, var(--primary) 30%, var(--border)); border-left: 3px solid var(--primary); }
+  .post__head { display: flex; align-items: flex-start; gap: var(--space-3); }
+  .post__title { margin: 0; font: 700 18px/24px var(--font-display); color: var(--ink); letter-spacing: -.01em; }
+  .post__body { font: 400 14px/22px var(--font-body); color: var(--ink); white-space: pre-wrap; }
+  .post__body--excerpt { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .post__foot { display: flex; align-items: center; gap: var(--space-3); padding-top: var(--space-2); border-top: 1px solid var(--border-subtle); }
+  .pinned-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: var(--radius-full); background: var(--primary); color: var(--on-primary); font: 500 10px/14px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; }
+  .react-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; background: var(--surface-muted); border: 1px solid var(--border-subtle); border-radius: var(--radius-full); font: 500 12px/16px var(--font-body); color: var(--ink); cursor: pointer; }
+  .react-pill:hover { background: var(--primary-soft); color: var(--primary-text); }
+  .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-bottom: var(--space-4); }
+  @media (max-width: 767px) { .hero-grid { grid-template-columns: 1fr; } }
+  .feed-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+  @media (max-width: 1200px) { .feed-grid { grid-template-columns: 1fr; } }
+</style>
 </head>
 <body>
 <div id="root"></div>
@@ -19,30 +35,119 @@
 (() => {
   const S = window.S21, D = window.S21Demo, e = React.createElement;
 
+  // ─── mock data ─────────────────────────────────────────────────────
+  // Posts — pinned first, rest in grid. body is markdown-ish (plain text + newlines).
   const POSTS = [
-    { id: 1, author: "Lubomír Hulín", time: "před 1 h", category: "Důležité",
-      title: "Nový zaměstnanec — Jana Svobodová",
-      content: "Od pondělí 17. 11. k nám nastupuje Jana Svobodová jako office manager. Přivítejte ji prosím srdečně. Jana bude mít na starosti recepci, jednání s dodavateli a podporu týmu.",
-      reactions: { "👋": 4, "❤️": 2 }, comments: 3 },
-    { id: 2, author: "Pavel Obdržálek", time: "před 4 h", category: "Školení",
-      title: "Školení k novým produktům Allianz — 15. 11.",
-      content: "V pátek 15. 11. od 13:00 proběhne online školení k novým produktům Allianz. Účast povinná pro všechny konzultanty. Odkaz na Teams pošlu den předem.",
-      reactions: { "📚": 3 }, comments: 1 },
-    { id: 3, author: "Alena Dvořáková", time: "včera", category: "Provoz",
-      title: "Nová šablona smlouvy pro firemní klienty",
-      content: "V DMS jsem nahrála aktualizovanou šablonu firemní pojistné smlouvy. Prosím používejte od nynějška tuto verzi — stará (2024) je archivovaná.",
-      reactions: { "👍": 5, "🎉": 1 }, comments: 2 },
-    { id: 4, author: "Lubomír Hulín", time: "2 dny zpět", category: "Oznámení",
-      title: "Měsíční výsledky za říjen 2026",
-      content: "Říjen jsme uzavřeli s tržbami 2,48 mil. Kč a 94% konverzí nabídek. Velké díky všem za práci! Kompletní výsledky v příloze — podrobnosti rozebereme na pondělním meetingu.",
+    { id: 1, pinned: true, author: "Lubomír Hulín", time: "před 1 h", category: "Důležité",
+      title: "Měsíční výsledky — říjen 2026",
+      body: "Říjen jsme uzavřeli s tržbami **2,48 mil. Kč** a 94% konverzí nabídek.\n\nVelké díky všem za práci! Kompletní výsledky v příloze — podrobnosti rozebereme na pondělním meetingu v 9:00.\n\nNa dalších obdobích se zaměříme na:\n- udržení konverze 94 %\n- zvýšení počtu nových rodin\n- integraci s ČPP (viz pá 15.)",
       reactions: { "🎉": 8, "💪": 4, "🚀": 2 }, comments: 5 },
+    { id: 2, pinned: true, author: "Lubomír Hulín", time: "před 4 h", category: "Školení",
+      title: "Školení ČPP — pátek 15. 11.",
+      body: "V pátek 15. 11. od **13:00** proběhne online školení k novým produktům ČPP.\n\nÚčast povinná pro všechny konzultanty. Odkaz na Teams pošlu den předem.",
+      reactions: { "📚": 3, "👍": 2 }, comments: 1 },
+    { id: 3, pinned: false, author: "Alena Dvořáková", time: "včera", category: "Provoz",
+      title: "Nová šablona smlouvy pro firemní klienty",
+      body: "V DMS jsem nahrála aktualizovanou šablonu firemní pojistné smlouvy.\n\nProsím používejte od nynějška tuto verzi — stará (2024) je archivovaná.",
+      reactions: { "👍": 5, "🎉": 1 }, comments: 2 },
+    { id: 4, pinned: false, author: "Lubomír Hulín", time: "2 dny zpět", category: "Oznámení",
+      title: "Nový zaměstnanec — Jana Svobodová",
+      body: "Od pondělí 17. 11. k nám nastupuje Jana Svobodová jako office manager.\n\nPřivítejte ji prosím srdečně. Jana bude mít na starosti recepci, jednání s dodavateli a podporu týmu.",
+      reactions: { "👋": 4, "❤️": 2 }, comments: 3 },
+    { id: 5, pinned: false, author: "Pavel Obdržálek", time: "3 dny zpět", category: "Pochvala",
+      title: "Pochvala pro Alenu",
+      body: "Chci veřejně poděkovat Aleně za vyřízení pojistné události Dvořákových. Zrychlila proces ze 14 dnů na 5. Super práce!",
+      reactions: { "👏": 7, "❤️": 3 }, comments: 1 },
+    { id: 6, pinned: false, author: "Tomáš Novák", time: "4 dny zpět", category: "Zprávy",
+      title: "Postgres cluster upgrade — plánovaná odstávka 20. 11.",
+      body: "V neděli 20. 11. v noci (02:00–04:00) proběhne upgrade DB clusteru.\n\nAplikace bude nedostupná po dobu odstávky. Pokud potřebujete v neděli ráno pracovat, dejte vědět — vyřešíme to.",
+      reactions: { "👍": 2 }, comments: 0 },
   ];
 
+  const CATEGORIES = [
+    { id: "all", label: "Vše" },
+    { id: "dulezite", label: "Důležité", catName: "Důležité" },
+    { id: "skoleni", label: "Školení", catName: "Školení" },
+    { id: "provoz", label: "Provoz", catName: "Provoz" },
+    { id: "oznameni", label: "Oznámení", catName: "Oznámení" },
+    { id: "pochvala", label: "Pochvala", catName: "Pochvala" },
+    { id: "zpravy", label: "Zprávy", catName: "Zprávy" },
+  ];
+  const CAT_TONE = { "Důležité": "primary", "Školení": "neutral", "Provoz": "neutral", "Oznámení": "success", "Pochvala": "primary", "Zprávy": "neutral" };
+
+  // very simple markdown-ish rendering: **bold** + newlines + - list items
+  function renderBody(text) {
+    const lines = text.split("\n");
+    const out = [];
+    let listBuffer = [];
+    const flushList = () => {
+      if (listBuffer.length) {
+        out.push(e("ul", { key: out.length, style: { margin: "4px 0", paddingLeft: 18 } },
+          listBuffer.map((item, j) => e("li", { key: j }, parseInline(item)))
+        ));
+        listBuffer = [];
+      }
+    };
+    lines.forEach((line, i) => {
+      if (line.startsWith("- ")) {
+        listBuffer.push(line.slice(2));
+      } else {
+        flushList();
+        if (line === "") out.push(e("div", { key: i, style: { height: 8 } }));
+        else out.push(e("div", { key: i }, parseInline(line)));
+      }
+    });
+    flushList();
+    return out;
+  }
+  function parseInline(text) {
+    const parts = text.split(/(\*\*[^*]+\*\*)/g);
+    return parts.map((p, i) => {
+      if (p.startsWith("**") && p.endsWith("**")) return e("strong", { key: i }, p.slice(2, -2));
+      return p;
+    });
+  }
+
   const CRUMBS = [{ label: "Intranet", href: "/intranet" }, { label: "Nástěnka", href: "/nastenka" }];
-  const CAT_TONE = { "Důležité": "primary", "Školení": "neutral", "Provoz": "neutral", "Oznámení": "success" };
 
   function Page() {
-    const [chip, setChip] = React.useState("all");
+    const [cat, setCat] = React.useState("all");
+    const [posts, setPosts] = React.useState(POSTS);
+
+    const filtered = cat === "all" ? posts : posts.filter((p) => {
+      const c = CATEGORIES.find((x) => x.id === cat);
+      return c && p.category === c.catName;
+    });
+    const pinned = filtered.filter((p) => p.pinned);
+    const rest = filtered.filter((p) => !p.pinned);
+
+    function PostCard({ p, pinned }) {
+      return e("article", { className: "post" + (pinned ? " post--pinned" : "") },
+        e("div", { className: "post__head" },
+          e(S.Avatar, { name: p.author, size: 36 }),
+          e("div", { style: { flex: 1, minWidth: 0 } },
+            e("div", { style: { font: "500 13px/18px var(--font-body)" } }, p.author),
+            e("div", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)" } }, p.time)
+          ),
+          e("div", { style: { display: "inline-flex", gap: "var(--space-1)", alignItems: "center" } },
+            pinned && e("span", { className: "pinned-badge" },
+              e(S.Icon, { name: "bookmark", size: 10 }), "Připnuto"
+            ),
+            e(S.Tag, { tone: CAT_TONE[p.category] || "neutral" }, p.category)
+          )
+        ),
+        e("h3", { className: "post__title" }, p.title),
+        e("div", { className: "post__body" + (!pinned ? " post__body--excerpt" : "") }, renderBody(p.body)),
+        e("div", { className: "post__foot" },
+          e("div", { style: { display: "flex", gap: "var(--space-1)", flex: 1, flexWrap: "wrap" } },
+            Object.entries(p.reactions).map(([emoji, n]) => e("span", { key: emoji, className: "react-pill" }, emoji, " ", n)),
+            e(S.Button, { size: "sm", variant: "ghost", icon: "plus" }, "Reagovat")
+          ),
+          e(S.Button, { size: "sm", variant: "ghost", icon: "chat" }, p.comments + " komentářů")
+        )
+      );
+    }
+
     return e(S.AppShell, {
       sidebar: e(D.DemoSidebar, { active: "/nastenka" }),
       topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
@@ -53,50 +158,20 @@
         actions: e(S.Button, { icon: "plus" }, "Nový příspěvek")
       }),
       e(S.PageBody, null,
-        e(S.ChipGroup, { value: chip, onChange: setChip, items: [
-          { value: "all", label: "Vše", count: 4 },
-          { value: "vazne", label: "Důležité", count: 1 },
-          { value: "skoleni", label: "Školení", count: 1 },
-          { value: "provoz", label: "Provoz", count: 1 },
-          { value: "oznameni", label: "Oznámení", count: 1 },
-        ] }),
-        e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-4)", maxWidth: 780 } },
-          POSTS.map((p) => e("article", { key: p.id,
-            style: {
-              display: "flex", flexDirection: "column", gap: "var(--space-3)",
-              padding: "var(--space-4)", background: "var(--surface-raised)",
-              border: "1px solid var(--border)", borderRadius: "var(--radius-xl)",
-              boxShadow: "var(--elev-1)"
-            }
-          },
-            e("header", { style: { display: "flex", alignItems: "flex-start", gap: "var(--space-3)" } },
-              e(S.Avatar, { name: p.author, size: 36 }),
-              e("div", { style: { flex: 1, minWidth: 0 } },
-                e("div", { style: { font: "500 13px/18px var(--font-body)" } }, p.author),
-                e("div", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)" } }, p.time)
-              ),
-              e(S.Tag, { tone: CAT_TONE[p.category] || "neutral" }, p.category)
-            ),
-            e("h3", { style: { margin: 0, font: "700 18px/24px var(--font-display)", color: "var(--ink)" } }, p.title),
-            e("div", { style: { font: "400 14px/22px var(--font-body)", color: "var(--ink)", whiteSpace: "pre-wrap" } }, p.content),
-            e("footer", { style: { display: "flex", alignItems: "center", gap: "var(--space-3)", paddingTop: "var(--space-2)", borderTop: "1px solid var(--border-subtle)" } },
-              e("div", { style: { display: "flex", gap: "var(--space-1)", flex: 1, flexWrap: "wrap" } },
-                Object.entries(p.reactions).map(([emoji, n]) =>
-                  e("span", { key: emoji,
-                    style: {
-                      display: "inline-flex", alignItems: "center", gap: 4,
-                      padding: "2px 10px", background: "var(--surface-muted)",
-                      border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-full)",
-                      font: "500 12px/16px var(--font-body)", color: "var(--ink)",
-                    }
-                  }, emoji, " ", n)
-                ),
-                e(S.Button, { size: "sm", variant: "ghost", icon: "plus" }, "Reagovat")
-              ),
-              e(S.Button, { size: "sm", variant: "ghost", icon: "chat" }, p.comments + " komentářů")
-            )
-          ))
-        )
+        e(S.ChipGroup, { value: cat, onChange: setCat, items: CATEGORIES.map((c) => ({
+          value: c.id, label: c.label,
+          count: c.id === "all" ? posts.length : posts.filter((p) => p.category === c.catName).length,
+        })) }),
+
+        pinned.length > 0 && e("div", { className: "hero-grid", style: { marginTop: "var(--space-4)" } },
+          pinned.map((p) => e(PostCard, { key: p.id, p, pinned: true }))
+        ),
+
+        rest.length > 0 && e("div", { className: "feed-grid", style: { marginTop: pinned.length ? 0 : "var(--space-4)" } },
+          rest.map((p) => e(PostCard, { key: p.id, p, pinned: false }))
+        ),
+
+        filtered.length === 0 && e(S.EmptyState, { icon: "folder", title: "Žádné příspěvky", description: "V této kategorii zatím nic není." })
       )
     );
   }

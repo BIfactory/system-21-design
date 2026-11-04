@@ -12,6 +12,16 @@
 <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="../dist/system21.js"></script>
 <script src="./_shared.js"></script>
+<style>
+  .art-card { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-3) var(--space-4); background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-xl); cursor: pointer; text-decoration: none; color: var(--ink); transition: all .15s var(--motion-ease-out); }
+  .art-card:hover { border-color: var(--border-strong); box-shadow: var(--elev-2); transform: translateY(-1px); }
+  .art-card__title { font: 600 15px/22px var(--font-display); color: var(--ink); }
+  .art-card__excerpt { font: 400 13px/18px var(--font-body); color: var(--ink-muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .art-card__meta { font: 400 11px/16px var(--font-mono); color: var(--ink-subtle); display: flex; gap: 8px; flex-wrap: wrap; }
+  .cat-btn { display: flex; align-items: center; gap: var(--space-2); width: 100%; padding: var(--space-2); background: transparent; border: 0; border-radius: var(--radius-md); color: var(--ink); font: 400 13px/18px var(--font-body); cursor: pointer; text-align: left; }
+  .cat-btn.is-active { background: var(--primary-soft); color: var(--primary-text); font-weight: 600; }
+  .cat-btn:hover:not(.is-active) { background: var(--surface-muted); }
+</style>
 </head>
 <body>
 <div id="root"></div>
@@ -20,33 +30,53 @@
   const S = window.S21, D = window.S21Demo, e = React.createElement;
 
   const CATEGORIES = [
-    { id: "all", label: "Všechny", icon: "notes", count: 24 },
-    { id: "onboarding", label: "Onboarding", icon: "user-plus", count: 5 },
-    { id: "procesy", label: "Procesy", icon: "refresh", count: 8 },
-    { id: "produkty", label: "Produkty pojištění", icon: "folder", count: 7 },
-    { id: "it", label: "IT a systémy", icon: "settings", count: 4 },
+    { id: "all", label: "Všechny", icon: "notes" },
+    { id: "onboarding", label: "Onboarding", icon: "user-plus" },
+    { id: "procesy", label: "Procesy", icon: "refresh" },
+    { id: "produkty", label: "Produkty pojištění", icon: "folder" },
+    { id: "it", label: "IT a systémy", icon: "settings" },
   ];
 
   const ARTICLES = [
-    { id: 1, category: "onboarding", title: "První týden v týmu", author: "Lubomír Hulín", updated: "15. 10. 2026", reading: "3 min", views: 42, tags: ["Onboarding", "Nováček"] },
-    { id: 2, category: "procesy", title: "Proces zpracování pojistné události", author: "Alena Dvořáková", updated: "08. 10. 2026", reading: "7 min", views: 128, tags: ["Pojistná událost", "Likvidace"] },
-    { id: 3, category: "produkty", title: "Produkty Allianz — porovnání s UNIQA", author: "Pavel Obdržálek", updated: "02. 10. 2026", reading: "12 min", views: 87, tags: ["Allianz", "UNIQA", "Porovnání"] },
-    { id: 4, category: "procesy", title: "Jak napárovat dokument ke klientovi", author: "Tomáš Novák", updated: "28. 09. 2026", reading: "4 min", views: 64, tags: ["DMS", "Automatizace"] },
-    { id: 5, category: "produkty", title: "Nová úrazová pojistka 2027 — brief", author: "Pavel Obdržálek", updated: "25. 09. 2026", reading: "5 min", views: 39, tags: ["Produkt 2027", "Úraz"] },
-    { id: 6, category: "it", title: "Napojení Gmailu na System 21", author: "Marek Krejčí", updated: "20. 09. 2026", reading: "3 min", views: 23, tags: ["Integrace", "Gmail"] },
-    { id: 7, category: "onboarding", title: "Jak nastavit brand pro nového zákazníka", author: "Lubomír Hulín", updated: "18. 09. 2026", reading: "10 min", views: 15, tags: ["Multi-brand", "Nastavení"] },
-    { id: 8, category: "procesy", title: "Checklist před podpisem smlouvy", author: "Alena Dvořáková", updated: "12. 09. 2026", reading: "2 min", views: 94, tags: ["Smlouva", "Checklist"] },
+    { id: 1, slug: "prvni-tyden", category: "onboarding", title: "První týden v týmu",
+      excerpt: "Co tě čeká první týden: seznámení s týmem, přístupy k systémům, první zakázka. Typické kroky, kontakty na všechny, co ti pomůžou.",
+      author: "Lubomír Hulín", updated: "15. 10. 2026", reading: "3 min", views: 42, tags: ["Onboarding", "Nováček"], published: true },
+    { id: 2, slug: "pojistna-udalost", category: "procesy", title: "Proces zpracování pojistné události",
+      excerpt: "Krok za krokem: přijetí, evidence, komunikace s pojišťovnou, likvidace. S konkrétními šablonami a termíny.",
+      author: "Alena Dvořáková", updated: "08. 10. 2026", reading: "7 min", views: 128, tags: ["Pojistná událost", "Likvidace"], published: true, pinned: true },
+    { id: 3, slug: "allianz-vs-uniqa", category: "produkty", title: "Produkty Allianz vs. UNIQA — porovnání",
+      excerpt: "Detailní porovnání životního pojištění obou pojišťoven. Rozdíly v krytí, výlukách a cenách pro různé věkové skupiny.",
+      author: "Pavel Obdržálek", updated: "02. 10. 2026", reading: "12 min", views: 87, tags: ["Allianz", "UNIQA", "Porovnání"], published: true, pinned: true },
+    { id: 4, slug: "naparovat-dokument", category: "procesy", title: "Jak napárovat dokument ke klientovi",
+      excerpt: "Když AI nedokáže dokument jednoznačně napárovat, tady je postup: vyhledávání podle rodného čísla, jména, adresy, IČ.",
+      author: "Tomáš Novák", updated: "28. 09. 2026", reading: "4 min", views: 64, tags: ["DMS", "Automatizace"], published: true },
+    { id: 5, slug: "urazova-2027", category: "produkty", title: "Nová úrazová pojistka 2027 — brief",
+      excerpt: "Co je nového v nabídce úrazového pojištění pro rok 2027: rozšíření krytí, nové varianty, cenové srovnání.",
+      author: "Pavel Obdržálek", updated: "25. 09. 2026", reading: "5 min", views: 39, tags: ["Produkt 2027", "Úraz"], published: true },
+    { id: 6, slug: "gmail-napojeni", category: "it", title: "Napojení Gmailu na System 21",
+      excerpt: "Jak si přidat svůj firemní Gmail do DMS, aby se emaily automaticky parsovaly a napojovaly na klienty.",
+      author: "Marek Krejčí", updated: "20. 09. 2026", reading: "3 min", views: 23, tags: ["Integrace", "Gmail"], published: true },
+    { id: 7, slug: "novy-brand", category: "onboarding", title: "Jak nastavit brand pro nového zákazníka",
+      excerpt: "Technický postup přebarvení System 21 pro customer GUI: brand tokeny, logo, fonty, kontrast.",
+      author: "Lubomír Hulín", updated: "18. 09. 2026", reading: "10 min", views: 15, tags: ["Multi-brand", "Nastavení"], published: true },
+    { id: 8, slug: "podpis-checklist", category: "procesy", title: "Checklist před podpisem smlouvy",
+      excerpt: "7 bodů, které musí být vyřešené před podpisem smlouvy s klientem. Kontrola kontaktů, DMS, platebních podmínek.",
+      author: "Alena Dvořáková", updated: "12. 09. 2026", reading: "2 min", views: 94, tags: ["Smlouva", "Checklist"], published: true },
   ];
-
-  const POPULAR = ARTICLES.slice().sort((a, b) => b.views - a.views).slice(0, 3);
 
   const CRUMBS = [{ label: "Intranet", href: "/intranet" }, { label: "Knowledge base", href: "/kb" }];
 
   function Page() {
     const [cat, setCat] = React.useState("all");
     const [q, setQ] = React.useState("");
-    const rows = cat === "all" ? ARTICLES : ARTICLES.filter((a) => a.category === cat);
-    const filtered = !q ? rows : rows.filter((a) => (a.title + " " + a.tags.join(" ")).toLowerCase().includes(q.toLowerCase()));
+
+    let list = cat === "all" ? ARTICLES : ARTICLES.filter((a) => a.category === cat);
+    if (q) list = list.filter((a) =>
+      (a.title + " " + a.excerpt + " " + a.tags.join(" ")).toLowerCase().includes(q.toLowerCase())
+    );
+
+    const pinned = cat === "all" && !q ? ARTICLES.filter((a) => a.pinned) : [];
+    const rest = cat === "all" && !q ? list.filter((a) => !a.pinned) : list;
 
     return e(S.AppShell, {
       sidebar: e(D.DemoSidebar, { active: "/kb" }),
@@ -58,67 +88,66 @@
         actions: e(S.Button, { icon: "plus" }, "Nový článek")
       }),
       e(S.PageBody, null,
-        e("div", { style: { display: "grid", gridTemplateColumns: "220px 1fr", gap: "var(--space-4)", alignItems: "start" } },
-          e("aside", { style: { background: "var(--surface-raised)", border: "1px solid var(--border)", borderRadius: "var(--radius-xl)", padding: "var(--space-2)" } },
-            e("nav", { "aria-label": "Kategorie" },
+        e("div", { style: { display: "grid", gridTemplateColumns: "240px 1fr", gap: "var(--space-4)", alignItems: "start" } },
+
+          // Levý sidebar — kategorie + search
+          e("aside", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+            e(S.SearchInput, { value: q, onChange: setQ, placeholder: "Hledat článek, tag…" }),
+            e("div", { style: { background: "var(--surface-raised)", border: "1px solid var(--border)", borderRadius: "var(--radius-xl)", padding: "var(--space-2)", display: "flex", flexDirection: "column", gap: 2 } },
               CATEGORIES.map((c) => e("button", {
                 key: c.id, type: "button",
-                onClick: () => setCat(c.id),
-                style: {
-                  display: "flex", alignItems: "center", gap: "var(--space-2)",
-                  width: "100%", padding: "var(--space-2)",
-                  background: cat === c.id ? "var(--primary-soft)" : "transparent",
-                  border: 0, borderRadius: "var(--radius-md)",
-                  color: cat === c.id ? "var(--primary-text)" : "var(--ink)",
-                  font: cat === c.id ? "600 13px/18px var(--font-body)" : "400 13px/18px var(--font-body)",
-                  cursor: "pointer", textAlign: "left"
-                }
+                className: "cat-btn" + (cat === c.id ? " is-active" : ""),
+                onClick: () => setCat(c.id)
               },
                 e(S.Icon, { name: c.icon, size: 14 }),
                 e("span", { style: { flex: 1 } }, c.label),
-                e("span", { style: { font: "500 11px/16px var(--font-mono)", color: "var(--ink-muted)" } }, c.count)
+                e("span", { style: { font: "500 11px/16px var(--font-mono)", color: "var(--ink-muted)" } },
+                  c.id === "all" ? ARTICLES.length : ARTICLES.filter((a) => a.category === c.id).length
+                )
               ))
             )
           ),
+
+          // Pravý sloupec — seznam článků
           e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-4)" } },
-            e(S.FilterBar, null,
-              e(S.SearchInput, { className: "s21-grow", value: q, onChange: setQ, placeholder: "Hledat článek, tag, autor…" }),
-              e(S.Select, { placeholder: "Nejnovější", options: [
-                { value: "new", label: "Nejnovější" }, { value: "popular", label: "Nejoblíbenější" }, { value: "views", label: "Nejvíc čtené" }
-              ] })
-            ),
-            cat === "all" && !q && e(S.Section, { title: "Nejoblíbenější" },
-              e("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "var(--space-3)" } },
-                POPULAR.map((a) => e(S.EntityCard, {
-                  key: a.id,
-                  icon: "star",
-                  accent: "primary",
-                  title: a.title,
-                  subtitle: a.author + " · " + a.reading,
-                  meta: [
-                    { label: "Zobrazení", value: a.views },
-                    { label: "Aktualizace", value: a.updated },
-                  ],
-                  tags: a.tags.slice(0, 2).map((t) => ({ label: t, tone: "neutral" })),
-                  onClick: () => {}
-                }))
+
+            pinned.length > 0 && e(S.Section, { title: "Připnuté" },
+              e("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-3)" } },
+                pinned.map((a) => e("a", { key: a.id, href: "#" + a.slug, className: "art-card",
+                  style: { background: "linear-gradient(135deg, var(--primary-soft) 0%, var(--surface-raised) 60%)", borderLeft: "3px solid var(--primary)" }
+                },
+                  e("div", { className: "art-card__title" }, a.title),
+                  e("div", { className: "art-card__excerpt" }, a.excerpt),
+                  e("div", { className: "art-card__meta" },
+                    e("span", null, a.author),
+                    e("span", null, "·"),
+                    e("span", null, a.reading),
+                    e("span", null, "·"),
+                    e("span", null, a.views, " zobrazení")
+                  )
+                ))
               )
             ),
-            e(S.Section, { title: cat === "all" ? "Všechny články" : CATEGORIES.find((c) => c.id === cat).label },
-              e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-2)" } },
-                filtered.map((a) => e(S.EntityCard, {
-                  key: a.id,
-                  icon: "notes",
-                  title: a.title,
-                  subtitle: a.author + " · " + a.updated + " · " + a.reading,
-                  tags: a.tags.map((t) => ({ label: t, tone: "neutral" })),
-                  actions: e("span", { style: { font: "500 11px/14px var(--font-mono)", color: "var(--ink-muted)" } },
-                    a.views + " zobrazení"
-                  ),
-                  onClick: () => {}
-                })),
-                filtered.length === 0 && e(S.EmptyState, { title: "Nic nenalezeno", description: "Zkus upravit hledání nebo vybrat jinou kategorii." })
-              )
+
+            e(S.Section, { title: cat === "all" && !q ? "Všechny články" : q ? ("Výsledky pro „" + q + "\"") : CATEGORIES.find((c) => c.id === cat).label },
+              rest.length === 0
+                ? e(S.EmptyState, { title: "Nic nenalezeno", description: "Zkus upravit hledání nebo vybrat jinou kategorii." })
+                : e("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-3)" } },
+                    rest.map((a) => e("a", { key: a.id, href: "#" + a.slug, className: "art-card" },
+                      e("div", { className: "art-card__title" }, a.title),
+                      e("div", { className: "art-card__excerpt" }, a.excerpt),
+                      e("div", { className: "art-card__meta" },
+                        e("span", null, a.author),
+                        e("span", null, "·"),
+                        e("span", null, a.reading),
+                        e("span", null, "·"),
+                        e("span", null, a.views, " zobrazení")
+                      ),
+                      a.tags.length > 0 && e("div", { style: { display: "flex", gap: 4, flexWrap: "wrap", marginTop: 4 } },
+                        a.tags.map((t) => e(S.Tag, { key: t, tone: "neutral" }, t))
+                      )
+                    ))
+                  )
             )
           )
         )
