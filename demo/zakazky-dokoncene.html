@@ -17,25 +17,99 @@
 <script>
 (() => {
   const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  const DONE = [
+    { id: 1, code: "ZAK-2026-0127", name: "AI asistent pro zápisy z porad", client: "Obec Staré Město", finished: "15. 10. 2026", hours: "32:00", amount: "48 000 Kč", invoice: null },
+    { id: 2, code: "ZAK-2026-0126", name: "Audit CRM dat", client: "Moravia Steel a.s.", finished: "12. 10. 2026", hours: "18:30", amount: "27 500 Kč", invoice: null },
+    { id: 3, code: "ZAK-2026-0122", name: "Školení týmu v Notion", client: "Hradecká strojírna", finished: "05. 10. 2026", hours: "8:00", amount: "16 000 Kč", invoice: "FA-2026-0834" },
+    { id: 4, code: "ZAK-2026-0118", name: "Import historie z Raynet", client: "Agro Slovácko", finished: "28. 09. 2026", hours: "24:00", amount: "36 000 Kč", invoice: "FA-2026-0821" },
+    { id: 5, code: "ZAK-2026-0114", name: "Konzultace migrace", client: "Procházkovi s.r.o.", finished: "20. 09. 2026", hours: "6:30", amount: "13 000 Kč", invoice: null },
+    { id: 6, code: "ZAK-2026-0109", name: "Dashboard pro management", client: "Moravia Steel a.s.", finished: "10. 09. 2026", hours: "42:00", amount: "63 000 Kč", invoice: "FA-2026-0801" },
+  ];
+
+  const COLUMNS = [
+    { key: "code", label: "Číslo", sortable: true, width: "14%", render: (z) => e("span", { className: "s21-cell-code" }, z.code) },
+    { key: "name", label: "Zakázka", sortable: true, width: "32%", render: (z) =>
+      e("div", null,
+        e("div", { className: "s21-cell-title" }, z.name),
+        e("div", { className: "s21-cell-meta" }, z.client)
+      )
+    },
+    { key: "finished", label: "Dokončeno", align: "right", numeric: true, width: "14%" },
+    { key: "hours", label: "Odpracováno", align: "right", numeric: true, width: "12%" },
+    { key: "amount", label: "Částka", align: "right", numeric: true, width: "14%", render: (z) => e("strong", null, z.amount) },
+    { key: "invoice", label: "Faktura", width: "10%", render: (z) =>
+      z.invoice
+        ? e(S.Tag, { tone: "success" }, z.invoice)
+        : e(S.Tag, { tone: "warning" }, "Čeká")
+    },
+    { key: "actions", label: "", align: "center", width: "4%", render: () =>
+      e(S.Button, { size: "sm", iconOnly: true, icon: "more", variant: "ghost", "aria-label": "Víc", title: "Víc" })
+    }
+  ];
+
   const CRUMBS = [{ label: "Zakázky", href: "/zakazky" }, { label: "Dokončené k fakturaci", href: "/zakazky/dokoncene" }];
+
   function Page() {
+    const [tab, setTab] = React.useState("cekaji");
+    const [selected, setSelected] = React.useState([]);
+    const [q, setQ] = React.useState("");
+
+    const rows = tab === "cekaji" ? DONE.filter((d) => !d.invoice) : tab === "vyfakturovane" ? DONE.filter((d) => d.invoice) : DONE;
+    const toInvoice = DONE.filter((d) => !d.invoice);
+    const totalAmount = toInvoice.reduce((sum, d) => sum + parseInt(d.amount.replace(/[^0-9]/g, ""), 10), 0);
+
     return e(S.AppShell, {
       sidebar: e(D.DemoSidebar, { active: "/zakazky/dokoncene" }),
       topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
     },
-      e(S.PageHeader, { title: "Dokončené k fakturaci", description: "Zakázky čekající na fakturaci" }),
+      e(S.PageHeader, {
+        title: "Dokončené k fakturaci",
+        description: "Zakázky uzavřené, čekající na vystavení faktury",
+        actions: e(React.Fragment, null,
+          e(S.Button, { variant: "secondary", icon: "download" }, "Export"),
+          e(S.Button, { icon: "credit-card", disabled: selected.length === 0 }, selected.length > 0 ? "Vystavit " + selected.length + " faktur" : "Vystavit fakturu")
+        ),
+        tabs: e(S.Tabs, { value: tab, onChange: setTab, items: [
+          { value: "cekaji", label: "Čekají na fakturaci", count: toInvoice.length },
+          { value: "vyfakturovane", label: "Vyfakturované", count: DONE.length - toInvoice.length },
+          { value: "vsechny", label: "Všechny", count: DONE.length },
+        ] })
+      }),
       e(S.PageBody, null,
-        e("div", { style: { display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh", padding: "var(--space-8)" } },
-          e(S.EmptyState, {
-            icon: "check",
-            title: "Dokončené k fakturaci — brzy k dispozici",
-            description: "Tenhle modul System 21 je součástí platformy, ale v tomhle demu zatím není klikatelný. V Poema GUI a dalších zákaznických aplikacích se napojí přes API na backend `system21-test`.",
-            action: e(S.Button, { variant: "secondary", icon: "home", onClick: () => window.location.href = "./dashboard.html" }, "Zpět na dashboard")
-          })
-        )
+        e(S.KpiRow, { cols: 4 },
+          e(S.StatTile, { label: "K fakturaci", value: String(toInvoice.length), accent: "warning" }),
+          e(S.StatTile, { label: "Celková částka", value: totalAmount.toLocaleString("cs-CZ").replace(/,/g, " "), unit: "Kč", accent: "primary", big: true }),
+          e(S.StatTile, { label: "Dokončeno tento měsíc", value: "3" }),
+          e(S.StatTile, { label: "Fakturováno YTD", value: "1 487 000", unit: "Kč", accent: "success" })
+        ),
+        e(S.FilterBar, null,
+          e(S.SearchInput, { className: "s21-grow", value: q, onChange: setQ, placeholder: "Hledat zakázku, klient, číslo…" }),
+          e(S.Select, { placeholder: "Všichni klienti", options: [
+            { value: "moravia", label: "Moravia Steel" },
+            { value: "agro", label: "Agro Slovácko" },
+            { value: "hradecka", label: "Hradecká strojírna" },
+          ] })
+        ),
+        e(S.DataTable, {
+          columns: COLUMNS, rows, minWidth: 980,
+          selectable: true, selected, onSelectedChange: setSelected,
+          onRowClick: () => {}
+        }),
+        e(S.BulkActionBar, {
+          count: selected.length,
+          label: "zakázek vybráno",
+          onClear: () => setSelected([]),
+          actions: [
+            { label: "Vystavit faktury", icon: "credit-card", onClick: () => setSelected([]) },
+            { label: "Exportovat", icon: "download", onClick: () => {} },
+            { label: "Archivovat", icon: "folder", onClick: () => {} },
+          ]
+        })
       )
     );
   }
+
   ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
 })();
 </script>

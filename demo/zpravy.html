@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>System 21 · Zprávy</title>
+<title>System 21 · Zprávy (SMS)</title>
 <link rel="stylesheet" href="../tokens/tokens.css">
 <link rel="stylesheet" href="../dist/system21.css">
 <script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
@@ -17,25 +17,110 @@
 <script>
 (() => {
   const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  const MESSAGES = [
+    { id: 1, to: "Jan Novák", phone: "+420 602 123 456", body: "Dobrý den, připomínám schůzku zítra v 9:00 v kanceláři. Pavel", sent: "Dnes 10:42", state: "done" },
+    { id: 2, to: "Marie Nováková", phone: "+420 602 987 654", body: "Dobrý den, vaše pojistka čeká na podpis. Můžeme se domluvit na termínu? Pavel", sent: "Dnes 09:15", state: "done" },
+    { id: 3, to: "Petr Dvořák", phone: "+420 608 234 567", body: "Dobrý den, pojistná událost 03/2026 byla zpracována. Likvidace přijde do 7 dnů.", sent: "Včera 16:24", state: "done" },
+    { id: 4, to: "Agro Slovácko", phone: "+420 724 555 777", body: "Dobrý den, zasíláme nabídku pojištění vozového parku na uvedený email.", sent: "Včera 14:03", state: "in-progress" },
+    { id: 5, to: "Procházkovi", phone: "+420 605 333 444", body: "Upozornění: vaše smlouva SM-2026-0151 expiruje za 14 dnů. Kontaktuji vás tento týden.", sent: "2 dny zpět", state: "done" },
+    { id: 6, to: "Hradecká str.", phone: "+420 775 123 999", body: "Nabídka pojištění byla odeslána mailem. Pokud nedorazila, napište.", sent: "3 dny zpět", state: "overdue", err: "Doručení selhalo" },
+  ];
+
+  const TEMPLATES = [
+    { id: 1, name: "Připomínka schůzky", body: "Dobrý den, připomínám schůzku {datum} v {čas} v {místo}. {jméno}" },
+    { id: 2, name: "Pojistka k podpisu", body: "Dobrý den, vaše pojistka SM-{číslo} čeká na podpis. Můžeme se domluvit na termínu? {jméno}" },
+    { id: 3, name: "Expirace smlouvy", body: "Upozornění: vaše smlouva SM-{číslo} expiruje za {dnů} dnů. Kontaktujeme vás tento týden." },
+    { id: 4, name: "Likvidace hotová", body: "Dobrý den, pojistná událost {číslo} byla zpracována. Likvidace přijde do 7 dnů." },
+  ];
+
+  const COLUMNS = [
+    { key: "to", label: "Příjemce", sortable: true, width: "20%", render: (m) =>
+      e("div", null,
+        e("div", { className: "s21-cell-title" }, m.to),
+        e("div", { className: "s21-cell-meta" }, m.phone)
+      )
+    },
+    { key: "body", label: "Zpráva", width: "42%", render: (m) =>
+      e("div", { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 420 } }, m.body)
+    },
+    { key: "sent", label: "Odesláno", align: "right", width: "16%" },
+    { key: "state", label: "Stav", width: "14%", render: (m) =>
+      m.state === "overdue"
+        ? e(S.Badge, { tone: "danger", fitCell: true }, m.err || "Chyba")
+        : e(S.WorkflowBadge, { state: m.state, fitCell: true, label: m.state === "done" ? "Doručeno" : "Odesílá se" })
+    },
+    { key: "actions", label: "", align: "center", width: "8%", render: () =>
+      e("span", { className: "s21-row-actions", "data-no-row-click": true },
+        e(S.Button, { size: "sm", iconOnly: true, icon: "refresh", variant: "ghost", "aria-label": "Znovu odeslat", title: "Znovu odeslat" }),
+        e(S.Button, { size: "sm", iconOnly: true, icon: "more", variant: "ghost", "aria-label": "Víc", title: "Víc" })
+      )
+    }
+  ];
+
   const CRUMBS = [{ label: "Komunikace", href: "/komunikace" }, { label: "Zprávy", href: "/zpravy" }];
+
   function Page() {
+    const [tab, setTab] = React.useState("odeslane");
+    const [q, setQ] = React.useState("");
     return e(S.AppShell, {
       sidebar: e(D.DemoSidebar, { active: "/zpravy" }),
       topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
     },
-      e(S.PageHeader, { title: "Zprávy", description: "SMS a interní zprávy přes SMTP/ZS gateway" }),
+      e(S.PageHeader, {
+        title: "Zprávy",
+        description: "SMS a interní zprávy · napojeno na ZS SMS gateway",
+        actions: e(React.Fragment, null,
+          e(S.Button, { variant: "secondary", icon: "copy" }, "Šablony"),
+          e(S.Button, { icon: "send" }, "Nová zpráva")
+        ),
+        tabs: e(S.Tabs, { value: tab, onChange: setTab, items: [
+          { value: "odeslane", label: "Odeslané", count: MESSAGES.length },
+          { value: "sablony", label: "Šablony", count: TEMPLATES.length },
+          { value: "automatizace", label: "Automatizace" },
+        ] })
+      }),
       e(S.PageBody, null,
-        e("div", { style: { display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh", padding: "var(--space-8)" } },
-          e(S.EmptyState, {
-            icon: "send",
-            title: "Zprávy — brzy k dispozici",
-            description: "Tenhle modul System 21 je součástí platformy, ale v tomhle demu zatím není klikatelný. V Poema GUI a dalších zákaznických aplikacích se napojí přes API na backend `system21-test`.",
-            action: e(S.Button, { variant: "secondary", icon: "home", onClick: () => window.location.href = "./dashboard.html" }, "Zpět na dashboard")
-          })
-        )
+        e(S.KpiRow, { cols: 4 },
+          e(S.StatTile, { label: "Odesláno tento měsíc", value: "68", accent: "primary" }),
+          e(S.StatTile, { label: "Doručeno", value: "65", accent: "success" }),
+          e(S.StatTile, { label: "Selhalo", value: "3", accent: "danger" }),
+          e(S.StatTile, { label: "Náklady", value: "187", unit: "Kč" })
+        ),
+        tab === "odeslane" && e(React.Fragment, null,
+          e(S.FilterBar, null,
+            e(S.SearchInput, { className: "s21-grow", value: q, onChange: setQ, placeholder: "Hledat příjemce, text…" }),
+            e(S.Select, { placeholder: "Všechny stavy", options: [
+              { value: "done", label: "Doručeno" }, { value: "pending", label: "Odesílá se" }, { value: "failed", label: "Chyba" }
+            ] })
+          ),
+          e(S.DataTable, { columns: COLUMNS, rows: MESSAGES, minWidth: 980 })
+        ),
+        tab === "sablony" && e(S.Section, {
+          title: "Šablony zpráv",
+          action: e(S.Button, { size: "sm", icon: "plus" }, "Nová šablona")
+        },
+          e("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(360px, 1fr))", gap: "var(--space-3)" } },
+            TEMPLATES.map((t) => e(S.EntityCard, {
+              key: t.id,
+              icon: "copy",
+              title: t.name,
+              subtitle: t.body,
+              actions: e(S.Button, { size: "sm", icon: "send" }, "Použít"),
+              onClick: () => {}
+            }))
+          )
+        ),
+        tab === "automatizace" && e(S.EmptyState, {
+          icon: "sparkles",
+          title: "Automatizace SMS",
+          description: "Nastav pravidla, kdy se SMS pošle automaticky — např. 7 dnů před expirací smlouvy nebo po podpisu nabídky. Pravidla se spravují v DMS → Automatizace.",
+          action: e(S.Button, { icon: "sparkles", onClick: () => window.location.href = "./dms-automatizace.html" }, "Přejít do automatizace")
+        })
       )
     );
   }
+
   ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
 })();
 </script>

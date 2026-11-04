@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>System 21 · Docházka</title>
+<title>System 21 · HR Docházka</title>
 <link rel="stylesheet" href="../tokens/tokens.css">
 <link rel="stylesheet" href="../dist/system21.css">
 <script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
@@ -17,25 +17,100 @@
 <script>
 (() => {
   const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  // Mock: aktuální týden 17.-23. 11. 2026
+  const WEEK = [
+    { date: "Po 17. 11.", arrive: "08:12", leave: "17:03", pause: "0:45", total: "8:06", state: "ok" },
+    { date: "Út 18. 11.", arrive: "08:04", leave: "16:48", pause: "0:30", total: "8:14", state: "ok" },
+    { date: "St 19. 11.", arrive: "08:21", leave: "17:16", pause: "0:45", total: "8:10", state: "ok" },
+    { date: "Čt 20. 11.", arrive: "09:00", leave: "18:30", pause: "0:30", total: "9:00", state: "overtime" },
+    { date: "Pá 21. 11.", arrive: "—", leave: "—", pause: "—", total: "—", state: "vacation" },
+    { date: "So 22. 11.", arrive: "—", leave: "—", pause: "—", total: "—", state: "weekend" },
+    { date: "Ne 23. 11.", arrive: "—", leave: "—", pause: "—", total: "—", state: "weekend" },
+  ];
+
+  const STATE_LABELS = {
+    ok: { label: "Odpracováno", tone: "success" },
+    overtime: { label: "Přesčas", tone: "primary" },
+    vacation: { label: "Dovolená", tone: "warning" },
+    weekend: { label: "Víkend", tone: "neutral" },
+    sick: { label: "Nemoc", tone: "danger" },
+  };
+
+  const TEAM = [
+    { id: 1, name: "Pavel Obdržálek", today: "přítomen od 08:04", total: "38:24", vacation: 12 },
+    { id: 2, name: "Alena Dvořáková", today: "přítomna od 08:30", total: "36:12", vacation: 5 },
+    { id: 3, name: "Tomáš Novák", today: "home office", total: "40:18", vacation: 8 },
+    { id: 4, name: "Marek Krejčí", today: "nepřítomen (dovolená)", total: "28:00", vacation: 2 },
+    { id: 5, name: "Eva Horáková", today: "externě", total: "—", vacation: "—" },
+  ];
+
+  const COLUMNS = [
+    { key: "date", label: "Den", width: "18%", render: (d) => e("span", { className: "s21-cell-code", style: { fontSize: 13 } }, d.date) },
+    { key: "arrive", label: "Příchod", align: "right", numeric: true, width: "14%" },
+    { key: "leave", label: "Odchod", align: "right", numeric: true, width: "14%" },
+    { key: "pause", label: "Přestávka", align: "right", numeric: true, width: "14%" },
+    { key: "total", label: "Odpracováno", align: "right", numeric: true, width: "16%", render: (d) => e("strong", null, d.total) },
+    { key: "state", label: "Stav", width: "18%", render: (d) => {
+      const s = STATE_LABELS[d.state] || STATE_LABELS.ok;
+      return e(S.Badge, { tone: s.tone, fitCell: true }, s.label);
+    } },
+    { key: "actions", label: "", align: "center", width: "6%", render: () =>
+      e(S.Button, { size: "sm", iconOnly: true, icon: "edit", variant: "ghost", "aria-label": "Upravit", title: "Upravit" })
+    }
+  ];
+
   const CRUMBS = [{ label: "HR", href: "/hr" }, { label: "Docházka", href: "/hr/dochazka" }];
+
   function Page() {
+    const [tab, setTab] = React.useState("tyden");
     return e(S.AppShell, {
       sidebar: e(D.DemoSidebar, { active: "/hr/dochazka" }),
       topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
     },
-      e(S.PageHeader, { title: "Docházka", description: "Záznam příchodů, odchodů a směn" }),
+      e(S.PageHeader, {
+        title: "Docházka",
+        description: "Pracovní doba, dovolená, nemoc · aktuální týden 17.–23. 11. 2026",
+        actions: e(React.Fragment, null,
+          e(S.Button, { variant: "secondary", icon: "calendar" }, "Žádost o dovolenou"),
+          e(S.Button, { icon: "play" }, "Zapnout přihlášení")
+        ),
+        tabs: e(S.Tabs, { value: tab, onChange: setTab, items: [
+          { value: "tyden", label: "Aktuální týden" },
+          { value: "mesic", label: "Měsíc" },
+          { value: "rok", label: "Rok" },
+          { value: "tym", label: "Tým" },
+        ] })
+      }),
       e(S.PageBody, null,
-        e("div", { style: { display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh", padding: "var(--space-8)" } },
-          e(S.EmptyState, {
-            icon: "clock",
-            title: "Docházka — brzy k dispozici",
-            description: "Tenhle modul System 21 je součástí platformy, ale v tomhle demu zatím není klikatelný. V Poema GUI a dalších zákaznických aplikacích se napojí přes API na backend `system21-test`.",
-            action: e(S.Button, { variant: "secondary", icon: "home", onClick: () => window.location.href = "./dashboard.html" }, "Zpět na dashboard")
-          })
+        e(S.KpiRow, { cols: 4 },
+          e(S.StatTile, { label: "Odpracováno tento týden", value: "33:30", unit: "h", accent: "primary" }),
+          e(S.StatTile, { label: "Fond týdne", value: "40:00", unit: "h" }),
+          e(S.StatTile, { label: "Přesčas", value: "1:00", unit: "h", accent: "warning" }),
+          e(S.StatTile, { label: "Zbývá dovolené", value: "12", unit: "dnů", accent: "success" })
+        ),
+        e(S.Section, { title: "Tento týden" },
+          e(S.DataTable, { columns: COLUMNS, rows: WEEK, minWidth: 820 })
+        ),
+        e(S.Section, { title: "Tým právě teď" },
+          e("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "var(--space-3)" } },
+            TEAM.map((p) => e(S.EntityCard, {
+              key: p.id,
+              icon: "user",
+              title: p.name,
+              subtitle: p.today,
+              meta: [
+                { label: "Měsíčně", value: p.total },
+                { label: "Dovolená zbývá", value: p.vacation + (typeof p.vacation === "number" ? " dnů" : "") },
+              ],
+              onClick: () => {}
+            }))
+          )
         )
       )
     );
   }
+
   ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
 })();
 </script>
