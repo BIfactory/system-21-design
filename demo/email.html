@@ -17,25 +17,124 @@
 <script>
 (() => {
   const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  const MAILS = [
+    { id: 1, from: "Jan Novák", email: "jan@novak.cz", subject: "Dotaz na pojištění nemovitosti", preview: "Dobrý den, zdravím a chtěl bych se zeptat na možnosti pojištění naší chalupy…", time: "9:42", read: false, star: false, attachments: 0, tag: "Klient" },
+    { id: 2, from: "Alena Dvořáková", email: "alena@bifactory.cz", subject: "Re: Podpis smlouvy Moravia", preview: "Super, podpis plánujeme na 20. 11. v kanceláři. Můžu připravit i tu doplňkovou nabídku…", time: "8:23", read: false, star: true, attachments: 1, tag: "Interní" },
+    { id: 3, from: "Allianz pojišťovna", email: "info@allianz.cz", subject: "Potvrzení přijetí žádosti", preview: "Potvrzujeme přijetí vaší žádosti o pojištění pod číslem ALZ-2026-12847…", time: "včera", read: true, star: false, attachments: 2, tag: "Pojistitel" },
+    { id: 4, from: "ing. Vlastimil Kříž", email: "v.kriz@agroslovacko.cz", subject: "Re: Nabídka pojištění vozového parku", preview: "Dobrý den, děkuji za nabídku. Rádi bychom se k tomu vyjádřili do konce týdne…", time: "včera", read: true, star: false, attachments: 0, tag: "Klient" },
+    { id: 5, from: "UNIQA", email: "noreply@uniqa.cz", subject: "Nový sazebník od 1. 1. 2027", preview: "Vážení partneři, zasíláme aktualizovaný sazebník pojistných produktů…", time: "2 d", read: true, star: false, attachments: 1, tag: "Pojistitel" },
+    { id: 6, from: "Marie Nováková", email: "marie@novak.cz", subject: "Dotaz na úrazové pojištění pro děti", preview: "Zdravím, zajímalo by nás rozšíření úrazového pojištění i na naše děti…", time: "2 d", read: true, star: true, attachments: 0, tag: "Klient" },
+    { id: 7, from: "ČPP pojišťovna", email: "partner@cpp.cz", subject: "Školení nových produktů 15. 11.", preview: "Dobrý den, zveme Vás na školení k novým produktům…", time: "3 d", read: true, star: false, attachments: 0, tag: "Vzdělávání" },
+    { id: 8, from: "Petr Král", email: "p.kral@moraviasteel.cz", subject: "Re: Firemní pojištění — dodatek", preview: "Dobrý den Pavle, prosím o kontrolu přiloženého dodatku…", time: "4 d", read: true, star: false, attachments: 3, tag: "Klient" },
+  ];
+
+  const FOLDERS = [
+    { id: "inbox", label: "Doručená pošta", icon: "mail", count: 2 },
+    { id: "star", label: "Hvězdičkované", icon: "star", count: 2 },
+    { id: "sent", label: "Odeslaná", icon: "send", count: 0 },
+    { id: "draft", label: "Rozepsané", icon: "edit", count: 1 },
+    { id: "trash", label: "Koš", icon: "trash", count: 0 },
+  ];
+
   const CRUMBS = [{ label: "Komunikace", href: "/komunikace" }, { label: "Email", href: "/email" }];
+
   function Page() {
+    const [folder, setFolder] = React.useState("inbox");
+    const [active, setActive] = React.useState(MAILS[0]);
+    const [q, setQ] = React.useState("");
+
     return e(S.AppShell, {
       sidebar: e(D.DemoSidebar, { active: "/email" }),
       topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
     },
-      e(S.PageHeader, { title: "Email", description: "Integrovaný mailový klient" }),
+      e(S.PageHeader, {
+        title: "Email",
+        description: "2 nepřečtené · napojeno na Gmail",
+        actions: e(React.Fragment, null,
+          e(S.Button, { variant: "secondary", icon: "refresh" }, "Aktualizovat"),
+          e(S.Button, { icon: "send" }, "Nová zpráva")
+        )
+      }),
       e(S.PageBody, null,
-        e("div", { style: { display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh", padding: "var(--space-8)" } },
-          e(S.EmptyState, {
-            icon: "mail",
-            title: "Email — brzy k dispozici",
-            description: "Tenhle modul System 21 je součástí platformy, ale v tomhle demu zatím není klikatelný. V Poema GUI a dalších zákaznických aplikacích se napojí přes API na backend `system21-test`.",
-            action: e(S.Button, { variant: "secondary", icon: "home", onClick: () => window.location.href = "./dashboard.html" }, "Zpět na dashboard")
-          })
+        e("div", { style: { display: "grid", gridTemplateColumns: "200px 1fr 1fr", gap: "var(--space-4)", alignItems: "start" } },
+          e("aside", { style: { background: "var(--surface-raised)", border: "1px solid var(--border)", borderRadius: "var(--radius-xl)", padding: "var(--space-2)" } },
+            e("nav", { "aria-label": "Složky" },
+              FOLDERS.map((f) => e("button", {
+                key: f.id, type: "button",
+                onClick: () => setFolder(f.id),
+                style: {
+                  display: "flex", alignItems: "center", gap: "var(--space-2)",
+                  width: "100%", padding: "var(--space-2)",
+                  background: folder === f.id ? "var(--primary-soft)" : "transparent",
+                  border: 0, borderRadius: "var(--radius-md)",
+                  color: folder === f.id ? "var(--primary-text)" : "var(--ink)",
+                  font: folder === f.id ? "600 13px/18px var(--font-body)" : "400 13px/18px var(--font-body)",
+                  cursor: "pointer", textAlign: "left"
+                }
+              },
+                e(S.Icon, { name: f.icon, size: 14 }),
+                e("span", { style: { flex: 1 } }, f.label),
+                f.count > 0 && e("span", { style: { background: "var(--ink-subtle)", color: "var(--surface)", padding: "0 6px", borderRadius: "var(--radius-full)", font: "700 10px/18px var(--font-mono)", minWidth: 20, textAlign: "center" } }, f.count)
+              ))
+            )
+          ),
+          e("div", { style: { background: "var(--surface-raised)", border: "1px solid var(--border)", borderRadius: "var(--radius-xl)", overflow: "hidden", display: "flex", flexDirection: "column" } },
+            e("div", { style: { padding: "var(--space-2)", borderBottom: "1px solid var(--border-subtle)" } },
+              e(S.SearchInput, { value: q, onChange: setQ, placeholder: "Hledat v mailech…" })
+            ),
+            e("ul", { style: { listStyle: "none", margin: 0, padding: 0, maxHeight: 640, overflowY: "auto" } },
+              MAILS.map((m) => e("li", { key: m.id },
+                e("button", {
+                  type: "button",
+                  onClick: () => setActive(m),
+                  style: {
+                    display: "flex", flexDirection: "column", gap: 4,
+                    width: "100%", padding: "var(--space-2) var(--space-3)",
+                    background: active.id === m.id ? "var(--primary-soft)" : m.read ? "transparent" : "color-mix(in srgb, var(--primary-soft) 40%, transparent)",
+                    border: 0, borderLeft: "3px solid " + (active.id === m.id ? "var(--primary)" : "transparent"),
+                    borderBottom: "1px solid var(--border-subtle)",
+                    cursor: "pointer", textAlign: "left", font: "inherit", color: "inherit"
+                  }
+                },
+                  e("div", { style: { display: "flex", alignItems: "baseline", gap: "var(--space-2)" } },
+                    e("span", { style: { font: m.read ? "500 13px/18px var(--font-body)" : "700 13px/18px var(--font-body)", color: "var(--ink)", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, m.from),
+                    m.star && e(S.Icon, { name: "star", size: 12 }),
+                    m.attachments > 0 && e(S.Icon, { name: "paperclip", size: 12 }),
+                    e("span", { style: { font: "400 11px/16px var(--font-body)", color: "var(--ink-muted)" } }, m.time)
+                  ),
+                  e("div", { style: { font: m.read ? "400 13px/18px var(--font-body)" : "600 13px/18px var(--font-body)", color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, m.subject),
+                  e("div", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, m.preview)
+                )
+              ))
+            )
+          ),
+          e("div", { style: { background: "var(--surface-raised)", border: "1px solid var(--border)", borderRadius: "var(--radius-xl)", padding: "var(--space-4)", display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+            e("div", { style: { display: "flex", alignItems: "flex-start", gap: "var(--space-3)", paddingBottom: "var(--space-3)", borderBottom: "1px solid var(--border-subtle)" } },
+              e(S.Avatar, { name: active.from, size: 40 }),
+              e("div", { style: { flex: 1, minWidth: 0 } },
+                e("div", { style: { font: "600 14px/20px var(--font-body)" } }, active.from),
+                e("div", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)" } }, active.email),
+                e("div", { style: { font: "400 11px/14px var(--font-body)", color: "var(--ink-subtle)", marginTop: 2 } }, active.time)
+              ),
+              e(S.Tag, { tone: "neutral" }, active.tag)
+            ),
+            e("h2", { style: { margin: 0, font: "700 18px/24px var(--font-display)" } }, active.subject),
+            e("div", { style: { font: "400 14px/22px var(--font-body)", color: "var(--ink)", minHeight: 160 } },
+              active.preview + "\n\nS pozdravem,\n" + active.from
+            ),
+            active.attachments > 0 && e(S.AttachmentList, { items: Array.from({ length: active.attachments }, (_, i) => ({ id: i, name: "Priloha_" + (i+1) + ".pdf", mimeType: "application/pdf", size: 180000 + i * 40000 })), compact: true, onDownload: () => {} }),
+            e("div", { style: { display: "flex", gap: "var(--space-2)", paddingTop: "var(--space-3)", borderTop: "1px solid var(--border-subtle)" } },
+              e(S.Button, { icon: "send" }, "Odpovědět"),
+              e(S.Button, { variant: "secondary", icon: "share" }, "Přeposlat"),
+              e(S.Button, { variant: "ghost", icon: "folder" }, "Archivovat")
+            )
+          )
         )
       )
     );
   }
+
   ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
 })();
 </script>

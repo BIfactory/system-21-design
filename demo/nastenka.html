@@ -17,25 +17,89 @@
 <script>
 (() => {
   const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  const POSTS = [
+    { id: 1, author: "Lubomír Hulín", time: "před 1 h", category: "Důležité",
+      title: "Nový zaměstnanec — Jana Svobodová",
+      content: "Od pondělí 17. 11. k nám nastupuje Jana Svobodová jako office manager. Přivítejte ji prosím srdečně. Jana bude mít na starosti recepci, jednání s dodavateli a podporu týmu.",
+      reactions: { "👋": 4, "❤️": 2 }, comments: 3 },
+    { id: 2, author: "Pavel Obdržálek", time: "před 4 h", category: "Školení",
+      title: "Školení k novým produktům Allianz — 15. 11.",
+      content: "V pátek 15. 11. od 13:00 proběhne online školení k novým produktům Allianz. Účast povinná pro všechny konzultanty. Odkaz na Teams pošlu den předem.",
+      reactions: { "📚": 3 }, comments: 1 },
+    { id: 3, author: "Alena Dvořáková", time: "včera", category: "Provoz",
+      title: "Nová šablona smlouvy pro firemní klienty",
+      content: "V DMS jsem nahrála aktualizovanou šablonu firemní pojistné smlouvy. Prosím používejte od nynějška tuto verzi — stará (2024) je archivovaná.",
+      reactions: { "👍": 5, "🎉": 1 }, comments: 2 },
+    { id: 4, author: "Lubomír Hulín", time: "2 dny zpět", category: "Oznámení",
+      title: "Měsíční výsledky za říjen 2026",
+      content: "Říjen jsme uzavřeli s tržbami 2,48 mil. Kč a 94% konverzí nabídek. Velké díky všem za práci! Kompletní výsledky v příloze — podrobnosti rozebereme na pondělním meetingu.",
+      reactions: { "🎉": 8, "💪": 4, "🚀": 2 }, comments: 5 },
+  ];
+
   const CRUMBS = [{ label: "Intranet", href: "/intranet" }, { label: "Nástěnka", href: "/nastenka" }];
+  const CAT_TONE = { "Důležité": "primary", "Školení": "neutral", "Provoz": "neutral", "Oznámení": "success" };
+
   function Page() {
+    const [chip, setChip] = React.useState("all");
     return e(S.AppShell, {
       sidebar: e(D.DemoSidebar, { active: "/nastenka" }),
       topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
     },
-      e(S.PageHeader, { title: "Nástěnka", description: "Interní oznámení pro celý tým" }),
+      e(S.PageHeader, {
+        title: "Nástěnka",
+        description: "Interní oznámení a aktuality pro celý tým",
+        actions: e(S.Button, { icon: "plus" }, "Nový příspěvek")
+      }),
       e(S.PageBody, null,
-        e("div", { style: { display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh", padding: "var(--space-8)" } },
-          e(S.EmptyState, {
-            icon: "bell",
-            title: "Nástěnka — brzy k dispozici",
-            description: "Tenhle modul System 21 je součástí platformy, ale v tomhle demu zatím není klikatelný. V Poema GUI a dalších zákaznických aplikacích se napojí přes API na backend `system21-test`.",
-            action: e(S.Button, { variant: "secondary", icon: "home", onClick: () => window.location.href = "./dashboard.html" }, "Zpět na dashboard")
-          })
+        e(S.ChipGroup, { value: chip, onChange: setChip, items: [
+          { value: "all", label: "Vše", count: 4 },
+          { value: "vazne", label: "Důležité", count: 1 },
+          { value: "skoleni", label: "Školení", count: 1 },
+          { value: "provoz", label: "Provoz", count: 1 },
+          { value: "oznameni", label: "Oznámení", count: 1 },
+        ] }),
+        e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-4)", maxWidth: 780 } },
+          POSTS.map((p) => e("article", { key: p.id,
+            style: {
+              display: "flex", flexDirection: "column", gap: "var(--space-3)",
+              padding: "var(--space-4)", background: "var(--surface-raised)",
+              border: "1px solid var(--border)", borderRadius: "var(--radius-xl)",
+              boxShadow: "var(--elev-1)"
+            }
+          },
+            e("header", { style: { display: "flex", alignItems: "flex-start", gap: "var(--space-3)" } },
+              e(S.Avatar, { name: p.author, size: 36 }),
+              e("div", { style: { flex: 1, minWidth: 0 } },
+                e("div", { style: { font: "500 13px/18px var(--font-body)" } }, p.author),
+                e("div", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)" } }, p.time)
+              ),
+              e(S.Tag, { tone: CAT_TONE[p.category] || "neutral" }, p.category)
+            ),
+            e("h3", { style: { margin: 0, font: "700 18px/24px var(--font-display)", color: "var(--ink)" } }, p.title),
+            e("div", { style: { font: "400 14px/22px var(--font-body)", color: "var(--ink)", whiteSpace: "pre-wrap" } }, p.content),
+            e("footer", { style: { display: "flex", alignItems: "center", gap: "var(--space-3)", paddingTop: "var(--space-2)", borderTop: "1px solid var(--border-subtle)" } },
+              e("div", { style: { display: "flex", gap: "var(--space-1)", flex: 1, flexWrap: "wrap" } },
+                Object.entries(p.reactions).map(([emoji, n]) =>
+                  e("span", { key: emoji,
+                    style: {
+                      display: "inline-flex", alignItems: "center", gap: 4,
+                      padding: "2px 10px", background: "var(--surface-muted)",
+                      border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-full)",
+                      font: "500 12px/16px var(--font-body)", color: "var(--ink)",
+                    }
+                  }, emoji, " ", n)
+                ),
+                e(S.Button, { size: "sm", variant: "ghost", icon: "plus" }, "Reagovat")
+              ),
+              e(S.Button, { size: "sm", variant: "ghost", icon: "chat" }, p.comments + " komentářů")
+            )
+          ))
         )
       )
     );
   }
+
   ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
 })();
 </script>

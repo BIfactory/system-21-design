@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>System 21 · Dokumenty</title>
+<title>System 21 · DMS Dokumenty</title>
 <link rel="stylesheet" href="../tokens/tokens.css">
 <link rel="stylesheet" href="../dist/system21.css">
 <script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
@@ -17,25 +17,127 @@
 <script>
 (() => {
   const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  const FOLDERS = [
+    { id: "all", label: "Všechny dokumenty", icon: "folder", count: 1695 },
+    { id: "contracts", label: "Smlouvy", icon: "file", count: 847 },
+    { id: "invoices", label: "Faktury", icon: "credit-card", count: 412 },
+    { id: "insurance", label: "Pojistné události", icon: "alert-triangle", count: 234 },
+    { id: "templates", label: "Šablony", icon: "copy", count: 28 },
+    { id: "pending", label: "Čeká na kontrolu", icon: "clock", count: 4 },
+  ];
+
+  const FILES = [
+    { id: 1, name: "SM-2026-0117 Pojištění majetku Novákovi.pdf", mimeType: "application/pdf", size: 243200, uploadedBy: "Pavel O.", uploadedAt: "před 3 h", folder: "contracts", client: "Novákovi" },
+    { id: 2, name: "FA-2026-0845 Allianz pojišťovna.pdf", mimeType: "application/pdf", size: 86400, uploadedBy: "Alena D.", uploadedAt: "včera", folder: "invoices", client: "Allianz" },
+    { id: 3, name: "Pojistná událost 03-2026 Dvořákovi.pdf", mimeType: "application/pdf", size: 112400, uploadedBy: "Alena D.", uploadedAt: "včera", folder: "insurance", client: "Dvořákovi" },
+    { id: 4, name: "Firemní smlouva šablona 2026.docx", mimeType: "application/msword", size: 42000, uploadedBy: "Lubomír H.", uploadedAt: "2 d", folder: "templates", client: "—" },
+    { id: 5, name: "Foto škody IMG_2041.jpg", mimeType: "image/jpeg", size: 2480000, uploadedBy: "Jan Novák", uploadedAt: "3 d", folder: "insurance", client: "Novákovi" },
+    { id: 6, name: "SM-2026-0130 Autopojištění Dvořákovi.pdf", mimeType: "application/pdf", size: 198000, uploadedBy: "Pavel O.", uploadedAt: "4 d", folder: "contracts", client: "Dvořákovi" },
+    { id: 7, name: "FA-2026-0831 UNIQA.pdf", mimeType: "application/pdf", size: 76200, uploadedBy: "Alena D.", uploadedAt: "1 t", folder: "invoices", client: "UNIQA" },
+    { id: 8, name: "Zadání od klienta ZAK-131.pdf", mimeType: "application/pdf", size: 280000, uploadedBy: "Pavel O.", uploadedAt: "1 t", folder: "contracts", client: "Agro Slovácko" },
+  ];
+
+  function fmtSize(n) {
+    if (n < 1024) return n + " B";
+    if (n < 1024*1024) return (n/1024).toFixed(1).replace(".0","") + " kB";
+    return (n/1024/1024).toFixed(1).replace(".0","") + " MB";
+  }
+
+  const COLUMNS = [
+    { key: "name", label: "Soubor", sortable: true, width: "44%", render: (f) =>
+      e("div", { style: { display: "flex", alignItems: "center", gap: "var(--space-2)" } },
+        e(S.Icon, { name: f.mimeType.startsWith("image") ? "image" : "file", size: 16, className: "s21-atl__icon" }),
+        e("div", { style: { minWidth: 0 } },
+          e("div", { className: "s21-cell-title", style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, f.name),
+          e("div", { className: "s21-cell-meta" }, f.mimeType.split("/").pop().toUpperCase())
+        )
+      )
+    },
+    { key: "client", label: "Klient", width: "16%" },
+    { key: "size", label: "Velikost", align: "right", numeric: true, width: "10%", render: (f) => fmtSize(f.size) },
+    { key: "uploadedBy", label: "Nahrál", width: "14%" },
+    { key: "uploadedAt", label: "Kdy", align: "right", width: "10%" },
+    { key: "actions", label: "", align: "center", width: "6%", render: () =>
+      e("span", { className: "s21-row-actions", "data-no-row-click": true },
+        e(S.Button, { size: "sm", iconOnly: true, icon: "download", variant: "ghost", "aria-label": "Stáhnout", title: "Stáhnout" }),
+        e(S.Button, { size: "sm", iconOnly: true, icon: "more", variant: "ghost", "aria-label": "Víc", title: "Víc" })
+      )
+    }
+  ];
+
   const CRUMBS = [{ label: "DMS", href: "/dms" }, { label: "Dokumenty", href: "/dms/dokumenty" }];
+
   function Page() {
+    const [folder, setFolder] = React.useState("all");
+    const [q, setQ] = React.useState("");
+    const [selected, setSelected] = React.useState([]);
+    const rows = folder === "all" ? FILES : FILES.filter((f) => f.folder === folder);
     return e(S.AppShell, {
       sidebar: e(D.DemoSidebar, { active: "/dms/dokumenty" }),
       topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
     },
-      e(S.PageHeader, { title: "Dokumenty", description: "Správa dokumentů napříč klienty a smlouvami" }),
-      e(S.PageBody, null,
-        e("div", { style: { display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh", padding: "var(--space-8)" } },
-          e(S.EmptyState, {
-            icon: "folder",
-            title: "Dokumenty — brzy k dispozici",
-            description: "Tenhle modul System 21 je součástí platformy, ale v tomhle demu zatím není klikatelný. V Poema GUI a dalších zákaznických aplikacích se napojí přes API na backend `system21-test`.",
-            action: e(S.Button, { variant: "secondary", icon: "home", onClick: () => window.location.href = "./dashboard.html" }, "Zpět na dashboard")
-          })
+      e(S.PageHeader, {
+        title: "Dokumenty",
+        description: "Centrální úložiště smluv, faktur a dalších dokumentů",
+        actions: e(React.Fragment, null,
+          e(S.Button, { variant: "secondary", icon: "folder" }, "Nová složka"),
+          e(S.Button, { icon: "upload" }, "Nahrát soubory")
         )
+      }),
+      e(S.PageBody, null,
+        e("div", { style: { display: "grid", gridTemplateColumns: "220px 1fr", gap: "var(--space-4)", alignItems: "start" } },
+          e("aside", { style: { background: "var(--surface-raised)", border: "1px solid var(--border)", borderRadius: "var(--radius-xl)", padding: "var(--space-2)" } },
+            e("nav", null,
+              FOLDERS.map((f) => e("button", {
+                key: f.id, type: "button",
+                onClick: () => setFolder(f.id),
+                style: {
+                  display: "flex", alignItems: "center", gap: "var(--space-2)",
+                  width: "100%", padding: "var(--space-2)",
+                  background: folder === f.id ? "var(--primary-soft)" : "transparent",
+                  border: 0, borderRadius: "var(--radius-md)",
+                  color: folder === f.id ? "var(--primary-text)" : "var(--ink)",
+                  font: folder === f.id ? "600 13px/18px var(--font-body)" : "400 13px/18px var(--font-body)",
+                  cursor: "pointer", textAlign: "left"
+                }
+              },
+                e(S.Icon, { name: f.icon, size: 14 }),
+                e("span", { style: { flex: 1 } }, f.label),
+                e("span", { style: { font: "500 11px/16px var(--font-mono)", color: "var(--ink-muted)" } }, f.count)
+              ))
+            )
+          ),
+          e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+            e(S.FilterBar, null,
+              e(S.SearchInput, { className: "s21-grow", value: q, onChange: setQ, placeholder: "Hledat soubor, klient…" }),
+              e(S.Select, { placeholder: "Všechny typy", options: [
+                { value: "pdf", label: "PDF" }, { value: "docx", label: "Word" }, { value: "xlsx", label: "Excel" }, { value: "img", label: "Obrázek" }
+              ] }),
+              e(S.Button, { variant: "secondary", icon: "grid" }, "Mřížka")
+            ),
+            e(S.FileUploadZone, { onFiles: (files) => new Promise((res) => setTimeout(res, 800)), accept: ".pdf,.jpg,.png,.doc,.docx,.xlsx", maxSize: 20 * 1024 * 1024 }),
+            e(S.DataTable, {
+              columns: COLUMNS, rows, minWidth: 820,
+              selectable: true, selected, onSelectedChange: setSelected,
+              onRowClick: () => {}
+            })
+          )
+        ),
+        e(S.BulkActionBar, {
+          count: selected.length,
+          label: "souborů vybráno",
+          onClear: () => setSelected([]),
+          actions: [
+            { label: "Stáhnout", icon: "download", onClick: () => {} },
+            { label: "Přesunout", icon: "folder", onClick: () => {} },
+            { label: "Smazat", icon: "trash", variant: "danger", onClick: () => {} },
+          ]
+        })
       )
     );
   }
+
   ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
 })();
 </script>

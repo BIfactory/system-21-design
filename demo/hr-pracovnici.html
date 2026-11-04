@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>System 21 · Pracovníci</title>
+<title>System 21 · HR Pracovníci</title>
 <link rel="stylesheet" href="../tokens/tokens.css">
 <link rel="stylesheet" href="../dist/system21.css">
 <script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
@@ -17,25 +17,94 @@
 <script>
 (() => {
   const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  const WORKERS = [
+    { id: 1, code: "ZAM-001", name: "Lubomír Hulín", position: "CEO / Vedoucí", dept: "Management", start: "01. 01. 2024", contract: "HPP", salary: "—", state: "in-progress" },
+    { id: 2, code: "ZAM-002", name: "Pavel Obdržálek", position: "Senior Konzultant", dept: "Konzultace", start: "01. 03. 2024", contract: "HPP", salary: "68 000 Kč", state: "in-progress" },
+    { id: 3, code: "ZAM-003", name: "Alena Dvořáková", position: "Konzultant", dept: "Konzultace", start: "15. 05. 2024", contract: "HPP", salary: "58 000 Kč", state: "in-progress" },
+    { id: 4, code: "ZAM-004", name: "Tomáš Novák", position: "Junior Konzultant", dept: "Konzultace", start: "01. 09. 2024", contract: "HPP", salary: "42 000 Kč", state: "in-progress" },
+    { id: 5, code: "ZAM-005", name: "Jana Svobodová", position: "Office manager", dept: "Backoffice", start: "17. 11. 2026", contract: "HPP", salary: "38 000 Kč", state: "draft" },
+    { id: 6, code: "ZAM-006", name: "Marek Krejčí", position: "IT Specialist", dept: "IT", start: "15. 08. 2024", contract: "DPČ", salary: "350 Kč/h", state: "in-progress" },
+    { id: 7, code: "ZAM-007", name: "Eva Horáková", position: "Účetní", dept: "Backoffice", start: "01. 06. 2025", contract: "Externě", salary: "22 000 Kč/měs", state: "in-progress" },
+  ];
+
+  const COLUMNS = [
+    { key: "code", label: "ID", width: "10%", render: (r) => e("span", { className: "s21-cell-code" }, r.code) },
+    { key: "name", label: "Jméno a pozice", sortable: true, width: "28%", render: (r) =>
+      e("div", null,
+        e("div", { className: "s21-cell-title" }, r.name),
+        e("div", { className: "s21-cell-meta" }, r.position + " · " + r.dept)
+      )
+    },
+    { key: "start", label: "Nástup", align: "right", numeric: true, width: "14%" },
+    { key: "contract", label: "Smlouva", width: "12%" },
+    { key: "salary", label: "Mzda", align: "right", numeric: true, width: "14%" },
+    { key: "state", label: "Stav", width: "14%", render: (r) => e(S.WorkflowBadge, { state: r.state, fitCell: true, label: r.state === "draft" ? "Nastupuje" : "Aktivní" }) },
+    { key: "actions", label: "", align: "center", width: "8%", render: () =>
+      e(S.Button, { size: "sm", iconOnly: true, icon: "more", variant: "ghost", "aria-label": "Víc", title: "Víc" })
+    }
+  ];
+
   const CRUMBS = [{ label: "HR", href: "/hr" }, { label: "Pracovníci", href: "/hr/pracovnici" }];
+
   function Page() {
+    const [tab, setTab] = React.useState("aktivni");
+    const [q, setQ] = React.useState("");
+    const [selected, setSelected] = React.useState([]);
     return e(S.AppShell, {
       sidebar: e(D.DemoSidebar, { active: "/hr/pracovnici" }),
       topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
     },
-      e(S.PageHeader, { title: "Pracovníci", description: "Správa zaměstnanců, pozic a mezd" }),
+      e(S.PageHeader, {
+        title: "Pracovníci",
+        description: "Zaměstnanci, externisti, kontrakty, mzdy",
+        actions: e(React.Fragment, null,
+          e(S.Button, { variant: "secondary", icon: "download" }, "Export"),
+          e(S.Button, { icon: "user-plus" }, "Nový pracovník")
+        ),
+        tabs: e(S.Tabs, { value: tab, onChange: setTab, items: [
+          { value: "aktivni", label: "Aktivní", count: 6 },
+          { value: "nastupuji", label: "Nastupující", count: 1 },
+          { value: "externiste", label: "Externisti", count: 2 },
+          { value: "archiv", label: "Archiv" },
+        ] })
+      }),
       e(S.PageBody, null,
-        e("div", { style: { display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh", padding: "var(--space-8)" } },
-          e(S.EmptyState, {
-            icon: "users",
-            title: "Pracovníci — brzy k dispozici",
-            description: "Tenhle modul System 21 je součástí platformy, ale v tomhle demu zatím není klikatelný. V Poema GUI a dalších zákaznických aplikacích se napojí přes API na backend `system21-test`.",
-            action: e(S.Button, { variant: "secondary", icon: "home", onClick: () => window.location.href = "./dashboard.html" }, "Zpět na dashboard")
-          })
-        )
+        e(S.KpiRow, { cols: 4 },
+          e(S.StatTile, { label: "Celkem", value: "7" }),
+          e(S.StatTile, { label: "Mzdové náklady", value: "248 000", unit: "Kč", hint: "/měsíc" }),
+          e(S.StatTile, { label: "Fluktuace", value: "4 %", accent: "success", hint: "/rok" }),
+          e(S.StatTile, { label: "Dovolená dnes", value: "0", accent: "primary" })
+        ),
+        e(S.FilterBar, null,
+          e(S.SearchInput, { className: "s21-grow", value: q, onChange: setQ, placeholder: "Hledat jméno, pozici, oddělení…" }),
+          e(S.Select, { placeholder: "Všechna oddělení", options: [
+            { value: "mgmt", label: "Management" }, { value: "konz", label: "Konzultace" },
+            { value: "bo", label: "Backoffice" }, { value: "it", label: "IT" }
+          ] }),
+          e(S.Select, { placeholder: "Všechny smlouvy", options: [
+            { value: "hpp", label: "HPP" }, { value: "dpc", label: "DPČ" }, { value: "dpp", label: "DPP" }, { value: "ext", label: "Externě" }
+          ] })
+        ),
+        e(S.DataTable, {
+          columns: COLUMNS, rows: WORKERS, minWidth: 980,
+          selectable: true, selected, onSelectedChange: setSelected,
+          onRowClick: () => {}
+        }),
+        e(S.BulkActionBar, {
+          count: selected.length,
+          label: "pracovníků vybráno",
+          onClear: () => setSelected([]),
+          actions: [
+            { label: "Exportovat", icon: "download", onClick: () => {} },
+            { label: "Hromadná zpráva", icon: "mail", onClick: () => {} },
+            { label: "Archivovat", icon: "trash", variant: "danger", onClick: () => {} },
+          ]
+        })
       )
     );
   }
+
   ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
 })();
 </script>
