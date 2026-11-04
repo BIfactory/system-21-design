@@ -1629,6 +1629,131 @@ function ModuleHome({ title, description, kpis, quickActions, activity, diary, c
   );
 }
 
+/* ───────────── CommentThread (NEW — demo-prep/D) ─────────────
+   Vertikální list komentářů s avatarem, tělem, reactions, repliesy. */
+
+function formatBytes(n) {
+  if (!Number.isFinite(n)) return "";
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toLocaleString("cs-CZ", { maximumFractionDigits: 1 })} kB`;
+  if (n < 1024 * 1024 * 1024) return `${(n / 1024 / 1024).toLocaleString("cs-CZ", { maximumFractionDigits: 1 })} MB`;
+  return `${(n / 1024 / 1024 / 1024).toLocaleString("cs-CZ", { maximumFractionDigits: 1 })} GB`;
+}
+
+function CommentItem({ c, depth = 0 }) {
+  return (
+    <article className={cx("s21-comment", depth > 0 && "s21-comment--reply")}>
+      <Avatar name={c.author} src={c.avatar} size={32} />
+      <div className="s21-comment__body">
+        <header className="s21-comment__head">
+          <strong className="s21-comment__author">{c.author}</strong>
+          <span className="s21-comment__time">{relativeTime(c.createdAt)}</span>
+        </header>
+        <div className="s21-comment__text">{c.text}</div>
+        {(c.reactions && Object.keys(c.reactions).length > 0) && (
+          <div className="s21-comment__reactions">
+            {Object.entries(c.reactions).map(([emoji, n]) => (
+              <span key={emoji} className="s21-comment__rx">{emoji} {n}</span>
+            ))}
+          </div>
+        )}
+      </div>
+    </article>
+  );
+}
+
+function CommentThread({ items = [], onAdd, currentUser, className }) {
+  const [draft, setDraft] = useState("");
+  const submit = () => {
+    const t = draft.trim();
+    if (!t || !onAdd) return;
+    onAdd(t);
+    setDraft("");
+  };
+  return (
+    <div className={cx("s21-cmt", className)}>
+      {items.length === 0 ? (
+        <EmptyState title="Žádné komentáře" hint="Buďte první, kdo sem napíše." />
+      ) : (
+        <ul className="s21-cmt__list" role="list">
+          {items.map((c) => (
+            <li key={c.id}>
+              <CommentItem c={c} />
+              {c.replies && c.replies.length > 0 && (
+                <ul className="s21-cmt__replies" role="list">
+                  {c.replies.map((r) => <li key={r.id}><CommentItem c={r} depth={1} /></li>)}
+                </ul>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      {typeof onAdd === "function" && (
+        <form
+          className="s21-cmt__form"
+          onSubmit={(e) => { e.preventDefault(); submit(); }}
+        >
+          <Avatar name={currentUser && currentUser.name} src={currentUser && currentUser.avatar} size={28} />
+          <div className="s21-cmt__form-main">
+            <textarea
+              className="s21-cmt__input"
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              placeholder="Napište komentář…"
+              rows={2}
+            />
+            <div className="s21-cmt__form-foot">
+              <Button type="submit" size="sm" disabled={!draft.trim()}>Odeslat</Button>
+            </div>
+          </div>
+        </form>
+      )}
+    </div>
+  );
+}
+
+/* ───────────── AttachmentList (NEW — demo-prep/D) ─────────────
+   Řádkový seznam souborů: ikona typu, název, velikost, uploader, akce. */
+
+function iconForMime(m) {
+  if (!m) return "file";
+  if (m.startsWith("image/")) return "image";
+  if (m === "application/pdf") return "file";
+  if (m.startsWith("text/")) return "notes";
+  return "paperclip";
+}
+function AttachmentList({ items = [], onDownload, onRemove, compact, className }) {
+  if (!items.length) return <EmptyState title="Žádné přílohy" hint="Přetáhněte soubor nebo klikněte na Nahrát." />;
+  return (
+    <ul className={cx("s21-atl", compact && "s21-atl--compact", className)} role="list">
+      {items.map((a) => (
+        <li key={a.id} className="s21-atl__item">
+          <Icon name={a.icon || iconForMime(a.mimeType)} size={compact ? 14 : 18} className="s21-atl__icon" />
+          <div className="s21-atl__main">
+            <div className="s21-atl__name">{a.name}</div>
+            {!compact && (
+              <div className="s21-atl__meta">
+                {a.mimeType && <span>{a.mimeType.split("/").pop().toUpperCase()}</span>}
+                {a.size != null && <span>· {formatBytes(a.size)}</span>}
+                {a.uploadedBy && <span>· {a.uploadedBy}</span>}
+                {a.uploadedAt && <span>· {relativeTime(a.uploadedAt)}</span>}
+              </div>
+            )}
+          </div>
+          <div className="s21-atl__actions">
+            {typeof onDownload === "function" && (
+              <Button size="sm" variant="ghost" iconOnly icon="download" aria-label="Stáhnout" title="Stáhnout" onClick={() => onDownload(a.id)} />
+            )}
+            {typeof onRemove === "function" && (
+              <Button size="sm" variant="ghost" iconOnly icon="trash" aria-label="Odstranit" title="Odstranit" onClick={() => onRemove(a.id)} />
+            )}
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 /* ───────────── Theme (NEW — Fáze E) ───────────── */
 function getInitialTheme() {
   if (typeof window === "undefined") return "light";
@@ -1755,6 +1880,7 @@ export {
   BrandToggle, useBrand,
   moduleNavSections, KpiRow, ActivityFeed, QuickActions,
   EntityCard, WorkflowBadge, RelationsSidebar, ModuleHome,
+  CommentThread, AttachmentList,
   Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
   InputGroup, Textarea, FileDrop,
   BottomNav, useScrollDirection,
@@ -1773,6 +1899,7 @@ if (typeof window !== "undefined") {
   BrandToggle, useBrand,
   moduleNavSections, KpiRow, ActivityFeed, QuickActions,
   EntityCard, WorkflowBadge, RelationsSidebar, ModuleHome,
+  CommentThread, AttachmentList,
   Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
   InputGroup, Textarea, FileDrop,
   BottomNav, useScrollDirection,

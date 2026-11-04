@@ -287,6 +287,43 @@ export interface ModuleHomeProps {
 }
 export declare function ModuleHome(p: ModuleHomeProps): JSX.Element;
 
+/* — Comments + attachments (demo-prep/D, 2026-11-04) — */
+export interface Comment {
+  id: string | number;
+  author: string;
+  avatar?: string;
+  text: string;
+  createdAt: string | Date;
+  replies?: Comment[];
+  reactions?: Record<string, number>;
+}
+export interface CommentThreadProps {
+  items?: Comment[];
+  onAdd?: (text: string) => void;
+  currentUser?: { name: string; avatar?: string };
+  className?: string;
+}
+export declare function CommentThread(p: CommentThreadProps): JSX.Element;
+
+export interface Attachment {
+  id: string | number;
+  name: string;
+  size?: number;
+  mimeType?: string;
+  thumbnailUrl?: string;
+  uploadedBy?: string;
+  uploadedAt?: string | Date;
+  icon?: IconName;
+}
+export interface AttachmentListProps {
+  items?: Attachment[];
+  onDownload?: (id: string | number) => void;
+  onRemove?: (id: string | number) => void;
+  compact?: boolean;
+  className?: string;
+}
+export declare function AttachmentList(p: AttachmentListProps): JSX.Element;
+
 /* — Fáze H components — */
 export interface DrawerProps { open: boolean; onClose?: () => void; side?: "left" | "right" | "top" | "bottom"; size?: number | string; title?: ReactNode; description?: ReactNode; footer?: ReactNode; children?: ReactNode; className?: string }
 export declare function Drawer(p: DrawerProps): JSX.Element | null;

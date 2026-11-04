@@ -962,3 +962,32 @@ body { font-family: var(--font-body); color: var(--ink); margin: 0; font-feature
 @media (max-width: 1023px) {
   .s21-modulehome__grid { grid-template-columns: 1fr; }
 }
+
+/* ─── CommentThread (demo-prep/D, 2026-11-04) ─── */
+.s21-cmt { display: flex; flex-direction: column; gap: var(--space-4); }
+.s21-cmt__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-4); }
+.s21-cmt__replies { list-style: none; margin: var(--space-3) 0 0 var(--space-6); padding: 0 0 0 var(--space-4); border-left: 2px solid var(--border-subtle); display: flex; flex-direction: column; gap: var(--space-3); }
+.s21-comment { display: flex; gap: var(--space-3); }
+.s21-comment__body { flex: 1; min-width: 0; }
+.s21-comment__head { display: flex; align-items: baseline; gap: var(--space-2); margin-bottom: 2px; }
+.s21-comment__author { font: 600 14px/20px var(--font-body); color: var(--ink); }
+.s21-comment__time { font: 400 12px/16px var(--font-body); color: var(--ink-muted); }
+.s21-comment__text { font: 400 14px/20px var(--font-body); color: var(--ink); white-space: pre-wrap; word-wrap: break-word; }
+.s21-comment__reactions { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-2); }
+.s21-comment__rx { display: inline-flex; align-items: center; gap: 4px; padding: 2px var(--space-1-5); background: var(--surface-muted); border: 1px solid var(--border-subtle); border-radius: var(--radius-full); font: 500 12px/16px var(--font-body); color: var(--ink-muted); cursor: default; }
+.s21-cmt__form { display: flex; gap: var(--space-3); padding-top: var(--space-4); border-top: 1px solid var(--border-subtle); }
+.s21-cmt__form-main { flex: 1; display: flex; flex-direction: column; gap: var(--space-2); }
+.s21-cmt__input { font: inherit; padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); resize: vertical; min-height: 56px; }
+.s21-cmt__input:focus { outline: 2px solid var(--focus-ring); outline-offset: -2px; border-color: transparent; }
+.s21-cmt__form-foot { display: flex; justify-content: flex-end; }
+
+/* ─── AttachmentList (demo-prep/D, 2026-11-04) ─── */
+.s21-atl { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-1); }
+.s21-atl__item { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3); background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); transition: background var(--motion-duration-fast) var(--motion-ease-out); }
+.s21-atl__item:hover { background: var(--surface-muted); }
+.s21-atl__icon { flex-shrink: 0; color: var(--primary-text); }
+.s21-atl__main { flex: 1; min-width: 0; }
+.s21-atl__name { font: 500 14px/20px var(--font-body); color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.s21-atl__meta { font: 400 12px/16px var(--font-body); color: var(--ink-muted); display: flex; flex-wrap: wrap; gap: 4px; }
+.s21-atl__actions { display: inline-flex; gap: 2px; flex-shrink: 0; }
+.s21-atl--compact .s21-atl__item { padding: var(--space-1) var(--space-2); }
