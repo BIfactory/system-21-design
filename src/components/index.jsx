@@ -1338,6 +1338,157 @@ function CommandPalette({ open, onClose, items = [], placeholder = "Hledat pří
   );
 }
 
+/* ───────────── ModuleNav sections (NEW — demo-prep/B, 2026-11-04) ─────────────
+   Defaultní navigace pro Sidebar se všemi moduly System 21 backendu.
+   Zákaznické GUI si převezme jen výběr; nepoužité moduly neimportuje. */
+
+const moduleNavSections = [
+  {
+    items: [
+      { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
+      { href: "/ukoly", label: "Úkoly", icon: "tasks" },
+      { href: "/muj-plan", label: "Můj plán", icon: "calendar" },
+    ],
+  },
+  {
+    title: "CRM",
+    collapsible: true,
+    items: [
+      { href: "/crm/klienti", label: "Klienti" },
+      { href: "/crm/osoby", label: "Osoby" },
+      { href: "/crm/obchodni-pripady", label: "Obchodní případy" },
+    ],
+  },
+  {
+    title: "DMS",
+    collapsible: true,
+    items: [
+      { href: "/dms/smlouvy", label: "Smlouvy" },
+      { href: "/dms/dokumenty", label: "Dokumenty" },
+      { href: "/dms/automatizace", label: "Automatizace" },
+    ],
+  },
+  {
+    title: "Obchod",
+    collapsible: true,
+    items: [
+      { href: "/zakazky", label: "Zakázky" },
+      { href: "/zakazky/dokoncene", label: "Dokončené k fakturaci" },
+    ],
+  },
+  {
+    title: "HR",
+    collapsible: true,
+    items: [
+      { href: "/hr/pracovnici", label: "Pracovníci" },
+      { href: "/hr/dochazka", label: "Docházka" },
+    ],
+  },
+  {
+    title: "Komunikace",
+    collapsible: true,
+    items: [
+      { href: "/email", label: "Email" },
+      { href: "/zpravy", label: "Zprávy" },
+    ],
+  },
+  {
+    title: "Intranet",
+    collapsible: true,
+    items: [
+      { href: "/nastenka", label: "Nástěnka" },
+      { href: "/kb", label: "Knowledge base" },
+    ],
+  },
+];
+
+/* ───────────── KpiRow (NEW — demo-prep/B) ─────────────
+   Grid wrapper pro StatTile. Props: cols (2|3|4|6, default = auto). */
+
+function KpiRow({ cols, children, className }) {
+  const style = cols ? { "--s21-kpi-cols": cols } : undefined;
+  return (
+    <div className={cx("s21-kpirow", cols && `s21-kpirow--${cols}`, className)} style={style}>
+      {children}
+    </div>
+  );
+}
+
+/* ───────────── ActivityFeed (NEW — demo-prep/B) ─────────────
+   Vertikální feed aktivit s avatarem, textem a relativním časem.
+   items: Array<{ id, actor: {name, avatarUrl?}, action, target?, timestamp, icon? }>
+   `timestamp` je buď string ("před 3h") nebo Date — pak se formátuje. */
+
+function relativeTime(ts) {
+  if (typeof ts === "string") return ts;
+  if (!(ts instanceof Date)) return "";
+  const diff = Math.round((Date.now() - ts.getTime()) / 1000);
+  if (diff < 60) return "před chvílí";
+  if (diff < 3600) return `před ${Math.round(diff / 60)} min`;
+  if (diff < 86400) return `před ${Math.round(diff / 3600)} h`;
+  if (diff < 86400 * 7) return `před ${Math.round(diff / 86400)} dny`;
+  return ts.toLocaleDateString("cs-CZ", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+function ActivityFeed({ items = [], empty, max, className }) {
+  if (!items.length) {
+    return (
+      <div className={cx("s21-feed", "s21-feed--empty", className)}>
+        {empty || <EmptyState title="Žádná aktivita" hint="Jakmile se něco stane, objeví se tady." />}
+      </div>
+    );
+  }
+  const list = max ? items.slice(0, max) : items;
+  return (
+    <ul className={cx("s21-feed", className)} role="list">
+      {list.map((it) => (
+        <li key={it.id} className="s21-feed__item">
+          {it.icon ? (
+            <span className="s21-feed__icon" aria-hidden="true"><Icon name={it.icon} size={14} /></span>
+          ) : (
+            <Avatar name={it.actor && it.actor.name} src={it.actor && it.actor.avatarUrl} size={28} />
+          )}
+          <div className="s21-feed__body">
+            <div className="s21-feed__text">
+              {it.actor && <strong>{it.actor.name}</strong>}
+              {it.actor && " "}
+              {it.action}
+              {it.target && <> <span className="s21-feed__target">{it.target}</span></>}
+            </div>
+            <div className="s21-feed__time">{relativeTime(it.timestamp)}</div>
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/* ───────────── QuickActions (NEW — demo-prep/B) ─────────────
+   Mřížka tlačítek (ikona + label) pro nejčastější akce. */
+
+function QuickActions({ actions = [], cols = 3, className }) {
+  if (!actions.length) return null;
+  return (
+    <div
+      className={cx("s21-quickact", className)}
+      style={{ "--s21-qa-cols": cols }}
+      role="group"
+      aria-label="Rychlé akce"
+    >
+      {actions.map((a, i) => {
+        const Tag = a.href ? "a" : "button";
+        const extra = a.href ? { href: a.href } : { type: "button", onClick: a.onClick };
+        return (
+          <Tag key={a.label + i} className="s21-quickact__item" {...extra}>
+            {a.icon && <Icon name={a.icon} size={20} />}
+            <span className="s21-quickact__label">{a.label}</span>
+            {a.badge != null && <span className="s21-quickact__badge">{a.badge}</span>}
+          </Tag>
+        );
+      })}
+    </div>
+  );
+}
+
 /* ───────────── Theme (NEW — Fáze E) ───────────── */
 function getInitialTheme() {
   if (typeof window === "undefined") return "light";
@@ -1462,6 +1613,7 @@ export {
   Tooltip, Skeleton, Progress, Callout, Switch, Avatar, AvatarGroup, Kbd, RadioGroup, Popover, DropdownMenu,
   ThemeToggle, useTheme,
   BrandToggle, useBrand,
+  moduleNavSections, KpiRow, ActivityFeed, QuickActions,
   Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
   InputGroup, Textarea, FileDrop,
   BottomNav, useScrollDirection,
@@ -1478,6 +1630,7 @@ if (typeof window !== "undefined") {
   Tooltip, Skeleton, Progress, Callout, Switch, Avatar, AvatarGroup, Kbd, RadioGroup, Popover, DropdownMenu,
   ThemeToggle, useTheme,
   BrandToggle, useBrand,
+  moduleNavSections, KpiRow, ActivityFeed, QuickActions,
   Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
   InputGroup, Textarea, FileDrop,
   BottomNav, useScrollDirection,

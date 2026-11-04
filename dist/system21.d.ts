@@ -221,6 +221,30 @@ export interface BrandInfo { id: string; name: string }
 export declare function useBrand(): { brand: string; setBrand(id: string): void; brands: BrandInfo[] };
 export declare function BrandToggle(p: { className?: string }): JSX.Element;
 
+/* — Dashboard widgets (demo-prep/B, 2026-11-04) — */
+export interface SidebarSectionItem { href: string; label: string; icon?: IconName; badge?: number; hint?: string }
+export interface SidebarSection { title?: string; collapsible?: boolean; items: SidebarSectionItem[] }
+/** Defaultní navigace pro Sidebar se všemi moduly backendu System 21. Zákaznické GUI si převezme jen výběr. */
+export declare const moduleNavSections: SidebarSection[];
+
+export interface KpiRowProps { cols?: 2 | 3 | 4 | 6; children?: ReactNode; className?: string }
+export declare function KpiRow(p: KpiRowProps): JSX.Element;
+
+export interface ActivityItem {
+  id: string | number;
+  actor?: { name: string; avatarUrl?: string };
+  action: ReactNode;
+  target?: ReactNode;
+  timestamp: string | Date;
+  icon?: IconName;
+}
+export interface ActivityFeedProps { items?: ActivityItem[]; empty?: ReactNode; max?: number; className?: string }
+export declare function ActivityFeed(p: ActivityFeedProps): JSX.Element;
+
+export interface QuickAction { label: string; icon?: IconName; href?: string; onClick?: () => void; badge?: number | string }
+export interface QuickActionsProps { actions: QuickAction[]; cols?: number; className?: string }
+export declare function QuickActions(p: QuickActionsProps): JSX.Element | null;
+
 /* — Fáze H components — */
 export interface DrawerProps { open: boolean; onClose?: () => void; side?: "left" | "right" | "top" | "bottom"; size?: number | string; title?: ReactNode; description?: ReactNode; footer?: ReactNode; children?: ReactNode; className?: string }
 export declare function Drawer(p: DrawerProps): JSX.Element | null;
