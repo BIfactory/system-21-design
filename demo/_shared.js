@@ -34,7 +34,7 @@
     "/obchod/pripady": "./crm-pripady.html",
     "/dms/smlouvy": "./dms-smlouvy.html",
     "/dms/dokumenty": "./_coming.html#/dms/dokumenty",
-    "/dms/automatizace": "./_coming.html#/dms/automatizace",
+    "/dms/automatizace": "./dms-automatizace.html",
     "/lide/pracovnici": "./hr-pracovnici.html",
     "/lide/dochazka": "./hr-dochazka.html",
     "/email": "./email.html",
