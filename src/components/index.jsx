@@ -1620,7 +1620,7 @@ function ModuleHome({ title, description, kpis, quickActions, activity, diary, c
             <Section title="Rychlé akce">{quickActions}</Section>
           )}
           {activity && (
-            <Section title="Deník dne">{activity}</Section>
+            <Section title="Aktivita">{activity}</Section>
           )}
         </div>
         {diary && <div className="s21-modulehome__aside">{diary}</div>}

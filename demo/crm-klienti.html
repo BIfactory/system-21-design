@@ -51,7 +51,7 @@
   const CRUMBS = [{ label: "CRM", href: "/crm/klienti" }, { label: "Klienti", href: "/crm/klienti" }];
 
   function Page() {
-    const [chip, setChip] = React.useState("all");
+    const [tab, setTab] = React.useState("vsichni");
     const [q, setQ] = React.useState("");
     return e(S.AppShell, {
       sidebar: e(D.DemoSidebar, { active: "/crm/klienti" }),
@@ -64,10 +64,10 @@
           e(S.Button, { variant: "secondary", icon: "download" }, "Export"),
           e(S.Button, { icon: "plus" }, "Nový klient")
         ),
-        tabs: e(S.Tabs, { value: "rodiny", items: [
+        tabs: e(S.Tabs, { value: tab, onChange: setTab, items: [
+          { value: "vsichni", label: "Všichni", count: 124 },
           { value: "rodiny", label: "Rodiny", count: 92 },
           { value: "firmy", label: "Firmy", count: 32 },
-          { value: "vsichni", label: "Všichni" },
         ] })
       }),
       e(S.PageBody, null,
@@ -77,16 +77,17 @@
           e(S.StatTile, { label: "Aktivních smluv", value: "208" }),
           e(S.StatTile, { label: "Expirace do 30 dnů", value: "3", accent: "warning" })
         ),
-        e(S.ChipGroup, { value: chip, onChange: setChip, items: [
-          { value: "all", label: "Všichni", count: 124 },
-          { value: "vip", label: "VIP", count: 18 },
-          { value: "aktivni", label: "Aktivní", count: 112 },
-          { value: "pasivni", label: "Pasivní", count: 12 },
-        ] }),
         e(S.FilterBar, null,
           e(S.SearchInput, { className: "s21-grow", value: q, onChange: setQ, placeholder: "Hledat jméno, firmu, IČ…" }),
-          e(S.Select, { placeholder: "Všechny segmenty", options: [{ value: "vip", label: "VIP" }, { value: "std", label: "Standard" }, { value: "b2b", label: "B2B" }] }),
-          e(S.Select, { placeholder: "Všechny kraje", options: [{ value: "jmk", label: "Jihomoravský" }, { value: "zlk", label: "Zlínský" }] })
+          e(S.Select, { placeholder: "Všechny stavy", options: [
+            { value: "aktivni", label: "Aktivní" }, { value: "vip", label: "VIP" }, { value: "pasivni", label: "Pasivní" }
+          ] }),
+          e(S.Select, { placeholder: "Všechny segmenty", options: [
+            { value: "std", label: "Standard" }, { value: "b2b", label: "B2B" }, { value: "prem", label: "Premium" }
+          ] }),
+          e(S.Select, { placeholder: "Všechny kraje", options: [
+            { value: "jmk", label: "Jihomoravský" }, { value: "zlk", label: "Zlínský" }, { value: "stc", label: "Středočeský" }
+          ] })
         ),
         e(S.DataTable, { columns: COLUMNS, rows: CLIENTS, onRowClick: () => { window.location.href = "./crm-klient-detail.html"; }, minWidth: 820 })
       )

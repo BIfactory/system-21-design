@@ -35,22 +35,34 @@
       sections: S.moduleNavSections,
       activeHref: a,
       onNavigate: (it) => { setA(it.href); if (it.href) global.location.href = demoHref(it.href); },
-      footer: "Powered by BIfactory",
+      footer: h(S.PoweredBy, {
+        logo: h("img", { src: "../assets/logos/bifactory-mark.png", alt: "" }),
+        name: "BIfactory",
+        href: "https://bifactory.cz",
+      }),
     });
   }
 
   function demoHref(path) {
-    // Map menu paths → demo HTML stránky; fallback = dashboard.
+    // Map menu paths → demo HTML stránky.
     const map = {
       "/dashboard": "./dashboard.html",
       "/ukoly": "./ukoly.html",
+      "/muj-plan": "./muj-plan.html",
       "/crm/klienti": "./crm-klienti.html",
-      "/crm/osoby": "./crm-klienti.html",
-      "/crm/obchodni-pripady": "./crm-klienti.html",
+      "/crm/osoby": "./crm-osoby.html",
+      "/crm/obchodni-pripady": "./crm-obchodni-pripady.html",
       "/dms/smlouvy": "./dms-smlouvy.html",
-      "/dms/dokumenty": "./dms-smlouvy.html",
-      "/dms/automatizace": "./dms-smlouvy.html",
+      "/dms/dokumenty": "./dms-dokumenty.html",
+      "/dms/automatizace": "./dms-automatizace.html",
       "/zakazky": "./index.html",
+      "/zakazky/dokoncene": "./zakazky-dokoncene.html",
+      "/hr/pracovnici": "./hr-pracovnici.html",
+      "/hr/dochazka": "./hr-dochazka.html",
+      "/email": "./email.html",
+      "/zpravy": "./zpravy.html",
+      "/nastenka": "./nastenka.html",
+      "/kb": "./kb.html",
     };
     return map[path] || "./dashboard.html";
   }

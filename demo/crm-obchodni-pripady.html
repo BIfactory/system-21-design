@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · CRM Obchodní případy</title>
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  const DEALS = [
+    { id: 1, code: "OP-2026-0045", name: "Firemní pojištění pro Moravia Steel", client: "Moravia Steel a.s.", value: "124 000 Kč", owner: "Pavel O.", state: "negotiation", nextStep: "Druhá schůzka 25. 11." },
+    { id: 2, code: "OP-2026-0043", name: "Pojištění vozového parku", client: "Agro Slovácko", value: "86 500 Kč", owner: "Alena D.", state: "offer", nextStep: "Nabídka odeslána" },
+    { id: 3, code: "OP-2026-0041", name: "Úrazové pojištění Novákovi (rozšíření)", client: "Novákovi", value: "7 200 Kč", owner: "Pavel O.", state: "win", nextStep: "Smlouva podepsaná" },
+    { id: 4, code: "OP-2026-0038", name: "Pojištění budovy Hradecká str.", client: "Hradecká strojírna", value: "48 000 Kč", owner: "Tomáš N.", state: "in-progress", nextStep: "Čekáme na pojistitele" },
+    { id: 5, code: "OP-2026-0036", name: "Doplňkové pojištění Dvořákovi", client: "Dvořákovi", value: "3 400 Kč", owner: "Pavel O.", state: "draft", nextStep: "Zavolat klientovi" },
+    { id: 6, code: "OP-2026-0032", name: "Firemní pojištění Procházkovi s.r.o.", client: "Procházkovi s.r.o.", value: "32 400 Kč", owner: "Alena D.", state: "loss", nextStep: "Konkurence vyhrála" },
+  ];
+
+  const COLUMNS = [
+    { key: "code", label: "Číslo", sortable: true, width: "12%", render: (d) => e("span", { className: "s21-cell-code" }, d.code) },
+    { key: "name", label: "Případ", sortable: true, width: "36%", render: (d) =>
+      e("div", null,
+        e("div", { className: "s21-cell-title" }, d.name),
+        e("div", { className: "s21-cell-meta" }, d.client + " · " + d.owner)
+      )
+    },
+    { key: "value", label: "Hodnota", align: "right", numeric: true, width: "14%" },
+    { key: "nextStep", label: "Další krok", width: "22%" },
+    { key: "state", label: "Stav", width: "12%", render: (d) => e(S.WorkflowBadge, { state: d.state, fitCell: true }) },
+    { key: "actions", label: "", align: "center", width: "4%", render: () =>
+      e(S.Button, { size: "sm", iconOnly: true, icon: "more", "aria-label": "Víc", title: "Víc" })
+    }
+  ];
+
+  const CRUMBS = [{ label: "CRM", href: "/crm" }, { label: "Obchodní případy", href: "/crm/obchodni-pripady" }];
+
+  function Page() {
+    const [tab, setTab] = React.useState("otevrene");
+    const [q, setQ] = React.useState("");
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/crm/obchodni-pripady" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
+    },
+      e(S.PageHeader, {
+        title: "Obchodní případy",
+        description: "Příležitosti, nabídky a rozjednané obchody",
+        actions: e(React.Fragment, null,
+          e(S.Button, { variant: "secondary", icon: "pie-chart" }, "Reporty"),
+          e(S.Button, { icon: "plus" }, "Nový případ")
+        ),
+        tabs: e(S.Tabs, { value: tab, onChange: setTab, items: [
+          { value: "otevrene", label: "Otevřené", count: 12 },
+          { value: "vyhrane", label: "Vyhrané", count: 38 },
+          { value: "prohrane", label: "Prohrané", count: 6 },
+          { value: "vsechny", label: "Všechny", count: 56 },
+        ] })
+      }),
+      e(S.PageBody, null,
+        e(S.KpiRow, { cols: 4 },
+          e(S.StatTile, { label: "Pipeline value", value: "487 500", unit: "Kč", accent: "primary", big: true }),
+          e(S.StatTile, { label: "Průměrná velikost", value: "40 625", unit: "Kč" }),
+          e(S.StatTile, { label: "Konverze", value: "63 %", accent: "success" }),
+          e(S.StatTile, { label: "Doba uzavření", value: "18", unit: "dní" })
+        ),
+        e(S.FilterBar, null,
+          e(S.SearchInput, { className: "s21-grow", value: q, onChange: setQ, placeholder: "Hledat případ, klient, číslo…" }),
+          e(S.Select, { placeholder: "Všichni obchodníci", options: [{ value: "pavel", label: "Pavel O." }, { value: "alena", label: "Alena D." }, { value: "tomas", label: "Tomáš N." }] }),
+          e(S.Select, { placeholder: "Všechny stavy", options: [
+            { value: "draft", label: "Rozpracováno" }, { value: "offer", label: "Nabídka" },
+            { value: "negotiation", label: "V jednání" }, { value: "win", label: "Výhra" }
+          ] })
+        ),
+        e(S.DataTable, { columns: COLUMNS, rows: DEALS, onRowClick: () => {}, minWidth: 980 })
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>

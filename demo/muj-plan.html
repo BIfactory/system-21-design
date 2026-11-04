@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · Můj plán</title>
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  const DAYS = [
+    { date: "Pondělí 17. 11.", events: [
+      { time: "09:00", title: "Schůzka s Novákovi", place: "Kancelář", tag: "Klient" },
+      { time: "11:30", title: "Odeslat nabídku Hradecké strojírně", tag: "Úkol" },
+      { time: "14:00", title: "Volání: Agro Slovácko", tag: "Follow-up" },
+    ]},
+    { date: "Úterý 18. 11.", events: [
+      { time: "10:00", title: "Interní meeting (týdenní)", place: "Teams", tag: "Interní" },
+      { time: "15:00", title: "Příprava smlouvy Moravia Steel", tag: "Úkol" },
+    ]},
+    { date: "Středa 19. 11.", events: [
+      { time: "08:30", title: "Zavolat klientovi 19. 11.", tag: "Follow-up" },
+      { time: "13:00", title: "Školení: nové produkty Allianz", place: "Online", tag: "Vzdělávání" },
+    ]},
+    { date: "Čtvrtek 20. 11.", events: [
+      { time: "09:00", title: "Podpis smlouvy SM-2026-0117", place: "U klienta", tag: "Důležité" },
+      { time: "14:00", title: "Schůzka s Dvořákovi", place: "Kancelář", tag: "Klient" },
+    ]},
+    { date: "Pátek 21. 11.", events: [
+      { time: "10:00", title: "Měsíční uzávěrka", tag: "Admin" },
+      { time: "15:00", title: "Příprava dalšího týdne", tag: "Plánování" },
+    ]},
+  ];
+
+  const CRUMBS = [{ label: "Můj plán", href: "/muj-plan" }];
+
+  function Page() {
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/muj-plan" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
+    },
+      e(S.PageHeader, {
+        title: "Můj plán",
+        description: "Týdenní pohled na tvé schůzky, úkoly a připomínky",
+        actions: e(React.Fragment, null,
+          e(S.Button, { variant: "secondary", icon: "calendar" }, "Kalendář"),
+          e(S.Button, { icon: "plus" }, "Nová událost")
+        )
+      }),
+      e(S.PageBody, null,
+        e(S.KpiRow, { cols: 4 },
+          e(S.StatTile, { label: "Dnes", value: "3", accent: "primary", hint: "schůzky a úkoly" }),
+          e(S.StatTile, { label: "Tento týden", value: "14" }),
+          e(S.StatTile, { label: "Follow-upy", value: "4", accent: "warning" }),
+          e(S.StatTile, { label: "Odloženo", value: "2" })
+        ),
+        e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-4)" } },
+          DAYS.map((d) => e(S.Section, { key: d.date, title: d.date },
+            e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-2)" } },
+              d.events.map((ev, i) => e("div", {
+                key: i,
+                style: { display: "flex", alignItems: "center", gap: "var(--space-3)", padding: "var(--space-2) var(--space-3)", background: "var(--surface-raised)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-lg)" }
+              },
+                e("span", { className: "s21-cell-code", style: { minWidth: 56, color: "var(--primary-text)" } }, ev.time),
+                e("div", { style: { flex: 1, minWidth: 0 } },
+                  e("div", { style: { font: "500 14px/20px var(--font-body)" } }, ev.title),
+                  ev.place && e("div", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)" } }, ev.place)
+                ),
+                e(S.Tag, { tone: ev.tag === "Důležité" ? "warning" : ev.tag === "Klient" ? "primary" : "neutral" }, ev.tag)
+              ))
+            )
+          ))
+        )
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · Dokumenty</title>
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, e = React.createElement;
+  const CRUMBS = [{ label: "DMS", href: "/dms" }, { label: "Dokumenty", href: "/dms/dokumenty" }];
+  function Page() {
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/dms/dokumenty" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
+    },
+      e(S.PageHeader, { title: "Dokumenty", description: "Správa dokumentů napříč klienty a smlouvami" }),
+      e(S.PageBody, null,
+        e("div", { style: { display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh", padding: "var(--space-8)" } },
+          e(S.EmptyState, {
+            icon: "folder",
+            title: "Dokumenty — brzy k dispozici",
+            description: "Tenhle modul System 21 je součástí platformy, ale v tomhle demu zatím není klikatelný. V Poema GUI a dalších zákaznických aplikacích se napojí přes API na backend `system21-test`.",
+            action: e(S.Button, { variant: "secondary", icon: "home", onClick: () => window.location.href = "./dashboard.html" }, "Zpět na dashboard")
+          })
+        )
+      )
+    );
+  }
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>
