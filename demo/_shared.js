@@ -29,7 +29,7 @@
     "/zakazky/nova": "./zakazka-nova.html",
     "/zakazky/131": "./zakazka-detail.html",
     "/vykazovani": "./vykazovani.html",
-    "/crm/klienti": "./_coming.html#/crm/klienti",
+    "/crm/klienti": "./crm-klienti.html",
     "/crm/osoby": "./_coming.html#/crm/osoby",
     "/crm/obchodni-pripady": "./_coming.html#/crm/obchodni-pripady",
     "/dms/smlouvy": "./_coming.html#/dms/smlouvy",

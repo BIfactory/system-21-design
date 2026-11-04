@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · Klienti</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  // Mental model (Poema features.md):
+  // - Family/Company = top-level entity
+  // - Osoby = members
+  // - Rodné číslo = global unique ID
+  // - No roles — všichni vidí vše
+  const CLIENTS = [
+    { id: 1, slug: "novakovi", kind: "family", name: "Novákovi", members: 4, primaryContact: "Jan Novák", city: "Zlín", contracts: 3, lastContact: "12. 10. 2026", tags: ["VIP"] },
+    { id: 2, slug: "dvorakovi", kind: "family", name: "Dvořákovi", members: 2, primaryContact: "Pavel Dvořák", city: "Uherské Hradiště", contracts: 2, lastContact: "02. 10. 2026", tags: [] },
+    { id: 3, slug: "prochazkovi", kind: "family", name: "Procházkovi", members: 3, primaryContact: "Tomáš Procházka", city: "Brno", contracts: 1, lastContact: "25. 09. 2026", tags: [] },
+    { id: 4, slug: "svobodovi", kind: "family", name: "Svobodovi", members: 5, primaryContact: "Zuzana Svobodová", city: "Zlín", contracts: 5, lastContact: "15. 09. 2026", tags: ["VIP"] },
+    { id: 5, slug: "horakovi", kind: "family", name: "Horákovi", members: 2, primaryContact: "Eva Horáková", city: "Praha", contracts: 2, lastContact: "08. 09. 2026", tags: [] },
+    { id: 6, slug: "moravia-steel", kind: "company", name: "Moravia Steel a.s.", members: 4, primaryContact: "Petr Král (jednatel)", city: "Ostrava", contracts: 8, lastContact: "08. 10. 2026", tags: ["B2B"], ico: "25812345" },
+    { id: 7, slug: "agro-slovacko", kind: "company", name: "Agro Slovácko s.r.o.", members: 3, primaryContact: "Ing. Vlastimil Kříž", city: "Uherské Hradiště", contracts: 4, lastContact: "28. 09. 2026", tags: ["B2B"], ico: "28192740" },
+    { id: 8, slug: "hradecka", kind: "company", name: "Hradecká strojírna s.r.o.", members: 2, primaryContact: "Jan Vomáčka", city: "Hradec Králové", contracts: 6, lastContact: "20. 09. 2026", tags: ["B2B"], ico: "47283756" },
+  ];
+
+  const CRUMBS = [{ label: "CRM", href: "/crm" }, { label: "Klienti", href: "/crm/klienti" }];
+
+  function Page() {
+    const [tab, setTab] = React.useState("vsichni");
+    const [q, setQ] = React.useState("");
+
+    let rows = tab === "rodiny" ? CLIENTS.filter((c) => c.kind === "family")
+      : tab === "firmy" ? CLIENTS.filter((c) => c.kind === "company")
+      : CLIENTS;
+
+    if (q) rows = rows.filter((c) =>
+      (c.name + " " + c.primaryContact + " " + c.city + " " + (c.ico || "")).toLowerCase().includes(q.toLowerCase())
+    );
+
+    const families = CLIENTS.filter((c) => c.kind === "family");
+    const companies = CLIENTS.filter((c) => c.kind === "company");
+
+    const COLUMNS = [
+      { key: "name", label: "Klient", sortable: true, width: "26%", render: (c) =>
+        e("div", { style: { display: "flex", alignItems: "center", gap: "var(--space-2)" } },
+          e("span", { style: { flexShrink: 0, width: 32, height: 32, borderRadius: "var(--radius-full)", background: c.kind === "family" ? "var(--primary-soft)" : "var(--surface-muted)", color: c.kind === "family" ? "var(--primary-text)" : "var(--ink-muted)", display: "inline-flex", alignItems: "center", justifyContent: "center" } },
+            e(S.Icon, { name: c.kind === "family" ? "users" : "building", size: 16 })
+          ),
+          e("div", null,
+            e("div", { style: { display: "flex", alignItems: "center", gap: 6 } },
+              e("span", { className: "s21-cell-title" }, c.name),
+              c.tags.map((t) => e(S.Tag, { key: t, tone: t === "VIP" ? "primary" : "neutral" }, t))
+            ),
+            e("div", { className: "s21-cell-meta" },
+              c.kind === "family" ? (c.members + " členů · " + c.city) : ("IČ " + c.ico + " · " + c.city)
+            )
+          )
+        )
+      },
+      { key: "primaryContact", label: "Hlavní kontakt", width: "22%", render: (c) =>
+        e("div", null, c.primaryContact)
+      },
+      { key: "contracts", label: "Smlouvy", align: "right", numeric: true, width: "12%" },
+      { key: "lastContact", label: "Poslední kontakt", align: "right", numeric: true, width: "18%" },
+      { key: "actions", label: "", align: "center", width: "8%", render: () =>
+        e("span", { className: "s21-row-actions", "data-no-row-click": true },
+          e(S.Button, { size: "sm", iconOnly: true, icon: "phone", variant: "ghost", "aria-label": "Zavolat", title: "Zavolat" }),
+          e(S.Button, { size: "sm", iconOnly: true, icon: "mail", variant: "ghost", "aria-label": "Mail", title: "Mail" })
+        )
+      }
+    ];
+
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/crm/klienti" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
+    },
+      e(S.PageHeader, {
+        title: "Klienti",
+        description: "Rodiny a firmy, se kterými spolupracujeme",
+        actions: e(S.Button, { icon: "plus" }, "Nový klient"),
+        tabs: e(S.Tabs, { value: tab, onChange: setTab, items: [
+          { value: "vsichni", label: "Všichni", count: CLIENTS.length },
+          { value: "rodiny", label: "Rodiny", count: families.length },
+          { value: "firmy", label: "Firmy", count: companies.length },
+        ] })
+      }),
+      e(S.PageBody, null,
+        e(S.KpiRow, { cols: 4 },
+          e(S.StatTile, { label: "Celkem klientů", value: String(CLIENTS.length) }),
+          e(S.StatTile, { label: "Rodiny / Firmy", value: families.length + " / " + companies.length }),
+          e(S.StatTile, { label: "Aktivních smluv", value: String(CLIENTS.reduce((s, c) => s + c.contracts, 0)) }),
+          e(S.StatTile, { label: "VIP klientů", value: String(CLIENTS.filter((c) => c.tags.includes("VIP")).length) })
+        ),
+
+        e(S.FilterBar, null,
+          e(S.SearchInput, { className: "s21-grow", value: q, onChange: setQ, placeholder: "Hledat jméno, kontakt, IČ, město…" }),
+          e(S.Select, { placeholder: "Všechny segmenty", options: [
+            { value: "vip", label: "VIP" },
+            { value: "b2b", label: "B2B" },
+            { value: "standard", label: "Standard" },
+          ] }),
+          e(S.Select, { placeholder: "Všechna města", options: [
+            { value: "zlin", label: "Zlín" },
+            { value: "uh", label: "Uherské Hradiště" },
+            { value: "brno", label: "Brno" },
+            { value: "ostrava", label: "Ostrava" },
+            { value: "praha", label: "Praha" },
+          ] })
+        ),
+
+        e(S.DataTable, {
+          columns: COLUMNS, rows, minWidth: 820,
+          onRowClick: (c) => window.location.href = "./crm-klient-detail.html"
+        })
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>

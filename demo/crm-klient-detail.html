@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · Novákovi</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+<style>
+  .person-card { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-3); background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-xl); }
+  .person-card.is-primary { border-color: var(--primary); background: linear-gradient(135deg, var(--primary-soft) 0%, var(--surface-raised) 60%); }
+  .person-card__head { display: flex; align-items: center; gap: var(--space-3); }
+  .person-card__name { font: 600 15px/22px var(--font-display); }
+  .person-card__role { font: 500 11px/16px var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--primary-text); }
+  .person-card__meta { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; font: 400 13px/18px var(--font-body); color: var(--ink); }
+  .person-card__meta dt { color: var(--ink-muted); font: 500 11px/16px var(--font-mono); letter-spacing: .04em; text-transform: uppercase; }
+  .person-card__meta dd { margin: 0; font-variant-numeric: tabular-nums; }
+  .note-area { width: 100%; min-height: 160px; padding: var(--space-3); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); font: 400 14px/22px var(--font-body); color: var(--ink); resize: vertical; }
+  .note-area:focus { outline: 2px solid var(--focus-ring); outline-offset: -2px; border-color: transparent; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  // ─── mock data — Novákovi (family-first, Poema mental model) ───────
+  const CLIENT = {
+    id: 1, slug: "novakovi", kind: "family", name: "Novákovi",
+    city: "Zlín", address: "Lipová 123, 760 01 Zlín",
+    createdAt: "12. 04. 2024", tags: ["VIP"],
+  };
+
+  // Osoby — každá s rodným číslem (global ID), telefon, mail, role v rodině
+  const PERSONS = [
+    { id: 1, name: "Jan Novák", birth: "720514/1234", role: "Hlavní kontakt · pojistník", phone: "+420 602 123 456", email: "jan@novak.cz", primary: true },
+    { id: 2, name: "Marie Nováková", birth: "755623/5678", role: "Manželka", phone: "+420 602 987 654", email: "marie@novak.cz" },
+    { id: 3, name: "Jana Nováková", birth: "086123/4567", role: "Dcera", phone: "+420 605 111 222", email: "jana@novak.cz" },
+    { id: 4, name: "Petr Novák", birth: "096224/3456", role: "Syn", phone: "+420 605 333 444", email: "" },
+  ];
+
+  // Smlouvy (3) — pojistník = Jan Novák (primary key per pojistník + číslo)
+  const CONTRACTS = [
+    { id: 1, number: "SM-2024-0117", product: "Pojištění majetku — rodinný dům", insurer: "Allianz", pojistnik: "Jan Novák", validFrom: "12. 04. 2024", validTo: "12. 04. 2027", anniversary: "12. 04.", daysToAnniversary: 158, premium: "14 400 Kč / rok", state: "active" },
+    { id: 2, number: "SM-2025-0233", product: "Úrazové pojištění (rodinné)", insurer: "UNIQA", pojistnik: "Jan Novák", validFrom: "03. 03. 2025", validTo: "03. 03. 2028", anniversary: "03. 03.", daysToAnniversary: 118, premium: "7 200 Kč / rok", state: "active" },
+    { id: 3, number: "SM-2026-0089", product: "Autopojištění Škoda Octavia", insurer: "ČPP", pojistnik: "Marie Nováková", validFrom: "10. 10. 2026", validTo: "10. 10. 2027", anniversary: "10. 10.", daysToAnniversary: 338, premium: "18 600 Kč / rok", state: "active" },
+  ];
+
+  const ACTIVITY = [
+    { id: 1, time: "12. 10. 2026", title: "Telefon s Janem", description: "Dotaz na rozšíření úrazovky pro děti.", icon: "phone", tone: "primary" },
+    { id: 2, time: "05. 10. 2026", title: "Nová smlouva SM-2026-0089", description: "Autopojištění Škoda Octavia podepsáno.", icon: "check", tone: "success" },
+    { id: 3, time: "22. 09. 2026", title: "Email od Marie", description: "Dotaz na úrazové pojištění pro děti.", icon: "mail" },
+    { id: 4, time: "15. 09. 2026", title: "Schůzka v kanceláři", description: "Přenesení autopojištění od předchozího pojistitele.", icon: "building", tone: "primary" },
+  ];
+
+  const CRUMBS = [
+    { label: "CRM", href: "/crm" },
+    { label: "Klienti", href: "/crm/klienti" },
+    { label: CLIENT.name, href: "/crm/klienti/" + CLIENT.slug },
+  ];
+
+  function Page() {
+    const [tab, setTab] = React.useState("prehled");
+    const [note, setNote] = React.useState("Paní klientka má alergii — vstupní lékařská prohlídka proběhla už loni, výsledky jsou ve složce.\n\nJan si přeje pojistit chatu v Beskydech (TBD po návratu z dovolené v lednu 2027).\n\nPozor — Petr nastupuje za 2 roky na VŠ, zvážit studentské pojištění.");
+
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/crm/klienti" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS, onNavigate: (it, i) => { if (i === 1) window.location.href = "./crm-klienti.html"; } }),
+    },
+      e(S.PageHeader, {
+        title: CLIENT.name,
+        description: "Rodina · " + PERSONS.length + " členů · " + CLIENT.city + " · klient od " + CLIENT.createdAt,
+        actions: e(React.Fragment, null,
+          e(S.Button, { variant: "secondary", icon: "phone" }, "Zavolat"),
+          e(S.Button, { icon: "plus" }, "Nová smlouva")
+        ),
+        tabs: e(S.Tabs, { value: tab, onChange: setTab, items: [
+          { value: "prehled", label: "Přehled" },
+          { value: "osoby", label: "Osoby", count: PERSONS.length },
+          { value: "smlouvy", label: "Smlouvy", count: CONTRACTS.length },
+          { value: "aktivita", label: "Aktivita", count: ACTIVITY.length },
+          { value: "dokumenty", label: "Dokumenty" },
+        ] })
+      }),
+      e(S.PageBody, null,
+
+        // ───── Overview ────────────────────────────────────────────
+        tab === "prehled" && e("div", { style: { display: "grid", gridTemplateColumns: "1fr 320px", gap: "var(--space-5)", alignItems: "start" } },
+          e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-4)" } },
+
+            e(S.Section, { title: "Osoby v rodině", action: e(S.Button, { size: "sm", icon: "user-plus" }, "Přidat osobu") },
+              e("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-3)" } },
+                PERSONS.map((p) => e("div", { key: p.id, className: "person-card" + (p.primary ? " is-primary" : "") },
+                  e("div", { className: "person-card__head" },
+                    e(S.Avatar, { name: p.name, size: 36 }),
+                    e("div", { style: { flex: 1, minWidth: 0 } },
+                      e("div", { className: "person-card__name" }, p.name),
+                      e("div", { className: "person-card__role" }, p.role)
+                    )
+                  ),
+                  e("dl", { className: "person-card__meta" },
+                    e("dt", null, "Rodné č."), e("dd", null, p.birth),
+                    p.phone && e("dt", null, "Telefon"), p.phone && e("dd", null, p.phone),
+                    p.email && e("dt", null, "E-mail"), p.email && e("dd", null, p.email)
+                  )
+                ))
+              )
+            ),
+
+            e(S.Section, { title: "Poznámka" },
+              e("textarea", { className: "note-area", value: note, onChange: (ev) => setNote(ev.target.value), placeholder: "Napište poznámku…" }),
+              e("div", { style: { marginTop: "var(--space-1)", font: "400 11px/14px var(--font-body)", color: "var(--ink-subtle)", textAlign: "right" } }, note.length + " znaků")
+            ),
+
+            e(S.Section, { title: "Aktivní smlouvy" },
+              e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-2)" } },
+                CONTRACTS.map((c) => e("a", { key: c.id, href: "./dms-smlouva-detail.html",
+                  style: {
+                    display: "grid", gridTemplateColumns: "100px 1fr 140px 120px 100px",
+                    alignItems: "center", gap: "var(--space-3)",
+                    padding: "var(--space-2) var(--space-3)",
+                    background: "var(--surface-raised)", border: "1px solid var(--border)",
+                    borderRadius: "var(--radius-lg)", textDecoration: "none", color: "var(--ink)"
+                  }
+                },
+                  e("span", { className: "s21-cell-code" }, c.number),
+                  e("div", null,
+                    e("div", { style: { font: "500 14px/20px var(--font-body)" } }, c.product),
+                    e("div", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)" } }, c.insurer, " · pojistník ", c.pojistnik)
+                  ),
+                  e("span", { style: { font: "400 12px/16px var(--font-body)", color: c.daysToAnniversary <= 30 ? "var(--danger-text)" : c.daysToAnniversary <= 90 ? "var(--warning-text)" : "var(--ink-muted)", fontWeight: c.daysToAnniversary <= 90 ? 600 : 400 } },
+                    "Výročí " + c.anniversary + " · za " + c.daysToAnniversary + " dnů"
+                  ),
+                  e("span", { style: { textAlign: "right", fontVariantNumeric: "tabular-nums" } }, c.premium),
+                  e(S.Badge, { tone: "success", fitCell: true }, "Aktivní")
+                ))
+              )
+            )
+          ),
+
+          // Right sidebar
+          e(S.RelationsSidebar, { sections: [
+            { title: "Adresa", count: 1, items: [{ icon: "map-pin", label: CLIENT.address }] },
+            { title: "Otevřené případy", count: 1, items: [
+              { icon: "folder", label: "OP-2026-0045 Rozšíření úrazovky pro děti", meta: "V jednání" }
+            ], action: { label: "Nový případ", icon: "plus", onClick: () => {} } },
+            { title: "Úkoly", count: 2, items: [
+              { icon: "tasks", label: "Zavolat ohledně obnovy", meta: "za 2 dny" },
+              { icon: "tasks", label: "Schůzka k autopojištění", meta: "20. 11." },
+            ] },
+            { title: "Dokumenty", count: 12, items: [
+              { icon: "file", label: "Pojistná smlouva 2024", meta: "PDF" },
+              { icon: "file", label: "Úrazové pojištění", meta: "PDF" },
+              { icon: "image", label: "Foto majetku" },
+            ], action: { label: "Zobrazit všechny", icon: "folder", onClick: () => window.location.href = "./_coming.html#/dms/dokumenty" } },
+          ] })
+        ),
+
+        // ───── Osoby tab ──────────────────────────────────────────
+        tab === "osoby" && e(S.Section, { title: "Všechny osoby v rodině", action: e(S.Button, { size: "sm", icon: "user-plus" }, "Přidat osobu") },
+          e("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "var(--space-3)" } },
+            PERSONS.map((p) => e("div", { key: p.id, className: "person-card" + (p.primary ? " is-primary" : "") },
+              e("div", { className: "person-card__head" },
+                e(S.Avatar, { name: p.name, size: 40 }),
+                e("div", { style: { flex: 1, minWidth: 0 } },
+                  e("div", { className: "person-card__name" }, p.name),
+                  e("div", { className: "person-card__role" }, p.role)
+                )
+              ),
+              e("dl", { className: "person-card__meta" },
+                e("dt", null, "Rodné č."), e("dd", null, p.birth),
+                p.phone && e("dt", null, "Telefon"), p.phone && e("dd", null, p.phone),
+                p.email && e("dt", null, "E-mail"), p.email && e("dd", null, p.email || "—")
+              )
+            ))
+          )
+        ),
+
+        // ───── Smlouvy tab ────────────────────────────────────────
+        tab === "smlouvy" && e(S.Section, { title: "Smlouvy", action: e(S.Button, { size: "sm", icon: "plus" }, "Nová smlouva") },
+          e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-2)" } },
+            CONTRACTS.map((c) => e("a", { key: c.id, href: "./dms-smlouva-detail.html",
+              style: {
+                display: "grid", gridTemplateColumns: "120px 1fr 160px 140px 100px",
+                alignItems: "center", gap: "var(--space-3)",
+                padding: "var(--space-3)",
+                background: "var(--surface-raised)", border: "1px solid var(--border)",
+                borderRadius: "var(--radius-lg)", textDecoration: "none", color: "var(--ink)"
+              }
+            },
+              e("span", { className: "s21-cell-code" }, c.number),
+              e("div", null,
+                e("div", { style: { font: "500 14px/20px var(--font-body)" } }, c.product),
+                e("div", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)" } }, c.insurer, " · ", c.validFrom, " – ", c.validTo)
+              ),
+              e("span", { style: { font: "400 12px/16px var(--font-body)", color: c.daysToAnniversary <= 30 ? "var(--danger-text)" : c.daysToAnniversary <= 90 ? "var(--warning-text)" : "var(--ink-muted)", fontWeight: c.daysToAnniversary <= 90 ? 600 : 400 } },
+                "Výročí " + c.anniversary + " · za " + c.daysToAnniversary + " dnů"
+              ),
+              e("div", null,
+                e("div", { style: { fontWeight: 500 } }, c.premium),
+                e("div", { style: { font: "400 11px/14px var(--font-body)", color: "var(--ink-muted)" } }, "pojistník ", c.pojistnik)
+              ),
+              e(S.Badge, { tone: "success", fitCell: true }, "Aktivní")
+            ))
+          )
+        ),
+
+        // ───── Aktivita tab ───────────────────────────────────────
+        tab === "aktivita" && e(S.Section, { title: "Časová osa" },
+          e(S.Timeline, { items: ACTIVITY })
+        ),
+
+        // ───── Dokumenty tab ──────────────────────────────────────
+        tab === "dokumenty" && e(S.Section, { title: "Dokumenty rodiny" },
+          e(S.AttachmentList, { items: [
+            { id: 1, name: "Pojistná smlouva SM-2024-0117.pdf", mimeType: "application/pdf", size: 240000, uploadedBy: "Pavel O.", uploadedAt: "před týdnem" },
+            { id: 2, name: "Úrazové pojištění SM-2025-0233.pdf", mimeType: "application/pdf", size: 180000, uploadedBy: "Alena D.", uploadedAt: "březen 2025" },
+            { id: 3, name: "Foto rodinného domu.jpg", mimeType: "image/jpeg", size: 2800000, uploadedBy: "Jan Novák", uploadedAt: "duben 2024" },
+          ], onDownload: () => {} })
+        )
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>
