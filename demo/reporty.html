@@ -93,36 +93,35 @@
         ] })
       }),
       e(S.PageBody, null,
-        // Primary KPIs with trend
+        // Primary KPIs — vždy viditelné nad tabs
         e(S.KpiRow, { cols: 4 },
-          e(S.StatTile, { label: "Tržby YTD", value: "17,48", unit: "mil. Kč", big: true, accent: "primary" }),
+          e(S.StatTile, { label: "Tržby YTD", value: "17,48", unit: "mil. Kč", big: true }),
           e(S.StatTile, { label: "Smlouvy", value: "317", hint: "+28 vs. minulý měsíc" }),
-          e(S.StatTile, { label: "Noví klienti", value: "76", accent: "success" }),
-          e(S.StatTile, { label: "Konverze pipeline", value: "63 %", accent: "success", hint: "+5 pp" })
+          e(S.StatTile, { label: "Noví klienti", value: "76" }),
+          e(S.StatTile, { label: "Konverze pipeline", value: "63 %", hint: "+5 pp" })
         ),
 
-        // Revenue bar chart
-        e(S.Section, { title: "Tržby po měsících", subtitle: "Prosinec 2025 – Listopad 2026" },
-          e(BarChart, { data: REVENUE, labels: MONTHS, height: 220 }),
-          e("div", { style: { display: "flex", gap: "var(--space-4)", font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)", marginTop: "var(--space-2)" } },
-            e("span", null, "Celkem: ", e("strong", { style: { color: "var(--ink)" } }, "17 480 tis. Kč")),
-            e("span", null, "Průměr/měs.: ", e("strong", { style: { color: "var(--ink)" } }, "1 457 tis. Kč")),
-            e("span", null, "Peak: ", e("strong", { style: { color: "var(--primary-text)" } }, "Říj 26 · 2 480 tis. Kč"))
-          )
-        ),
-
-        // Two columns: contracts + AI docs
-        e("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-4)" } },
-          e(S.Section, { title: "Nové smlouvy po měsících" },
-            e(BarChart, { data: CONTRACTS, labels: MONTHS, color: "var(--primary)", height: 160 })
+        tab === "prehled" && e(React.Fragment, null,
+          e(S.Section, { title: "Tržby po měsících", subtitle: "Prosinec 2025 – Listopad 2026" },
+            e(BarChart, { data: REVENUE, labels: MONTHS, height: 220 }),
+            e("div", { style: { display: "flex", gap: "var(--space-4)", font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)", marginTop: "var(--space-2)" } },
+              e("span", null, "Celkem: ", e("strong", { style: { color: "var(--ink)" } }, "17 480 tis. Kč")),
+              e("span", null, "Průměr/měs.: ", e("strong", { style: { color: "var(--ink)" } }, "1 457 tis. Kč")),
+              e("span", null, "Peak: ", e("strong", { style: { color: "var(--primary-text)" } }, "Říj 26 · 2 480 tis. Kč"))
+            )
           ),
-          e(S.Section, { title: "AI zpracované dokumenty" },
-            e(BarChart, { data: AI_DOCS, labels: MONTHS, color: "var(--ai-c-mid)", height: 160 })
+          e(S.Section, { title: "Milníky kvartálu" },
+            e(S.Timeline, { items: [
+              { time: "01. 09. 2026", title: "Nasazení System 21 u klienta Moravia Steel", description: "První enterprise instalace.", icon: "check", tone: "success" },
+              { time: "15. 09. 2026", title: "AI asistentka — zpracování smluv v produkci", description: "Rozpoznání typu + extrakce údajů, 94% úspěšnost.", icon: "sparkles", tone: "primary" },
+              { time: "08. 10. 2026", title: "Nový pojistitel — ČPP", description: "Napojení na partnerský portál.", icon: "building", tone: "primary" },
+              { time: "20. 10. 2026", title: "Překročena hranice 1 500 smluv v systému", description: "Oproti začátku roku +520 smluv (+53 %).", icon: "trending-up", tone: "success" },
+              { time: "01. 11. 2026", title: "Rozšíření týmu o Janu Svobodovou", description: "Office manager — nástup 17. 11.", icon: "user-plus" },
+            ] })
           )
         ),
 
-        // Top clients
-        e(S.Section, { title: "Top 5 klientů podle tržeb (YTD)" },
+        tab === "klienti" && e(S.Section, { title: "Top 5 klientů podle tržeb (YTD)" },
           e("ul", { style: { listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "var(--space-2)" } },
             TOP_CLIENTS.map((c, i) => e("li", { key: c.name,
               style: {
@@ -145,33 +144,36 @@
           )
         ),
 
-        // Top consultants
-        e(S.Section, { title: "Výkonnost konzultantů" },
-          e("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "var(--space-3)" } },
-            TOP_CONSULTANTS.map((p) => e(S.EntityCard, {
-              key: p.name,
-              icon: "user",
-              title: p.name,
-              subtitle: p.deals + " uzavřených obchodů · winrate " + p.winrate,
-              meta: [
-                { label: "Tržby YTD", value: p.revenue },
-                { label: "Win rate", value: p.winrate },
-              ],
-              accent: "primary",
-              onClick: () => {}
-            }))
+        tab === "tym" && e(React.Fragment, null,
+          e(S.Section, { title: "Výkonnost konzultantů" },
+            e("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "var(--space-3)" } },
+              TOP_CONSULTANTS.map((p) => e(S.EntityCard, {
+                key: p.name,
+                icon: "user",
+                title: p.name,
+                subtitle: p.deals + " uzavřených obchodů · winrate " + p.winrate,
+                meta: [
+                  { label: "Tržby YTD", value: p.revenue },
+                  { label: "Win rate", value: p.winrate },
+                ],
+                onClick: () => {}
+              }))
+            )
+          ),
+          e(S.Section, { title: "Nové smlouvy po měsících" },
+            e(BarChart, { data: CONTRACTS, labels: MONTHS, color: "var(--primary)", height: 180 })
           )
         ),
 
-        // Timeline of milestones
-        e(S.Section, { title: "Milníky kvartálu" },
-          e(S.Timeline, { items: [
-            { time: "01. 09. 2026", title: "Nasazení System 21 u klienta Moravia Steel", description: "První enterprise instalace.", icon: "check", tone: "success" },
-            { time: "15. 09. 2026", title: "AI asistentka — zpracování smluv v produkci", description: "Rozpoznání typu + extrakce údajů, 94% úspěšnost.", icon: "sparkles", tone: "primary" },
-            { time: "08. 10. 2026", title: "Nový pojistitel — ČPP", description: "Napojení na partnerský portál.", icon: "building", tone: "primary" },
-            { time: "20. 10. 2026", title: "Překročena hranice 1 500 smluv v systému", description: "Oproti začátku roku +520 smluv (+53 %).", icon: "trending-up", tone: "success" },
-            { time: "01. 11. 2026", title: "Rozšíření týmu o Janu Svobodovou", description: "Office manager — nástup 17. 11.", icon: "user-plus" },
-          ] })
+        tab === "ai" && e(React.Fragment, null,
+          e(S.Section, { title: "AI zpracované dokumenty" },
+            e(BarChart, { data: AI_DOCS, labels: MONTHS, color: "var(--ai-c-mid)", height: 220 }),
+            e("div", { style: { display: "flex", gap: "var(--space-4)", font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)", marginTop: "var(--space-2)" } },
+              e("span", null, "Celkem: ", e("strong", { style: { color: "var(--ink)" } }, "5 230 dokumentů")),
+              e("span", null, "Úspěšnost: ", e("strong", { style: { color: "var(--ink)" } }, "94 %")),
+              e("span", null, "Ušetřený čas: ", e("strong", { style: { color: "var(--primary-text)" } }, "~340 hodin"))
+            )
+          )
         )
       )
     );

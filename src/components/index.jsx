@@ -739,7 +739,7 @@ function TopBar({ breadcrumbs, title, settings, user, onLogout, extra, brand, qu
           ))}
           {settings && <div className="s21-mobile-only s21-dd__mobileset">{settingsList(usr.setOpen)}</div>}
           {onLogout && (
-            <div className="s21-mobile-only s21-dd__group">
+            <div className="s21-dd__group">
               <button type="button" role="menuitem" className="s21-dd__item s21-dd__item--btn" onClick={() => { usr.setOpen(false); onLogout(); }}>
                 <span className="s21-dd__itemmain"><Icon name="logout" size={16} />Odhlásit se</span>
               </button>
@@ -785,9 +785,6 @@ function TopBar({ breadcrumbs, title, settings, user, onLogout, extra, brand, qu
             </div>
           )}
           {avatar}
-          {onLogout && (
-            <button type="button" className="s21-iconbtn" aria-label="Odhlásit se" title="Odhlásit se" onClick={onLogout}><Icon name="logout" size={20} /></button>
-          )}
         </div>
       </div>
     </header>
