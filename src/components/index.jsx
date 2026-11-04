@@ -1354,7 +1354,7 @@ const moduleNavSections = [
     ],
   },
   {
-    title: "Obchod",
+    title: "Výroba",
     collapsible: true,
     items: [
       { href: "/zakazky", label: "Zakázky" },
@@ -1362,12 +1362,12 @@ const moduleNavSections = [
     ],
   },
   {
-    title: "CRM",
+    title: "Obchod",
     collapsible: true,
     items: [
-      { href: "/crm/klienti", label: "Klienti" },
-      { href: "/crm/osoby", label: "Osoby" },
-      { href: "/crm/obchodni-pripady", label: "Obchodní případy" },
+      { href: "/obchod/klienti", label: "Klienti" },
+      { href: "/obchod/osoby", label: "Osoby" },
+      { href: "/obchod/pripady", label: "Obchodní případy" },
     ],
   },
   {
@@ -1380,11 +1380,11 @@ const moduleNavSections = [
     ],
   },
   {
-    title: "HR",
+    title: "Lidé",
     collapsible: true,
     items: [
-      { href: "/hr/pracovnici", label: "Pracovníci" },
-      { href: "/hr/dochazka", label: "Docházka" },
+      { href: "/lide/pracovnici", label: "Pracovníci" },
+      { href: "/lide/dochazka", label: "Docházka" },
     ],
   },
   {
