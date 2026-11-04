@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · Úkoly</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+<style>
+  .ukol-row { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border-subtle); transition: background 150ms; }
+  .ukol-row:hover { background: var(--surface-muted); }
+  .ukol-row:last-child { border-bottom: 0; }
+  .ukol-row.done .ukol-title { text-decoration: line-through; color: var(--ink-muted); }
+  .ukol-check { flex-shrink: 0; margin-top: 2px; }
+  .ukol-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+  .ukol-title { font: 500 14px/20px var(--font-body); color: var(--ink); }
+  .ukol-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); font: 400 12px/16px var(--font-body); color: var(--ink-muted); }
+  .ukol-sep { color: var(--border); }
+  .ukol-side { display: flex; align-items: center; gap: var(--space-2); flex-shrink: 0; }
+  .ukol-deadline { font: 500 12px/16px var(--font-body); color: var(--ink-muted); }
+  .ukol-deadline.soon { color: var(--warning); font-weight: 600; }
+  .ukol-deadline.overdue { color: var(--danger); font-weight: 600; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  const INITIAL = [
+    { id: 1, title: "Zavolat paní Novákové kvůli dodatku SM-2024-0117", done: false, prio: "high", client: "Novákovi", linked: "SM-2024-0117", deadline: "dnes", deadlineKind: "soon", assignee: "Pavel O." },
+    { id: 2, title: "Zkontrolovat přijaté faktury v ÁJA frontě", done: false, prio: "med", client: null, linked: null, deadline: "dnes", deadlineKind: "soon", assignee: "Alena D." },
+    { id: 3, title: "Připravit nabídku pro Moravia Steel — reporting", done: false, prio: "high", client: "Moravia Steel", linked: "ZAK-2026-0142", deadline: "zítra", deadlineKind: "ok", assignee: "Pavel O." },
+    { id: 4, title: "Doplnit fotky škody — PU-2026-18", done: false, prio: "med", client: "Dvořákovi", linked: "PU-2026-18", deadline: "pá 06. 11.", deadlineKind: "ok", assignee: "Pavel O." },
+    { id: 5, title: "Protokol pro pojistnou událost Dvořákovi", done: false, prio: "med", client: "Dvořákovi", linked: "PU-2026-18", deadline: "pá 06. 11.", deadlineKind: "ok", assignee: "Alena D." },
+    { id: 6, title: "Výročí smlouvy EL-2024-0045 — porovnat s ceníkem", done: false, prio: "low", client: "Novákovi", linked: "EL-2024-0045", deadline: "po 10. 11.", deadlineKind: "ok", assignee: "Pavel O." },
+    { id: 7, title: "Prohlédnout si CSV export přehled smluv 2026", done: false, prio: "low", client: null, linked: null, deadline: "po 10. 11.", deadlineKind: "ok", assignee: "Alena D." },
+    { id: 8, title: "Opravit chybnou extrakci z faktury ČEZ Q3", done: true, prio: "med", client: "Novákovi", linked: "EL-2024-0045", deadline: "včera", deadlineKind: "ok", assignee: "Pavel O." },
+    { id: 9, title: "Předat Novákovým schválený dodatek (podepsaný)", done: true, prio: "high", client: "Novákovi", linked: "SM-2024-0117", deadline: "včera", deadlineKind: "ok", assignee: "Pavel O." },
+    { id: 10, title: "Nahrát cenník Allianz 2027 do DMS", done: false, prio: "low", client: null, linked: null, deadline: null, deadlineKind: null, assignee: "ÁJA (auto)" },
+  ];
+
+  const PRIO_LABEL = { high: "Vysoká", med: "Střední", low: "Nízká" };
+  const PRIO_TONE = { high: "danger", med: "warning", low: "default" };
+
+  const CRUMBS = [{ label: "Úkoly", href: "/ukoly" }];
+
+  function Row({ u, onToggle }) {
+    return e("div", { className: "ukol-row" + (u.done ? " done" : "") },
+      e(S.Checkbox, { checked: u.done, onChange: () => onToggle(u.id), className: "ukol-check", "aria-label": "Hotovo" }),
+      e("div", { className: "ukol-main" },
+        e("div", { className: "ukol-title" }, u.title),
+        e("div", { className: "ukol-meta" },
+          e(S.Badge, { tone: PRIO_TONE[u.prio] }, PRIO_LABEL[u.prio]),
+          u.client && e(React.Fragment, null,
+            e("span", { className: "ukol-sep" }, "·"),
+            e("span", null, u.client)
+          ),
+          u.linked && e(React.Fragment, null,
+            e("span", { className: "ukol-sep" }, "·"),
+            e("span", { className: "s21-cell-code" }, u.linked)
+          ),
+          e("span", { className: "ukol-sep" }, "·"),
+          e("span", null, u.assignee)
+        )
+      ),
+      e("div", { className: "ukol-side" },
+        u.deadline && e("span", { className: "ukol-deadline " + (u.deadlineKind || "") }, u.deadline),
+        e(S.Button, { size: "sm", iconOnly: true, icon: "more", variant: "ghost", "aria-label": "Akce" })
+      )
+    );
+  }
+
+  function Page() {
+    const [tasks, setTasks] = React.useState(INITIAL);
+    const [filter, setFilter] = React.useState("open");
+    const [who, setWho] = React.useState("me");
+    const [newTitle, setNewTitle] = React.useState("");
+
+    const toggle = (id) => setTasks(tasks.map((t) => t.id === id ? { ...t, done: !t.done } : t));
+
+    const add = () => {
+      if (!newTitle.trim()) return;
+      setTasks([{ id: Date.now(), title: newTitle.trim(), done: false, prio: "med", client: null, linked: null, deadline: null, deadlineKind: null, assignee: "Pavel O." }, ...tasks]);
+      setNewTitle("");
+    };
+
+    const rows = tasks.filter((t) => {
+      if (filter === "open" && t.done) return false;
+      if (filter === "done" && !t.done) return false;
+      if (who === "me" && t.assignee !== "Pavel O.") return false;
+      return true;
+    });
+
+    const openCount = tasks.filter((t) => !t.done).length;
+    const doneToday = tasks.filter((t) => t.done).length;
+    const overdue = tasks.filter((t) => !t.done && t.deadlineKind === "overdue").length;
+
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/ukoly" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
+    },
+      e(S.PageHeader, {
+        title: "Úkoly",
+        description: "To-do napojené na klienty, smlouvy a zakázky. Hotové se skryjí do archivu.",
+      }),
+      e(S.PageBody, null,
+        e(S.KpiRow, { cols: 3 },
+          e(S.StatTile, { label: "Otevřené", value: String(openCount), hint: "čekají na tebe nebo na tým" }),
+          e(S.StatTile, { label: "Po termínu", value: String(overdue), accent: overdue > 0 ? "danger" : undefined }),
+          e(S.StatTile, { label: "Hotovo", value: String(doneToday), hint: "celkem v archivu" }),
+        ),
+
+        e("div", { style: { marginTop: "var(--space-4)", display: "flex", gap: "var(--space-2)", alignItems: "center", flexWrap: "wrap" } },
+          e("input", {
+            className: "s21-input",
+            type: "text",
+            value: newTitle,
+            onChange: (ev) => setNewTitle(ev.target.value),
+            onKeyDown: (ev) => { if (ev.key === "Enter") add(); },
+            placeholder: "Nový úkol… (Enter pro přidání)",
+            style: { flex: 1, minWidth: 240 }
+          }),
+          e(S.Button, { icon: "plus", onClick: add, disabled: !newTitle.trim() }, "Přidat")
+        ),
+
+        e("div", { style: { marginTop: "var(--space-4)", display: "flex", gap: "var(--space-3)", alignItems: "center", flexWrap: "wrap" } },
+          e(S.SegmentedControl, {
+            value: filter, onChange: setFilter,
+            items: [
+              { value: "open", label: "Otevřené" },
+              { value: "done", label: "Hotové" },
+              { value: "all", label: "Vše" },
+            ]
+          }),
+          e("span", { style: { color: "var(--ink-muted)", font: "400 13px/18px var(--font-body)" } }, "·"),
+          e(S.SegmentedControl, {
+            value: who, onChange: setWho,
+            items: [
+              { value: "me", label: "Moje" },
+              { value: "all", label: "Celý tým" },
+            ]
+          })
+        ),
+
+        e("div", { style: { marginTop: "var(--space-3)", background: "var(--surface-raised)", border: "1px solid var(--border)", borderRadius: "var(--radius-xl)", overflow: "hidden" } },
+          rows.length === 0
+            ? e("div", { style: { padding: "var(--space-6)", textAlign: "center", color: "var(--ink-muted)" } }, "Nic tady není. 🎉")
+            : rows.map((u) => e(Row, { key: u.id, u, onToggle: toggle }))
+        )
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>

@@ -24,7 +24,7 @@
   const MAP = {
     "/dashboard": "./dashboard.html",
     "/muj-plan": "./muj-plan.html",
-    "/ukoly": "./_coming.html#/ukoly",
+    "/ukoly": "./ukoly.html",
     "/zakazky": "./zakazky.html",
     "/zakazky/nova": "./zakazka-nova.html",
     "/zakazky/131": "./zakazka-detail.html",
@@ -33,7 +33,7 @@
     "/obchod/osoby": "./crm-osoby.html",
     "/obchod/pripady": "./crm-pripady.html",
     "/dms/smlouvy": "./dms-smlouvy.html",
-    "/dms/dokumenty": "./_coming.html#/dms/dokumenty",
+    "/dms/dokumenty": "./dms-dokumenty.html",
     "/dms/automatizace": "./dms-automatizace.html",
     "/lide/pracovnici": "./hr-pracovnici.html",
     "/lide/dochazka": "./hr-dochazka.html",

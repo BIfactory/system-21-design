@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · DMS Dokumenty</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+<style>
+  .cat-btn { display: flex; align-items: center; gap: var(--space-2); width: 100%; padding: var(--space-2); background: transparent; border: 0; border-radius: var(--radius-md); color: var(--ink); font: 400 13px/18px var(--font-body); cursor: pointer; text-align: left; }
+  .cat-btn.is-active { background: var(--primary-soft); color: var(--primary-text); font-weight: 600; }
+  .cat-btn:hover:not(.is-active) { background: var(--surface-muted); }
+  .doc-type { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: var(--radius-lg); background: var(--surface-muted); color: var(--ink-muted); flex-shrink: 0; }
+  .doc-type.pdf { background: color-mix(in srgb, #dc2626 15%, var(--surface)); color: #b91c1c; }
+  .doc-type.img { background: color-mix(in srgb, #10b981 18%, var(--surface)); color: #047857; }
+  .doc-type.doc { background: color-mix(in srgb, #3b82f6 15%, var(--surface)); color: #1e40af; }
+  .doc-type.xls { background: color-mix(in srgb, #16a34a 15%, var(--surface)); color: #15803d; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  const FOLDERS = [
+    { id: "all", label: "Všechny", icon: "folder", count: 1247 },
+    { id: "smlouvy", label: "Smlouvy", icon: "file", count: 584 },
+    { id: "faktury", label: "Faktury", icon: "credit-card", count: 312 },
+    { id: "nabidky", label: "Nabídky", icon: "send", count: 148 },
+    { id: "udalosti", label: "Pojistné události", icon: "alert-triangle", count: 73 },
+    { id: "ostatni", label: "Ostatní", icon: "paperclip", count: 130 },
+  ];
+
+  const DOCS = [
+    { id: 1, name: "Smlouva_SM-2024-0117_Novakovi.pdf", type: "pdf", folder: "smlouvy", size: 240000, client: "Novákovi", linked: "SM-2024-0117", uploadedBy: "Pavel O.", uploadedAt: "12. 04. 2024" },
+    { id: 2, name: "Dodatek_c1_SM-2024-0117.pdf", type: "pdf", folder: "smlouvy", size: 86400, client: "Novákovi", linked: "SM-2024-0117", uploadedBy: "Pavel O.", uploadedAt: "15. 09. 2026" },
+    { id: 3, name: "Faktura_ALZ-2026-12847.pdf", type: "pdf", folder: "faktury", size: 112000, client: "Novákovi", linked: "ALZ-2026-12847", uploadedBy: "ÁJA (auto)", uploadedAt: "dnes 10:42" },
+    { id: 4, name: "Nabidka_Moravia_Reporting.pdf", type: "pdf", folder: "nabidky", size: 420000, client: "Moravia Steel", linked: "ZAK-2026-0142", uploadedBy: "Pavel O.", uploadedAt: "včera 14:30" },
+    { id: 5, name: "Foto_skoda_bok.jpg", type: "img", folder: "udalosti", size: 2800000, client: "Dvořákovi", linked: "PU-2026-18", uploadedBy: "Pavel Dvořák", uploadedAt: "28. 10. 2026" },
+    { id: 6, name: "Protokol_pojistna_udalost.docx", type: "doc", folder: "udalosti", size: 86000, client: "Dvořákovi", linked: "PU-2026-18", uploadedBy: "Alena D.", uploadedAt: "29. 10. 2026" },
+    { id: 7, name: "Cenik_Allianz_2027.pdf", type: "pdf", folder: "ostatni", size: 180000, client: null, linked: null, uploadedBy: "ÁJA (auto)", uploadedAt: "včera 16:24" },
+    { id: 8, name: "Smlouva_EL-2024-0045.pdf", type: "pdf", folder: "smlouvy", size: 320000, client: "Novákovi", linked: "EL-2024-0045", uploadedBy: "Pavel O.", uploadedAt: "01. 05. 2024" },
+    { id: 9, name: "Prehled_smluv_2026.xlsx", type: "xls", folder: "ostatni", size: 42000, client: null, linked: null, uploadedBy: "Alena D.", uploadedAt: "01. 11. 2026" },
+    { id: 10, name: "Faktura_CEZ_Q3.pdf", type: "pdf", folder: "faktury", size: 94000, client: "Novákovi", linked: "EL-2024-0045", uploadedBy: "ÁJA (auto)", uploadedAt: "15. 10. 2026" },
+  ];
+
+  const fmtSize = (n) => n < 1024 ? n + " B" : n < 1024*1024 ? (n/1024).toFixed(0) + " kB" : (n/1024/1024).toFixed(1) + " MB";
+  const typeLabel = { pdf: "PDF", img: "Obrázek", doc: "Word", xls: "Excel" };
+  const typeIcon = { pdf: "file", img: "image", doc: "file", xls: "file" };
+
+  const CRUMBS = [{ label: "DMS", href: "/dms" }, { label: "Dokumenty", href: "/dms/dokumenty" }];
+
+  const COLUMNS = [
+    { key: "name", label: "Dokument", sortable: true, width: "38%", render: (d) =>
+      e("div", { style: { display: "flex", alignItems: "center", gap: "var(--space-2)" } },
+        e("span", { className: "doc-type " + d.type }, e(S.Icon, { name: typeIcon[d.type], size: 16 })),
+        e("div", { style: { minWidth: 0 } },
+          e("div", { className: "s21-cell-title", style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, d.name),
+          e("div", { className: "s21-cell-meta" }, typeLabel[d.type], " · ", fmtSize(d.size))
+        )
+      )
+    },
+    { key: "client", label: "Klient", width: "16%", render: (d) =>
+      d.client ? e("span", null, d.client) : e("span", { className: "s21-cell-meta" }, "—")
+    },
+    { key: "linked", label: "Napojeno na", width: "18%", render: (d) =>
+      d.linked ? e("span", { className: "s21-cell-code" }, d.linked) : e("span", { className: "s21-cell-meta" }, "nenapojeno")
+    },
+    { key: "uploadedBy", label: "Nahrál", width: "14%" },
+    { key: "uploadedAt", label: "Kdy", align: "right", width: "10%" },
+    { key: "actions", label: "", align: "center", width: "4%", render: () =>
+      e("span", { className: "s21-row-actions", "data-no-row-click": true },
+        e(S.Button, { size: "sm", iconOnly: true, icon: "download", variant: "ghost", "aria-label": "Stáhnout" }),
+        e(S.Button, { size: "sm", iconOnly: true, icon: "more", variant: "ghost", "aria-label": "Akce" })
+      )
+    }
+  ];
+
+  function Page() {
+    const [folder, setFolder] = React.useState("all");
+    const [q, setQ] = React.useState("");
+    const [selected, setSelected] = React.useState([]);
+    const rows = folder === "all" ? DOCS : DOCS.filter((d) => d.folder === folder);
+    const filtered = q ? rows.filter((d) => (d.name + " " + (d.client || "") + " " + (d.linked || "")).toLowerCase().includes(q.toLowerCase())) : rows;
+
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/dms/dokumenty" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
+    },
+      e(S.PageHeader, {
+        title: "Dokumenty",
+        description: "Centrální úložiště smluv, faktur, nabídek a dalších dokumentů. Napojené na klienty a smlouvy.",
+        actions: e(React.Fragment, null,
+          e(S.Button, { variant: "secondary", icon: "folder" }, "Nová složka"),
+          e(S.Button, { icon: "upload" }, "Nahrát")
+        )
+      }),
+      e(S.PageBody, null,
+        e("div", { style: { display: "grid", gridTemplateColumns: "240px 1fr", gap: "var(--space-4)", alignItems: "start" } },
+
+          e("aside", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+            e(S.SearchInput, { value: q, onChange: setQ, placeholder: "Hledat dokument…" }),
+            e("div", { style: { background: "var(--surface-raised)", border: "1px solid var(--border)", borderRadius: "var(--radius-xl)", padding: "var(--space-2)" } },
+              FOLDERS.map((f) => e("button", {
+                key: f.id, type: "button",
+                className: "cat-btn" + (folder === f.id ? " is-active" : ""),
+                onClick: () => setFolder(f.id)
+              },
+                e(S.Icon, { name: f.icon, size: 14 }),
+                e("span", { style: { flex: 1 } }, f.label),
+                e("span", { style: { font: "500 11px/16px var(--font-mono)", color: "var(--ink-muted)" } }, f.count)
+              ))
+            )
+          ),
+
+          e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+            e(S.FileUploadZone, { onFiles: () => new Promise((r) => setTimeout(r, 600)), accept: ".pdf,.jpg,.png,.docx,.xlsx", maxSize: 20 * 1024 * 1024 }),
+            e(S.DataTable, {
+              columns: COLUMNS, rows: filtered, minWidth: 980,
+              selectable: true, selected, onSelectedChange: setSelected,
+              onRowClick: () => {}
+            })
+          )
+        ),
+
+        e(S.BulkActionBar, {
+          count: selected.length,
+          label: "souborů vybráno",
+          onClear: () => setSelected([]),
+          actions: [
+            { label: "Stáhnout", icon: "download", onClick: () => {} },
+            { label: "Napojit na klienta", icon: "users", onClick: () => {} },
+            { label: "Smazat", icon: "trash", variant: "danger", onClick: () => {} },
+          ]
+        })
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>
