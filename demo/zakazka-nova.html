@@ -117,20 +117,22 @@
     },
       e(S.PageHeader, { title: "Nová zakázka", description: "Zadej základní údaje, termíny a vlastníka. Operace a materiály doplníš v detailu." }),
       e(S.PageBody, null,
-        done
-          ? e(S.Callout, { tone: "success", title: "Zakázka vytvořena" },
-              "Zakázka „", done.name, "“ je uložena jako nová.",
-              e("div", { style: { marginTop: "var(--space-3)", display: "flex", gap: "var(--space-2)" } },
-                e(S.Button, { onClick: () => window.location.href = "./zakazka-detail.html" }, "Otevřít detail"),
-                e(S.Button, { variant: "secondary", onClick: () => window.location.href = "./zakazky.html" }, "Zpět na seznam")
+        e("div", { style: { maxWidth: 820, width: "100%", marginInline: "auto" } },
+          done
+            ? e(S.Callout, { tone: "success", title: "Zakázka vytvořena" },
+                "Zakázka „", done.name, "“ je uložena jako nová.",
+                e("div", { style: { marginTop: "var(--space-3)", display: "flex", gap: "var(--space-2)" } },
+                  e(S.Button, { onClick: () => window.location.href = "./zakazka-detail.html" }, "Otevřít detail"),
+                  e(S.Button, { variant: "secondary", onClick: () => window.location.href = "./zakazky.html" }, "Zpět na seznam")
+                )
               )
-            )
-          : e(S.FormWizard, {
-              steps,
-              initialValues: { name: "", client: "", type: "", start: "", deadline: "", owner: "" },
-              onComplete: setDone,
-              onCancel: () => window.location.href = "./zakazky.html",
-            })
+            : e(S.FormWizard, {
+                steps,
+                initialValues: { name: "", client: "", type: "", start: "", deadline: "", owner: "" },
+                onComplete: setDone,
+                onCancel: () => window.location.href = "./zakazky.html",
+              })
+        )
       )
     );
   }
