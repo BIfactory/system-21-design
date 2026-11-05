@@ -124,8 +124,7 @@
             e(S.FileUploadZone, { onFiles: () => new Promise((r) => setTimeout(r, 600)), accept: ".pdf,.jpg,.png,.docx,.xlsx", maxSize: 20 * 1024 * 1024 }),
             e(S.DataTable, {
               columns: COLUMNS, rows: filtered, minWidth: 980,
-              selectable: true, selected, onSelectedChange: setSelected,
-              onRowClick: () => {}
+              selectable: true, selected, onSelectedChange: setSelected
             })
           )
         ),

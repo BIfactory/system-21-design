@@ -89,8 +89,7 @@
         ),
         e(S.DataTable, {
           columns: COLUMNS, rows: WORKERS, minWidth: 980,
-          selectable: true, selected, onSelectedChange: setSelected,
-          onRowClick: () => {}
+          selectable: true, selected, onSelectedChange: setSelected
         }),
         e(S.BulkActionBar, {
           count: selected.length,
