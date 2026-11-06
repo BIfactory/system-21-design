@@ -105,7 +105,7 @@
     return e("div", { style: { display: "flex", gap: "var(--space-1)", flexWrap: "wrap", marginTop: "var(--space-1)" } },
       deadlineDays < 7 && e(S.Badge, { tone: "danger", key: "dl" }, "deadline blízko"),
       c.value > 100000 && e(S.Badge, { tone: "warning", key: "hv" }, "vysoká hodnota"),
-      lastContactDays > 5 && e(S.Badge, { tone: "neutral", key: "sl" }, "pomalá odpověď")
+      lastContactDays > 7 && e(S.Badge, { tone: "neutral", key: "sl" }, "pomalá odpověď")
     );
   }
 
