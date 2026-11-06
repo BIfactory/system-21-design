@@ -32,17 +32,6 @@
     { id: 7, code: "OP-2026-0030", title: "Autopojištění Škoda Octavia", client: "Novákovi", clientKind: "family", value: 18600, owner: "Pavel O.", stage: "won", stageLabel: "Podepsáno · SM-2026-0089", deadline: "—", type: "insurance", mails: 4, offers: 1 },
   ];
 
-  const FUNNEL = [
-    { id: "new", label: "Poptávka", count: CASES.filter((c) => c.stage === "new").length, color: "var(--ink-muted)" },
-    { id: "supplier_rfq", label: "K dodavateli", count: CASES.filter((c) => c.stage === "supplier_rfq").length, color: "#6366f1" },
-    { id: "offer", label: "Nabídka", count: CASES.filter((c) => c.stage === "offer").length, color: "var(--primary)" },
-    { id: "negotiation", label: "Vyhodnocení (naše)", count: CASES.filter((c) => c.stage === "negotiation").length, color: "#d97706" },
-    { id: "customer_eval", label: "Vyhodnocení (klient)", count: CASES.filter((c) => c.stage === "customer_eval").length, color: "#d97706" },
-    { id: "signed", label: "K podpisu", count: CASES.filter((c) => c.stage === "signed").length, color: "var(--success-text)" },
-    { id: "won", label: "Podepsáno", count: CASES.filter((c) => c.stage === "won").length, color: "var(--success-solid)" },
-    { id: "lost", label: "Prohra", count: CASES.filter((c) => c.stage === "lost").length, color: "var(--danger-solid)" },
-  ];
-
   const fmt = (n) => n.toLocaleString("cs-CZ").replace(/,/g, " ");
   function stageTone(s) {
     if (s === "won") return "success";
@@ -123,8 +112,6 @@
           e(S.StatTile, { label: "Podepsáno YTD", value: fmt(wonValue), unit: "Kč" }),
           e(S.StatTile, { label: "Konverze", value: conversion + " %" })
         ),
-
-        e(S.SalesFunnel, { title: "Pipeline — fáze obchodního případu (Scénář 3)", stages: FUNNEL, value: stage, onChange: setStage }),
 
         e(S.FilterBar, null,
           e(S.SearchInput, { className: "s21-grow", value: q, onChange: setQ, placeholder: "Hledat případ, klient, číslo…" }),

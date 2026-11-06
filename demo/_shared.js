@@ -31,6 +31,7 @@
     "/zakazky/nova": "./zakazka-nova.html",
     "/zakazky/131": "./zakazka-detail.html",
     "/vykazovani": "./vykazovani.html",
+    "/obchod": "./obchod.html",
     "/obchod/klienti": "./crm-klienti.html",
     "/obchod/osoby": "./crm-osoby.html",
     "/obchod/pripady": "./crm-pripady.html",

@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · Obchod</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+<script src="./_shared-data.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, SD = window.S21Data, e = React.createElement;
+
+  // ─── helpers ────────────────────────────────────────────────────────
+  const fmt = (n) => n.toLocaleString("cs-CZ").replace(/,/g, " ");
+
+  // Parse CZ date string "DD. MM. YYYY" → Date (returns null for "—")
+  function parseDate(s) {
+    if (!s || s === "—") return null;
+    const parts = s.replace(/\s/g, "").split(".");
+    if (parts.length < 3) return null;
+    return new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+  }
+
+  // Priority score for "Vyžaduje tvou pozornost"
+  const TODAY = new Date(2026, 10, 6); // 2026-11-06
+  function priority(c) {
+    const dl = parseDate(c.deadline);
+    const deadlineDays = dl ? Math.round((dl - TODAY) / 86400000) : 999;
+    const lastContactDays = c.lastContact && c.lastContact.match(/(\d+)/) ? parseInt(c.lastContact.match(/(\d+)/)[1], 10) : 0;
+    return (deadlineDays < 7 ? 3 : 0) + (c.value > 100000 ? 2 : 0) + (lastContactDays > 5 ? 2 : 0);
+  }
+
+  // Stage metadata for funnel (derived from S21Data stage values)
+  const STAGE_META = {
+    poptavka:          { label: "Poptávka",             color: "var(--ink-muted)" },
+    "k-dodavateli":    { label: "K dodavateli",         color: "#6366f1" },
+    nabidka:           { label: "Nabídka",              color: "var(--primary)" },
+    "vyhodnoceni-nase":{ label: "Vyhodnocení (naše)",   color: "#d97706" },
+    "vyhodnoceni-klient":{ label: "Vyhodnocení (klient)", color: "#d97706" },
+    "k-podpisu":       { label: "K podpisu",            color: "var(--success-text)" },
+    won:               { label: "Podepsáno",            color: "var(--success-solid)" },
+    lost:              { label: "Prohra",               color: "var(--danger-solid)" },
+  };
+
+  // Build funnel stages from CASES
+  const ALL_CASES = SD.CASES;
+  const FUNNEL_STAGES = ["poptavka", "k-dodavateli", "nabidka", "vyhodnoceni-nase", "vyhodnoceni-klient", "k-podpisu", "won", "lost"];
+  const FUNNEL = FUNNEL_STAGES.map((id) => {
+    const meta = STAGE_META[id];
+    const count = ALL_CASES.filter((c) => c.stage === id).length;
+    const val = ALL_CASES.filter((c) => c.stage === id).reduce((s, c) => s + (c.value || 0), 0);
+    return { id, label: meta.label, count, value: val, color: meta.color };
+  });
+
+  // Open cases & KPI
+  const openCases = SD.getOpenCases();
+  const pipelineValue = openCases.reduce((s, c) => s + (c.value || 0), 0);
+
+  // Top 5 by priority
+  const attentionCases = ALL_CASES
+    .filter((c) => c.stage !== "won" && c.stage !== "lost")
+    .map((c) => ({ ...c, _priority: priority(c) }))
+    .filter((c) => c._priority > 0)
+    .sort((a, b) => b._priority - a._priority)
+    .slice(0, 5);
+
+  // Unique clients from CASES
+  const uniqueClients = Array.from(new Set(ALL_CASES.map((c) => c.client))).slice(0, 5);
+
+  // Recent cases: sorted by id desc, top 5
+  const recentCases = [...ALL_CASES].sort((a, b) => {
+    const na = parseInt(String(a.id || a.code).replace(/\D/g, ""), 10);
+    const nb = parseInt(String(b.id || b.code).replace(/\D/g, ""), 10);
+    return nb - na;
+  }).slice(0, 5);
+
+  const CRUMBS = [{ label: "Obchod", href: "/obchod" }];
+
+  function stageToneFor(stage) {
+    if (stage === "won") return "success";
+    if (stage === "lost") return "danger";
+    if (stage === "vyhodnoceni-klient" || stage === "vyhodnoceni-nase") return "warning";
+    return "primary";
+  }
+
+  function stageLabel(stage) {
+    const m = STAGE_META[stage];
+    return m ? m.label : stage;
+  }
+
+  function AttentionFlags({ c }) {
+    const dl = parseDate(c.deadline);
+    const deadlineDays = dl ? Math.round((dl - TODAY) / 86400000) : 999;
+    const lastContactDays = c.lastContact && c.lastContact.match(/(\d+)/) ? parseInt(c.lastContact.match(/(\d+)/)[1], 10) : 0;
+    return e("div", { style: { display: "flex", gap: "var(--space-1)", flexWrap: "wrap", marginTop: "var(--space-1)" } },
+      deadlineDays < 7 && e(S.Badge, { tone: "danger", key: "dl" }, "deadline blízko"),
+      c.value > 100000 && e(S.Badge, { tone: "warning", key: "hv" }, "vysoká hodnota"),
+      lastContactDays > 5 && e(S.Badge, { tone: "neutral", key: "sl" }, "pomalá odpověď")
+    );
+  }
+
+  function Page() {
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/obchod" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
+    },
+      e(S.PageHeader, {
+        title: "Obchod",
+        description: "Prodejní pipeline, klienti a obchodní případy"
+      }),
+      e(S.PageBody, null,
+
+        // ─── KPI pruh ───────────────────────────────────────────────
+        e(S.KpiRow, { cols: 4 },
+          e(S.StatTile, { label: "Otevřené případy", value: String(openCases.length) }),
+          e(S.StatTile, { label: "Hodnota pipeline", value: fmt(pipelineValue), unit: "Kč", big: true }),
+          e(S.StatTile, { label: "Konverze (YTD)", value: "67 %", hint: "podepsáno / uzavřených" }),
+          e(S.StatTile, { label: "Case velocity", value: "28", unit: "dnů", hint: "poptávka → podpis" })
+        ),
+
+        // ─── 2-col hlavní blok: SalesFunnel + Vyžaduje pozornost ────
+        e("div", { className: "s21-grid-main-aside", style: { marginTop: "var(--space-5)" } },
+
+          // Levý: SalesFunnel
+          e(S.Section, { title: "Pipeline — fáze obchodního případu" },
+            e(S.SalesFunnel, { stages: FUNNEL })
+          ),
+
+          // Pravý: Vyžaduje tvou pozornost
+          e(S.Section, { title: "Vyžaduje tvou pozornost" },
+            attentionCases.length === 0
+              ? e(S.EmptyState, { icon: "check", title: "Vše v pořádku", description: "Žádný případ nevyžaduje okamžitou pozornost." })
+              : e("ul", { style: { listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+                  attentionCases.map((c) =>
+                    e("li", { key: c.code,
+                      style: {
+                        padding: "var(--space-3)",
+                        background: "var(--surface-raised)",
+                        border: "1px solid var(--border-subtle)",
+                        borderRadius: "var(--radius-lg)",
+                        cursor: "pointer"
+                      },
+                      onClick: () => window.location.href = "./crm-pripady.html"
+                    },
+                      e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "var(--space-2)" } },
+                        e("div", { style: { minWidth: 0 } },
+                          e("div", { style: { font: "500 14px/20px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, c.name),
+                          e("div", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)", marginTop: 2 } },
+                            e("span", { className: "s21-cell-code" }, c.code), " · ", c.client, " · ", c.owner
+                          ),
+                          e(AttentionFlags, { c })
+                        ),
+                        e("div", { style: { flexShrink: 0, textAlign: "right" } },
+                          e("div", { style: { font: "600 14px/20px var(--font-body)", fontVariantNumeric: "tabular-nums", color: "var(--ink)" } }, fmt(c.value), " Kč"),
+                          e(S.Badge, { tone: stageToneFor(c.stage), style: { marginTop: 4, display: "block" } }, stageLabel(c.stage))
+                        )
+                      )
+                    )
+                  )
+                )
+          )
+        ),
+
+        // ─── Spodní operativa ────────────────────────────────────────
+        e("div", { className: "s21-grid-cards-2", style: { marginTop: "var(--space-5)" } },
+
+          // Levá karta: Nejnovější případy
+          e(S.Section, { title: "Nejnovější případy" },
+            e("table", { style: { width: "100%", borderCollapse: "collapse", font: "400 13px/18px var(--font-body)" } },
+              e("thead", null,
+                e("tr", null,
+                  e("th", { style: { textAlign: "left", padding: "0 0 var(--space-2)", color: "var(--ink-muted)", fontWeight: 500 } }, "Kód"),
+                  e("th", { style: { textAlign: "left", padding: "0 0 var(--space-2)", color: "var(--ink-muted)", fontWeight: 500 } }, "Klient"),
+                  e("th", { style: { textAlign: "left", padding: "0 0 var(--space-2)", color: "var(--ink-muted)", fontWeight: 500 } }, "Fáze"),
+                  e("th", { style: { textAlign: "right", padding: "0 0 var(--space-2)", color: "var(--ink-muted)", fontWeight: 500 } }, "Hodnota")
+                )
+              ),
+              e("tbody", null,
+                recentCases.map((c) =>
+                  e("tr", { key: c.code,
+                    style: { borderTop: "1px solid var(--border-subtle)", cursor: "pointer" },
+                    onClick: () => window.location.href = "./crm-pripady.html"
+                  },
+                    e("td", { style: { padding: "var(--space-2) var(--space-1) var(--space-2) 0" } },
+                      e("span", { className: "s21-cell-code" }, c.code)
+                    ),
+                    e("td", { style: { padding: "var(--space-2) var(--space-1)" } }, c.client),
+                    e("td", { style: { padding: "var(--space-2) var(--space-1)" } },
+                      e(S.Badge, { tone: stageToneFor(c.stage), fitCell: true }, stageLabel(c.stage))
+                    ),
+                    e("td", { style: { padding: "var(--space-2) 0 var(--space-2) var(--space-1)", textAlign: "right", fontVariantNumeric: "tabular-nums", fontWeight: 500 } },
+                      fmt(c.value), " Kč"
+                    )
+                  )
+                )
+              )
+            ),
+            e("div", { style: { marginTop: "var(--space-3)", borderTop: "1px solid var(--border-subtle)", paddingTop: "var(--space-3)" } },
+              e(S.Button, { variant: "ghost", size: "sm", href: "./crm-pripady.html",
+                onClick: () => window.location.href = "./crm-pripady.html"
+              }, "→ Všechny obchodní případy (", ALL_CASES.length, ")")
+            )
+          ),
+
+          // Pravá karta: Klienti
+          e(S.Section, { title: "Klienti" },
+            e("ul", { style: { listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "var(--space-2)" } },
+              uniqueClients.map((client) => {
+                const isCompany = ALL_CASES.find((c) => c.client === client && c.clientKind === "b2b");
+                return e("li", { key: client,
+                  style: {
+                    display: "flex", alignItems: "center", gap: "var(--space-2)",
+                    padding: "var(--space-2) 0",
+                    borderBottom: "1px solid var(--border-subtle)",
+                    cursor: "pointer"
+                  },
+                  onClick: () => window.location.href = "./crm-klienti.html"
+                },
+                  e(S.Icon, { name: isCompany ? "building" : "users", size: 14, style: { color: "var(--ink-muted)", flexShrink: 0 } }),
+                  e("span", { style: { font: "500 13px/18px var(--font-body)", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, client),
+                  e("span", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)", flexShrink: 0 } },
+                    ALL_CASES.filter((c) => c.client === client).length, " příp."
+                  )
+                );
+              })
+            ),
+            e("div", { style: { marginTop: "var(--space-3)", borderTop: "1px solid var(--border-subtle)", paddingTop: "var(--space-3)" } },
+              e(S.Button, { variant: "ghost", size: "sm",
+                onClick: () => window.location.href = "./crm-klienti.html"
+              }, "→ Klienti")
+            )
+          )
+        )
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>
