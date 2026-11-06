@@ -76,9 +76,11 @@
   .lc-num { font: 700 28px/32px var(--font-display); color: var(--primary-text); }
   .lc-sub { font: 400 12px/16px var(--font-body); color: var(--ink-muted); }
   .lc-arrow { color: var(--ink-subtle); flex-shrink: 0; }
+  .lc-arrow-char { font: 700 24px/32px sans-serif; color: var(--ink-subtle); flex-shrink: 0; }
   @media (max-width: 767px) {
     .lifecycle-banner { flex-direction: column; }
     .lc-arrow { transform: rotate(90deg); }
+    .lc-arrow-char { transform: rotate(90deg); }
     .lc-step { width: 100%; }
   }
 
@@ -145,10 +147,10 @@
 
   // ── Dnes rozhoduješ — mock curated feed ──────────────────────────────────
   const TODAY_DECIDE = [
-    { icon: "alert-triangle", tone: "warning", section: "VÝROBA", title: "ZAK-2026-0131 Napojení ERP → CRM — po termínu", meta: "Agro Slovácko · marže -4 %", href: "./zakazka-detail.html" },
-    { icon: "handshake", tone: "primary", section: "OBCHOD", title: "OP-2026-0043 Moravia Steel — AI reporting", meta: "180 000 Kč pipeline · čeká na odpověď", href: "./crm-pripady.html" },
+    { icon: "info", tone: "warning", section: "VÝROBA", title: "ZAK-2026-0131 Napojení ERP → CRM — po termínu", meta: "Agro Slovácko · marže -4 %", href: "./zakazka-detail.html" },
+    { icon: "users", tone: "primary", section: "OBCHOD", title: "OP-2026-0043 Moravia Steel — AI reporting", meta: "180 000 Kč pipeline · čeká na odpověď", href: "./crm-pripady.html" },
     { icon: "file", tone: "default", section: "DMS", title: "PL-2024-0067 Plyn — vyprší za 10 dnů", meta: "Hradecká strojírna · konec fixace 15. 11.", href: "./dms-smlouvy.html" },
-    { icon: "check-square", tone: "default", section: "DMS", title: "3 ÁJA emailů čeká na schválení", meta: "Nejnižší confidence 68 %", href: "./dms-automatizace.html" },
+    { icon: "tasks", tone: "default", section: "DMS", title: "3 ÁJA emailů čeká na schválení", meta: "Nejnižší confidence 68 %", href: "./dms-automatizace.html" },
     { icon: "clock", tone: "primary", section: "ÚKOLY", title: "Zavolat Janu Novákovi o rozšíření úrazovky", meta: "deadline dnes", href: "./ukoly.html" },
   ];
 
@@ -158,7 +160,7 @@
     { time: "09:15", icon: "folder", tone: "primary", text: "Materiál M-01 vykázán na ZAK-2026-0131", client: "Alena D." },
     { time: "08:30", icon: "mail", tone: "default", text: "Nová poptávka od ing. Kříže", client: "Agro Slovácko" },
     { time: "včera 16:24", icon: "upload", tone: "default", text: "Nahrán cenník Allianz 2027", client: "ÁJA auto" },
-    { time: "včera 15:30", icon: "user-plus", tone: "primary", text: "Nový pracovník Jana Svobodová nastoupí 17. 11.", client: null },
+    { time: "včera 15:30", icon: "user", tone: "primary", text: "Nový pracovník Jana Svobodová nastoupí 17. 11.", client: null },
     { time: "včera 14:10", icon: "tasks", tone: "success", text: "3 úkoly dokončené", client: "Dvořákovi · Novákovi · Agro" },
   ];
 
@@ -298,13 +300,13 @@
             e("div", { className: "lc-num" }, String(openCases.length)),
             e("div", { className: "lc-sub" }, fmt(pipelineValue) + " Kč pipeline")
           ),
-          e(S.Icon, { name: "arrow-right", className: "lc-arrow" }),
+          e("span", { className: "lc-arrow-char" }, "→"),
           e("a", { className: "lc-step", href: "./zakazky.html" },
             e("h3", null, "V realizaci"),
             e("div", { className: "lc-num" }, String(active.length)),
             e("div", { className: "lc-sub" }, fmt(rozpracovanostKc) + " Kč rozpracováno")
           ),
-          e(S.Icon, { name: "arrow-right", className: "lc-arrow" }),
+          e("span", { className: "lc-arrow-char" }, "→"),
           e("a", { className: "lc-step", href: "./zakazky.html" },
             e("h3", null, "Dokončeno YTD"),
             e("div", { className: "lc-num" }, "3"),
