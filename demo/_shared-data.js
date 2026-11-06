@@ -66,7 +66,7 @@
     let s = 0;
     if (o.overdue) s += 4;
     if (o.realHours > o.plannedHours * 1.1) s += 3;
-    if (o.margin < 15) s += 2;
+    if (o.margin != null && o.margin < 15) s += 2;
     if (o.missingDocs) s += 1;
     return s;
   }
