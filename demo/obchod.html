@@ -37,7 +37,7 @@
     const dl = parseDate(c.deadline);
     const deadlineDays = dl ? Math.round((dl - TODAY) / 86400000) : 999;
     const lastContactDays = c.lastContact && c.lastContact.match(/(\d+)/) ? parseInt(c.lastContact.match(/(\d+)/)[1], 10) : 0;
-    return (deadlineDays < 7 ? 3 : 0) + (c.value > 100000 ? 2 : 0) + (lastContactDays > 5 ? 2 : 0);
+    return (deadlineDays < 7 ? 3 : 0) + (c.value > 100000 ? 2 : 0) + (lastContactDays > 7 ? 2 : 0);
   }
 
   // Stage metadata for funnel (derived from S21Data stage values)
