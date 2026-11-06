@@ -675,19 +675,17 @@ function Sidebar({ brand, sections, activeHref, onNavigate, quickAction, search,
                   </button>
                 </div>
               ) : <div className="s21-navsec__label">{s.title}</div>)}
-              {!isCol && (
-                <ul className="s21-navsec__list" id={`navsec-${si}`}>
-                  {s.items.map((it) => (
-                    <li key={it.href}>
-                      <a href={it.href} onClick={(e) => nav(e, it)} aria-current={isActive(it.href) ? "page" : undefined}
-                        className={cx("s21-navitem", isActive(it.href) && "is-active")}>
-                        <span className="s21-navitem__main">{it.icon && <Icon name={it.icon} />}<span className="s21-navitem__txt">{it.label}</span></span>
-                        {it.badge > 0 && <span className="s21-navitem__badge" title={`${it.badge} položek vyžaduje pozornost`}>{it.badge}</span>}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              )}
+              <ul className="s21-navsec__list" id={`navsec-${si}`} hidden={isCol || undefined}>
+                {s.items.map((it) => (
+                  <li key={it.href}>
+                    <a href={it.href} onClick={(e) => nav(e, it)} aria-current={isActive(it.href) ? "page" : undefined}
+                      className={cx("s21-navitem", isActive(it.href) && "is-active")}>
+                      <span className="s21-navitem__main">{it.icon && <Icon name={it.icon} />}<span className="s21-navitem__txt">{it.label}</span></span>
+                      {it.badge > 0 && <span className="s21-navitem__badge" title={`${it.badge} položek vyžaduje pozornost`}>{it.badge}</span>}
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </div>
           );
         })}
