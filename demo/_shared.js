@@ -20,6 +20,8 @@
     ],
   };
 
+  const INBOX_UNREAD = 5; // demo value
+
   // Mapa URL → demo HTML stránka. Nedokončené moduly ukazují na _coming.html.
   const MAP = {
     "/dashboard": "./dashboard.html",
@@ -76,6 +78,7 @@
     return h(S.TopBar, {
       breadcrumbs: h(S.Breadcrumbs, { items: crumbs, onNavigate: onNavigate || (() => {}) }),
       extra: h(R.Fragment, null,
+        h(S.InboxBell, { unread: INBOX_UNREAD, onClick: () => global.location.href = './inbox.html' }),
         h(S.NotificationCenter, {
           notifications: notifs,
           onMarkAllRead: () => setNotifs(notifs.map((n) => ({ ...n, read: true }))),
