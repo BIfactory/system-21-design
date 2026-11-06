@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · Lidé</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+<style>
+  /* ── Fond hodin — progress bar seznam ─────────────────────── */
+  .hours-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-3); }
+  .hours-row { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); }
+  .hours-row__avatar { flex-shrink: 0; }
+  .hours-row__main { flex: 1; min-width: 0; }
+  .hours-row__name { font: 500 14px/20px var(--font-body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hours-row__bar { margin-top: var(--space-2); display: flex; align-items: center; gap: var(--space-2); }
+  .hours-bar { flex: 1; height: 6px; background: var(--surface-muted); border-radius: var(--radius-full); overflow: hidden; }
+  .hours-bar__fill { height: 100%; border-radius: var(--radius-full); }
+  .hours-bar__fill--ok { background: var(--success-solid); }
+  .hours-bar__fill--low { background: var(--warning-text); }
+  .hours-bar__fill--high { background: var(--danger-solid); }
+  .hours-row__text { font: 500 11px/16px var(--font-mono); color: var(--ink-muted); min-width: 45px; text-align: right; }
+
+  /* ── Docházka dnes — status list ──────────────────────────── */
+  .attendance-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+  .attendance-row { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); }
+  .attendance-row__avatar { flex-shrink: 0; }
+  .attendance-row__main { flex: 1; min-width: 0; }
+  .attendance-row__name { font: 500 14px/20px var(--font-body); }
+  .attendance-row__status { font: 400 12px/16px var(--font-body); color: var(--ink-muted); margin-top: 2px; }
+  .attendance-row__time { font: 500 11px/16px var(--font-mono); color: var(--primary-text); }
+  .attendance-row__icon { flex-shrink: 0; color: var(--ink-muted); }
+
+  /* ── Spodní operativa — dvě tlačítka ────────────────────── */
+  .footer-actions { display: flex; flex-direction: column; gap: var(--space-3); }
+  .footer-btn { display: flex; align-items: center; justify-content: space-between; padding: var(--space-3); background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); cursor: pointer; transition: all .15s var(--motion-ease-out); }
+  .footer-btn:hover { background: var(--surface-muted); border-color: var(--border-strong); }
+  .footer-btn__label { font: 500 14px/20px var(--font-body); }
+  .footer-btn__arrow { color: var(--primary-text); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  // ─── Mock data ───────────────────────────────────────────────────
+  const WORKERS = [
+    { id: 1, name: "Pavel Obdržálek", hours: 38, planned: 40 },
+    { id: 2, name: "Alena Dvořáková", hours: 42, planned: 40 },
+    { id: 3, name: "Tomáš Novák", hours: 36, planned: 40 },
+    { id: 4, name: "Jana Svobodová", hours: 0, planned: 40 },
+    { id: 5, name: "Marek Krejčí", hours: 25, planned: 40 },
+    { id: 6, name: "Eva Horáková", hours: 20, planned: 20 },
+    { id: 7, name: "Lubomír Hulín", hours: 48, planned: 40 },
+  ];
+
+  const ATTENDANCE_TODAY = [
+    { id: 1, name: "Pavel Obdržálek", status: "Kancelář", time: "08:12", icon: "briefcase" },
+    { id: 2, name: "Alena Dvořáková", status: "Kancelář", time: "07:55", icon: "briefcase" },
+    { id: 5, name: "Marek Krejčí", status: "Home office", time: "09:30", icon: "home" },
+    { id: 7, name: "Lubomír Hulín", status: "Kancelář", time: "08:30", icon: "briefcase" },
+    { id: 3, name: "Tomáš Novák", status: "Oběd", time: "12:00–13:00", icon: "utensils" },
+  ];
+
+  // ─── Helpers ──────────────────────────────────────────────────────
+  function getHoursColor(hours, planned) {
+    const pct = planned > 0 ? (hours / planned) * 100 : 0;
+    if (pct >= 80 && pct <= 110) return "ok";
+    if (pct < 80) return "low";
+    return "high";
+  }
+
+  function HoursRow({ worker }) {
+    const color = getHoursColor(worker.hours, worker.planned);
+    const pct = worker.planned > 0 ? (worker.hours / worker.planned) * 100 : 0;
+    const clampedPct = Math.min(100, pct);
+
+    return e("li", { key: worker.id, className: "hours-row" },
+      e("div", { className: "hours-row__avatar" },
+        e(S.Avatar, { name: worker.name, size: 32 })
+      ),
+      e("div", { className: "hours-row__main" },
+        e("div", { className: "hours-row__name" }, worker.name),
+        e("div", { className: "hours-row__bar" },
+          e("div", { className: "hours-bar" },
+            e("div", {
+              className: "hours-bar__fill hours-bar__fill--" + color,
+              style: { width: clampedPct + "%" }
+            })
+          ),
+          e("div", { className: "hours-row__text" },
+            worker.hours + " / " + worker.planned + " h"
+          )
+        )
+      )
+    );
+  }
+
+  function AttendanceRow({ person }) {
+    return e("li", { key: person.id, className: "attendance-row" },
+      e("div", { className: "attendance-row__avatar" },
+        e(S.Avatar, { name: person.name, size: 32 })
+      ),
+      e("div", { className: "attendance-row__main" },
+        e("div", { className: "attendance-row__name" }, person.name),
+        e("div", { className: "attendance-row__status" }, person.status)
+      ),
+      e("div", { className: "attendance-row__time" }, person.time),
+      e("div", { className: "attendance-row__icon" },
+        e(S.Icon, { name: person.icon, size: 18 })
+      )
+    );
+  }
+
+  // ─── Breadcrumbs ──────────────────────────────────────────────────
+  const CRUMBS = [{ label: "Lidé", href: "/lide" }];
+
+  function Page() {
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/lide" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
+    },
+      e(S.PageHeader, {
+        title: "Lidé",
+        description: "Tým, kapacita, docházka"
+      }),
+
+      e(S.PageBody, null,
+
+        // ── KPI pruh ────────────────────────────────────────────────
+        e(S.KpiRow, { cols: 4 },
+          e(S.StatTile, { label: "Celkem pracovníků", value: "7" }),
+          e(S.StatTile, { label: "Dnes v práci", value: "5" }),
+          e(S.StatTile, { label: "Na dovolené", value: "1" }),
+          e(S.StatTile, { label: "Nemocní", value: "1" })
+        ),
+
+        // ── 2-col hlavní blok: Fond hodin + Docházka dnes ──────────
+        e("div", { className: "s21-grid-main-aside", style: { marginTop: "var(--space-5)" } },
+
+          // Levý: Fond hodin tento týden
+          e(S.Section, { title: "Fond hodin — tento týden" },
+            e("ul", { className: "hours-list" },
+              ...WORKERS.map(w => e(HoursRow, { key: w.id, worker: w }))
+            )
+          ),
+
+          // Pravý: Docházka dnes
+          e(S.Section, { title: "Docházka dnes" },
+            ATTENDANCE_TODAY.length === 0
+              ? e(S.EmptyState, {
+                  icon: "users",
+                  title: "Žádné záznamy",
+                  description: "Dnes ještě nikdo nepřišel."
+                })
+              : e("ul", { className: "attendance-list" },
+                  ...ATTENDANCE_TODAY.map(p => e(AttendanceRow, { key: p.id, person: p }))
+                )
+          )
+        ),
+
+        // ── Spodní operativa ────────────────────────────────────────
+        e("div", { className: "footer-actions", style: { marginTop: "var(--space-5)" } },
+          e("button", {
+            className: "footer-btn",
+            onClick: () => window.location.href = "./hr-pracovnici.html"
+          },
+            e("span", { className: "footer-btn__label" }, "→ Všichni pracovníci (7)"),
+            e(S.Icon, { name: "arrow-right", size: 16, className: "footer-btn__arrow" })
+          ),
+          e("button", {
+            className: "footer-btn",
+            onClick: () => window.location.href = "./hr-dochazka.html"
+          },
+            e("span", { className: "footer-btn__label" }, "→ Docházka tento měsíc"),
+            e(S.Icon, { name: "arrow-right", size: 16, className: "footer-btn__arrow" })
+          )
+        )
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>

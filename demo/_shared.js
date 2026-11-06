@@ -39,6 +39,7 @@
     "/dms/smlouvy": "./dms-smlouvy.html",
     "/dms/dokumenty": "./dms-dokumenty.html",
     "/dms/automatizace": "./dms-automatizace.html",
+    "/lide": "./lide.html",
     "/lide/pracovnici": "./hr-pracovnici.html",
     "/lide/dochazka": "./hr-dochazka.html",
     "/inbox": "./inbox.html",
