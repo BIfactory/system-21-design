@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · Výroba</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+<script src="./_shared-data.js"></script>
+<style>
+  /* ── Rizikový list ─────────────────────────────────────── */
+  .risk-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-3); }
+  .risk-row { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); flex-wrap: wrap; }
+  .risk-row__main { flex: 1; min-width: 0; }
+  .risk-row__name { font: 500 14px/20px var(--font-body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .risk-row__meta { font: 400 12px/16px var(--font-body); color: var(--ink-muted); margin-top: 2px; }
+  .risk-row__flags { display: flex; gap: var(--space-1); flex-wrap: wrap; align-items: center; flex-shrink: 0; }
+  .risk-flag { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: var(--radius-full); font: 500 11px/16px var(--font-mono); white-space: nowrap; }
+  .risk-flag--overdue { background: var(--danger-bg); color: var(--danger-text); }
+  .risk-flag--hours { background: var(--warning-bg); color: var(--warning-text); }
+  .risk-flag--margin { background: var(--danger-bg); color: var(--danger-text); }
+  .risk-flag--docs { background: var(--surface-muted); color: var(--ink-muted); }
+
+  /* ── Plán vs. realita heatmapa ─────────────────────────── */
+  .heat-table-wrap { overflow-x: auto; }
+  .heat-table { width: 100%; border-collapse: collapse; min-width: 480px; }
+  .heat-table th, .heat-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border-subtle); }
+  .heat-table th { font: 500 11px/16px var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-muted); }
+  .heat-table tr:hover { background: var(--surface-muted); cursor: pointer; }
+  .heat-table td:first-child { font: 500 13px/18px var(--font-body); }
+  .heat-table .num { font-variant-numeric: tabular-nums; color: var(--ink-muted); font-size: 13px; }
+  .heat-cell { display: inline-block; padding: 2px 8px; border-radius: var(--radius-full); font: 600 12px/16px var(--font-mono); }
+  .heat-cell--empty { background: var(--surface-muted); color: var(--ink-muted); }
+  .heat-cell--plan { background: var(--primary-soft); color: var(--primary-text); }
+  .heat-cell--done { background: var(--success-bg); color: var(--success-text); }
+  .heat-cell--over { background: var(--warning-bg); color: var(--warning-text); }
+
+  /* ── Spodní operativa — overdue tabulka ────────────────── */
+  .overdue-table { width: 100%; border-collapse: collapse; font: 400 13px/18px var(--font-body); }
+  .overdue-table th { text-align: left; padding: 0 0 var(--space-2); color: var(--ink-muted); font-weight: 500; }
+  .overdue-table td { padding: var(--space-2) var(--space-1) var(--space-2) 0; border-top: 1px solid var(--border-subtle); }
+  .overdue-table tr:hover td { background: var(--surface-muted); cursor: pointer; }
+  .overdue-table td:last-child { padding-right: 0; }
+  .section-footer { margin-top: var(--space-3); border-top: 1px solid var(--border-subtle); padding-top: var(--space-3); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, SD = window.S21Data, e = React.createElement;
+
+  const fmt = (n) => n.toLocaleString("cs-CZ").replace(/,/g, " ");
+  const hourlyRate = 1500;
+
+  // ─── KPI výpočty ────────────────────────────────────────────────────
+  const active = SD.getActiveOrders();
+  const activeCount = active.length;
+  const rozpracovanostKc = active.reduce((s, o) => s + (o.realHours * hourlyRate), 0);
+  const overdueCount = active.filter(o => o.overdue).length;
+  const marginsWithValue = active.filter(o => o.margin != null);
+  const avgMargin = marginsWithValue.length
+    ? Math.round(marginsWithValue.reduce((s, o) => s + o.margin, 0) / marginsWithValue.length)
+    : 0;
+
+  // ─── Rizikový list ───────────────────────────────────────────────────
+  const risky = active
+    .map(o => ({ o, score: SD.getRiskScore(o) }))
+    .filter(x => x.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5);
+
+  function RiskFlags({ o }) {
+    const flags = [];
+    if (o.overdue) flags.push(
+      e("span", { key: "overdue", className: "risk-flag risk-flag--overdue" },
+        e(S.Icon, { name: "alert-triangle", size: 11 }), "Po termínu"
+      )
+    );
+    if (o.realHours > o.plannedHours * 1.1) flags.push(
+      e("span", { key: "hours", className: "risk-flag risk-flag--hours" },
+        e(S.Icon, { name: "clock", size: 11 }), "+" + (o.realHours - o.plannedHours) + "h"
+      )
+    );
+    if (o.margin != null && o.margin < 15) flags.push(
+      e("span", { key: "margin", className: "risk-flag risk-flag--margin" },
+        e(S.Icon, { name: "trending-down", size: 11 }), "marže " + o.margin + "%"
+      )
+    );
+    if (o.missingDocs) flags.push(
+      e("span", { key: "docs", className: "risk-flag risk-flag--docs" },
+        e(S.Icon, { name: "file-x", size: 11 }), "chybí podklady"
+      )
+    );
+    return e("div", { className: "risk-row__flags" }, ...flags);
+  }
+
+  // ─── Heatmapa — plán vs. realita ────────────────────────────────────
+  const heatOrders = active.slice(0, 10);
+
+  // ─── Spodní operativa — nejhorší po termínu ─────────────────────────
+  const overdueOrders = active
+    .filter(o => o.overdue)
+    .slice(0, 5);
+
+  // ─── Breadcrumbs ─────────────────────────────────────────────────────
+  const CRUMBS = [{ label: "Výroba", href: "/vyroba" }];
+
+  function Page() {
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/vyroba" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
+    },
+      e(S.PageHeader, {
+        title: "Výroba",
+        description: "Zakázky, operace, hodiny",
+        actions: e(React.Fragment, null,
+          e(S.Button, { variant: "secondary", icon: "clock",
+            onClick: () => window.location.href = "./vykazovani.html"
+          }, "Vykázat hodiny"),
+          e(S.Button, { icon: "plus",
+            onClick: () => window.location.href = "./zakazka-nova.html"
+          }, "Nová zakázka")
+        )
+      }),
+
+      e(S.PageBody, null,
+
+        // ── KPI pruh ────────────────────────────────────────────────
+        e(S.KpiRow, { cols: 4 },
+          e(S.StatTile, { label: "Aktivních zakázek", value: activeCount.toString() }),
+          e(S.StatTile, { label: "Rozpracovanost", value: fmt(rozpracovanostKc), unit: "Kč", big: true }),
+          e(S.StatTile, { label: "Po termínu", value: overdueCount.toString(),
+            accent: overdueCount > 0 ? "danger" : undefined }),
+          e(S.StatTile, { label: "Průměrná marže", value: avgMargin.toFixed(0) + " %" })
+        ),
+
+        // ── 2-col hlavní blok: Rizikový list + Heatmapa ─────────────
+        e("div", { className: "s21-grid-main-aside", style: { marginTop: "var(--space-5)" } },
+
+          // Levý: Rizikový list TOP 5
+          e(S.Section, { title: "Zakázky v riziku — TOP 5" },
+            risky.length === 0
+              ? e(S.EmptyState, {
+                  icon: "check",
+                  title: "Vše v normě",
+                  description: "Žádná zakázka v riziku."
+                })
+              : e("ul", { className: "risk-list" },
+                  ...risky.map(({ o }) =>
+                    e("li", { key: o.id, className: "risk-row" },
+                      e("div", { className: "risk-row__main" },
+                        e("div", { className: "risk-row__name" }, o.code + " · " + o.name),
+                        e("div", { className: "risk-row__meta" }, o.client)
+                      ),
+                      e(RiskFlags, { o }),
+                      e(S.Button, {
+                        size: "sm",
+                        onClick: () => window.location.href = "./zakazka-detail.html"
+                      }, "Otevřít")
+                    )
+                  )
+                )
+          ),
+
+          // Pravý: Plán vs. realita heatmapa
+          e(S.Section, { title: "Plán vs. realita" },
+            e("div", { className: "heat-table-wrap" },
+              e("table", { className: "heat-table" },
+                e("thead", null,
+                  e("tr", null,
+                    e("th", null, "Zakázka"),
+                    e("th", null, "Plán (h)"),
+                    e("th", null, "Realita (h)"),
+                    e("th", null, "Stav")
+                  )
+                ),
+                e("tbody", null,
+                  ...heatOrders.map(o => {
+                    const pct = o.plannedHours ? Math.round(o.realHours / o.plannedHours * 100) : 0;
+                    const cls = pct === 0 ? "empty" : pct >= 110 ? "over" : pct >= 100 ? "done" : "plan";
+                    return e("tr", {
+                      key: o.id,
+                      onClick: () => window.location.href = "./zakazka-detail.html"
+                    },
+                      e("td", null, o.code + " " + o.name),
+                      e("td", { className: "num" }, o.plannedHours),
+                      e("td", { className: "num" }, o.realHours),
+                      e("td", null,
+                        e("div", {
+                          className: "heat-cell heat-cell--" + cls,
+                          title: pct + "% hotovo"
+                        }, pct + "%")
+                      )
+                    );
+                  })
+                )
+              )
+            )
+          )
+        ),
+
+        // ── Spodní operativa ────────────────────────────────────────
+        e("div", { className: "s21-grid-cards-2", style: { marginTop: "var(--space-5)" } },
+
+          // Levá: Nejhorší po termínu
+          e(S.Section, { title: "Nejhorší po termínu" },
+            overdueOrders.length === 0
+              ? e(S.EmptyState, {
+                  icon: "check",
+                  title: "Žádné překročení",
+                  description: "Žádná aktivní zakázka není po termínu."
+                })
+              : e(React.Fragment, null,
+                  e("table", { className: "overdue-table" },
+                    e("thead", null,
+                      e("tr", null,
+                        e("th", null, "Kód"),
+                        e("th", null, "Klient"),
+                        e("th", null, "Deadline")
+                      )
+                    ),
+                    e("tbody", null,
+                      ...overdueOrders.map(o =>
+                        e("tr", {
+                          key: o.id,
+                          onClick: () => window.location.href = "./zakazka-detail.html"
+                        },
+                          e("td", null, e("span", { className: "s21-cell-code" }, o.code)),
+                          e("td", null, o.client),
+                          e("td", null, o.deadline || "—")
+                        )
+                      )
+                    )
+                  ),
+                  e("div", { className: "section-footer" },
+                    e(S.Button, {
+                      variant: "ghost",
+                      size: "sm",
+                      onClick: () => window.location.href = "./zakazky.html"
+                    }, "→ Všechny zakázky")
+                  )
+                )
+          ),
+
+          // Pravá: Rychlé akce
+          e(S.Section, { title: "Rychlé akce" },
+            e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+              e(S.Button, {
+                variant: "secondary",
+                icon: "clock",
+                style: { width: "100%", justifyContent: "flex-start" },
+                onClick: () => window.location.href = "./vykazovani.html"
+              }, "Vykázat hodiny"),
+              e(S.Button, {
+                variant: "secondary",
+                icon: "plus",
+                style: { width: "100%", justifyContent: "flex-start" },
+                onClick: () => window.location.href = "./zakazka-nova.html"
+              }, "Nová zakázka")
+            )
+          )
+        )
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>

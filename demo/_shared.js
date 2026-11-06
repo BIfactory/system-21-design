@@ -27,6 +27,7 @@
     "/dashboard": "./dashboard.html",
     "/muj-plan": "./muj-plan.html",
     "/ukoly": "./ukoly.html",
+    "/vyroba": "./vyroba.html",
     "/zakazky": "./zakazky.html",
     "/zakazky/nova": "./zakazka-nova.html",
     "/zakazky/131": "./zakazka-detail.html",
