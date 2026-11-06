@@ -17,7 +17,7 @@
     { id: 'OP-2026-0041', code: 'OP-2026-0041', name: 'ERP→CRM integrace',
       client: 'Agro Slovácko s.r.o.', clientKind: 'b2b', owner: 'Pavel O.',
       stage: 'won', value: 312000, type: 'integration',
-      firstContactAt: '15. 08. 2026', wonAt: '22. 04. 2026',
+      firstContactAt: '15. 03. 2026', wonAt: '22. 04. 2026',
       productionOrderId: 'ZAK-2026-0131',
       deadline: '10. 11. 2026',
       lastContact: '7 dní' },
@@ -50,8 +50,8 @@
     { id: 9, code: "ZAK-2026-0109", name: "Dashboard pro management", client: "Moravia Steel a.s.", type: "Vývoj", status: "delivered", stateLabel: "Fakturováno", stateTone: "success", created: "10. 03. 2026", deadline: "—", priceOffer: 63000, priceReal: 63000, margin: 36, marginPos: true, progress: 100, raynet: "RN-4720", missingDocs: false, plannedHours: 45, realHours: 44, overdue: false },
     { id: 10, code: "ZAK-2026-0098", name: "Konzultace migrace", client: "Procházkovi s.r.o.", type: "Konzultace", status: "cancelled", stateLabel: "Zrušeno", stateTone: "danger", created: "25. 02. 2026", deadline: "—", priceOffer: 13000, priceReal: 0, margin: null, marginPos: true, progress: 40, raynet: null, missingDocs: false, plannedHours: 15, realHours: 8, overdue: false },
     // New 2 orders
-    { id: 11, code: "ZAK-2026-0155", name: "Fotovoltaika 8 kWp", client: "Novákovi", type: "Energie", status: "realizace", stateLabel: "Realizace", stateTone: "primary", created: "20. 10. 2026", deadline: "15. 12. 2026", priceOffer: 220000, priceReal: null, margin: 18, marginPos: true, progress: 27, raynet: null, missingDocs: false, plannedHours: 40, realHours: 12, caseId: 'OP-2026-0045', overdue: false },
-    { id: 12, code: "ZAK-2026-0156", name: "Rekonstrukce koupelny — RD Zlín", client: "Dvořákovi", type: "Stavba", status: "nabidka", stateLabel: "Nabídka", stateTone: "primary", created: "25. 10. 2026", deadline: "20. 11. 2026", priceOffer: 180000, priceReal: null, margin: 22, marginPos: true, progress: 0, raynet: null, missingDocs: false, plannedHours: 80, realHours: 0, caseId: 'OP-2026-0037', overdue: false },
+    { id: 11, code: "ZAK-2026-0155", name: "Fotovoltaika 8 kWp", client: "Novákovi", type: "Energie", status: "in_progress", stateLabel: "Realizace", stateTone: "primary", created: "20. 10. 2026", deadline: "15. 12. 2026", priceOffer: 220000, priceReal: null, margin: 18, marginPos: true, progress: 27, raynet: null, missingDocs: false, plannedHours: 40, realHours: 12, caseId: 'OP-2026-0045', overdue: false },
+    { id: 12, code: "ZAK-2026-0156", name: "Rekonstrukce koupelny — RD Zlín", client: "Dvořákovi", type: "Stavba", status: "quoted", stateLabel: "Nabídka", stateTone: "primary", created: "25. 10. 2026", deadline: "20. 11. 2026", priceOffer: 180000, priceReal: null, margin: 22, marginPos: true, progress: 0, raynet: null, missingDocs: false, plannedHours: 80, realHours: 0, caseId: 'OP-2026-0037', overdue: false },
   ];
 
   function getActiveOrders() {
