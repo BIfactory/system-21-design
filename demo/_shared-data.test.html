@@ -1,0 +1,16 @@
+<!doctype html>
+<html><head><title>_shared-data test</title></head>
+<body><pre id="out">Running...</pre>
+<script src="./_shared-data.js"></script>
+<script>
+  const S = window.S21Data;
+  const out = document.getElementById('out');
+  const asserts = [];
+  const assertEq = (name, actual, expected) => asserts.push({ name, pass: actual === expected, actual, expected });
+  assertEq('CASES length', S.CASES.length, 5);
+  assertEq('ORDERS length', S.ORDERS.length, 12); // 10 existing + 2 new
+  assertEq('Novakovi case links to ZAK-2026-0155', S.CASES.find(c => c.client === 'Novákovi').productionOrderId, 'ZAK-2026-0155');
+  assertEq('getOrderByCase roundtrip', S.getOrderByCase('OP-2026-0041').code, 'ZAK-2026-0131');
+  assertEq('getRiskScore returns number', typeof S.getRiskScore(S.ORDERS[0]), 'number');
+  out.textContent = asserts.map(a => (a.pass ? '✓' : '✗') + ' ' + a.name + (a.pass ? '' : ' expected=' + a.expected + ' got=' + a.actual)).join('\n');
+</script></body></html>
