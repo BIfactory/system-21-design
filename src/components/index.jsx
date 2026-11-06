@@ -1363,6 +1363,17 @@ const moduleNavSections = [
     ],
   },
   {
+    title: "Obchod",
+    sectionHref: "/obchod",
+    collapsible: true,
+    items: [
+      { href: "/obchod", label: "Přehled", icon: "layout-dashboard" },
+      { href: "/obchod/pripady", label: "Obchodní případy" },
+      { href: "/obchod/klienti", label: "Klienti" },
+      { href: "/obchod/osoby", label: "Osoby" },
+    ],
+  },
+  {
     title: "Výroba",
     sectionHref: "/vyroba",
     collapsible: true,
@@ -1373,14 +1384,13 @@ const moduleNavSections = [
     ],
   },
   {
-    title: "Obchod",
-    sectionHref: "/obchod",
+    title: "Lidé",
+    sectionHref: "/lide",
     collapsible: true,
     items: [
-      { href: "/obchod", label: "Přehled", icon: "layout-dashboard" },
-      { href: "/obchod/klienti", label: "Klienti" },
-      { href: "/obchod/osoby", label: "Osoby" },
-      { href: "/obchod/pripady", label: "Obchodní případy" },
+      { href: "/lide", label: "Přehled", icon: "layout-dashboard" },
+      { href: "/lide/pracovnici", label: "Pracovníci" },
+      { href: "/lide/dochazka", label: "Docházka" },
     ],
   },
   {
@@ -1392,16 +1402,6 @@ const moduleNavSections = [
       { href: "/dms/smlouvy", label: "Smlouvy" },
       { href: "/dms/dokumenty", label: "Dokumenty" },
       { href: "/dms/automatizace", label: "Automatizace / AI" },
-    ],
-  },
-  {
-    title: "Lidé",
-    sectionHref: "/lide",
-    collapsible: true,
-    items: [
-      { href: "/lide", label: "Přehled", icon: "layout-dashboard" },
-      { href: "/lide/pracovnici", label: "Pracovníci" },
-      { href: "/lide/dochazka", label: "Docházka" },
     ],
   },
 ];
