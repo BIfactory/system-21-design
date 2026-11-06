@@ -1279,3 +1279,9 @@ a.s21-stat, button.s21-stat { font: inherit; text-align: left; text-decoration: 
 .s21-nc__foot { padding: var(--space-2) var(--space-3); border-top: 1px solid var(--border-subtle); text-align: center; }
 .s21-nc__viewall { background: transparent; border: 0; color: var(--primary-text); font: 500 13px/18px var(--font-body); cursor: pointer; padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); }
 .s21-nc__viewall:hover { background: var(--primary-soft); }
+
+/* ─── InboxBell (Task 3, 2026-11-06) ─── */
+.s21-inboxbell { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: transparent; border: 0; border-radius: var(--radius-md); color: var(--ink-muted); cursor: pointer; transition: background-color .15s, color .15s; }
+.s21-inboxbell:hover { background: var(--surface-muted); color: var(--ink); }
+.s21-inboxbell:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.s21-inboxbell__badge { position: absolute; top: 4px; right: 4px; min-width: 16px; height: 16px; padding: 0 4px; background: var(--primary); color: var(--on-primary); font: 700 10px/16px var(--font-mono); border-radius: var(--radius-full); display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 0 0 2px var(--surface); }

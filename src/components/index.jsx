@@ -2461,6 +2461,16 @@ function NotificationCenter({ notifications = [], onMarkAllRead, onNavigate, onC
   );
 }
 
+/* ───────────── InboxBell (NEW — Task 3) ───────────── */
+function InboxBell({ unread = 0, onClick, 'aria-label': ariaLabel = 'Inbox' }) {
+  return (
+    <button type="button" className="s21-inboxbell" onClick={onClick} aria-label={ariaLabel} title={ariaLabel}>
+      <Icon name="mail" size={18} />
+      {unread > 0 && <span className="s21-inboxbell__badge">{unread > 99 ? '99+' : unread}</span>}
+    </button>
+  );
+}
+
 /* ───────────── Theme (NEW — Fáze E) ───────────── */
 function getInitialTheme() {
   if (typeof window === "undefined") return "light";
@@ -2592,7 +2602,7 @@ export {
   SearchSelect, FileUploadZone, FormWizard,
   BulkActionBar, SalesFunnel,
   AIBadge, AISuggestion, AIInputHelper, AIPanel,
-  NotificationCenter,
+  NotificationCenter, InboxBell,
   Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
   InputGroup, Textarea, FileDrop,
   BottomNav, useScrollDirection,
@@ -2616,7 +2626,7 @@ if (typeof window !== "undefined") {
   SearchSelect, FileUploadZone, FormWizard,
   BulkActionBar, SalesFunnel,
   AIBadge, AISuggestion, AIInputHelper, AIPanel,
-  NotificationCenter,
+  NotificationCenter, InboxBell,
   Drawer, BottomSheet, Accordion, Timeline, Sparkline, CommandPalette,
   InputGroup, Textarea, FileDrop,
   BottomNav, useScrollDirection,
