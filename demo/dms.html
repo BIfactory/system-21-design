@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · DMS</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+<style>
+  /* ── Výročí list ─────────────────────────────────────────── */
+  .anniv-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+  .anniv-row { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); }
+  .anniv-row__main { flex: 1; min-width: 0; }
+  .anniv-row__code { font: 600 13px/18px var(--font-body); color: var(--ink); }
+  .anniv-row__product { font: 400 12px/16px var(--font-body); color: var(--ink-muted); margin-top: 2px; }
+  .anniv-row__client { font: 400 12px/16px var(--font-body); color: var(--ink-muted); margin-top: 1px; }
+  .anniv-row__badge { flex-shrink: 0; font: 600 11px/16px var(--font-mono); letter-spacing: .04em; padding: 4px 10px; border-radius: var(--radius-full); white-space: nowrap; }
+  .anniv-row__badge.urgent { background: var(--danger-bg); color: var(--danger-text); }
+  .anniv-row__badge.soon { background: var(--warning-bg); color: var(--warning-text); }
+  .anniv-row__badge.ok { background: var(--surface-muted); color: var(--ink-muted); }
+
+  /* ── ÁJA fronta ───────────────────────────────────────────── */
+  .aja-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+  .aja-row { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3); background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); }
+  .aja-row__main { flex: 1; min-width: 0; }
+  .aja-row__from { font: 500 12px/16px var(--font-body); color: var(--ink); }
+  .aja-row__subject { font: 500 13px/18px var(--font-body); color: var(--ink); margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .aja-row__badges { display: flex; gap: var(--space-2); flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+  .conf-pill { display: inline-flex; align-items: center; gap: 3px; padding: 3px 8px; border-radius: var(--radius-full); font: 600 10px/14px var(--font-mono); letter-spacing: .04em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .conf-high { background: var(--success-bg); color: var(--success-text); }
+  .conf-mid { background: var(--warning-bg); color: var(--warning-text); }
+  .conf-low { background: var(--danger-bg); color: var(--danger-text); }
+  .status-pill { display: inline-flex; align-items: center; gap: 3px; padding: 3px 8px; border-radius: var(--radius-full); font: 500 10px/14px var(--font-mono); letter-spacing: .04em; white-space: nowrap; }
+  .status-auto { background: var(--success-bg); color: var(--success-text); }
+  .status-review { background: var(--warning-bg); color: var(--warning-text); }
+
+  /* ── Spodní operativa ────────────────────────────────────────── */
+  .footer-buttons { display: flex; flex-direction: column; gap: var(--space-3); }
+  .footer-btn { display: flex; align-items: center; justify-content: space-between; padding: var(--space-3); background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); cursor: pointer; transition: all .15s var(--motion-ease-out); text-decoration: none; }
+  .footer-btn:hover { background: var(--surface-muted); border-color: var(--border-strong); }
+  .footer-btn__label { font: 500 14px/20px var(--font-body); }
+  .footer-btn__arrow { color: var(--primary-text); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  // ─── Mock data ────────────────────────────────────────────────────────
+
+  // Top 5 contracts approaching anniversary
+  const UPCOMING = [
+    { code: "PL-2024-0067", product: "Plyn — výroba", client: "Hradecká strojírna", days: 10, anniv: "15. 11." },
+    { code: "SM-2025-0198", product: "Pojištění budovy", client: "Hradecká strojírna", days: 15, anniv: "20. 11." },
+    { code: "EL-2025-0012", product: "Elektřina — podnikání", client: "Agro Slovácko", days: 56, anniv: "31. 12." },
+    { code: "SM-2024-0117", product: "Pojištění majetku — rodinný dům", client: "Novákovi", days: 158, anniv: "12. 04." },
+    { code: "SM-2025-0233", product: "Úrazové pojištění (rodinné)", client: "Novákovi", days: 118, anniv: "03. 03." },
+  ];
+
+  // Top 5 ÁJA email items with confidence
+  const AJA = [
+    { from: "info@cez.cz", subject: "Změna ceníku MůjProud 2027", confidence: 68, status: "review" },
+    { from: "podpora@cpp.cz", subject: "Faktura — autopojištění", confidence: 71, status: "review" },
+    { from: "generali-obchod@generali.cz", subject: "Nabídka pojištění domu", confidence: 76, status: "review" },
+    { from: "pojisteni@allianz.cz", subject: "Vypsání reklamace", confidence: 94, status: "auto" },
+    { from: "info@uniqa.cz", subject: "Potvrzení přijetí žádosti", confidence: 88, status: "auto" },
+  ];
+
+  // ─── Helpers ───────────────────────────────────────────────────────────
+
+  function getAnnivTone(days) {
+    if (days < 30) return "urgent";
+    if (days < 90) return "soon";
+    return "ok";
+  }
+
+  function getConfTone(conf) {
+    if (conf >= 85) return "high";
+    if (conf >= 70) return "mid";
+    return "low";
+  }
+
+  function AnnivRow({ item }) {
+    const tone = getAnnivTone(item.days);
+    return e("li", { key: item.code, className: "anniv-row" },
+      e("div", { className: "anniv-row__main" },
+        e("div", { className: "anniv-row__code" }, item.code),
+        e("div", { className: "anniv-row__product" }, item.product),
+        e("div", { className: "anniv-row__client" }, item.client)
+      ),
+      e("div", { className: "anniv-row__badge anniv-row__badge--" + tone },
+        "za " + item.days + " dnů"
+      )
+    );
+  }
+
+  function AJARow({ item }) {
+    const confTone = getConfTone(item.confidence);
+    return e("li", { key: item.from + item.subject, className: "aja-row" },
+      e("div", { className: "aja-row__main" },
+        e("div", { className: "aja-row__from" }, item.from),
+        e("div", { className: "aja-row__subject" }, item.subject)
+      ),
+      e("div", { className: "aja-row__badges" },
+        e("span", { className: "conf-pill conf-" + confTone },
+          item.confidence, "%"
+        ),
+        e("span", { className: "status-pill status-" + item.status },
+          item.status === "auto" ? "Auto" : "Kontrola"
+        )
+      )
+    );
+  }
+
+  // ─── Breadcrumbs ───────────────────────────────────────────────────────
+  const CRUMBS = [{ label: "DMS", href: "/dms" }];
+
+  function Page() {
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/dms" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
+    },
+      e(S.PageHeader, {
+        title: "DMS",
+        description: "Smlouvy, dokumenty, automatizace"
+      }),
+
+      e(S.PageBody, null,
+
+        // ── KPI pruh ────────────────────────────────────────────────
+        e(S.KpiRow, { cols: 4 },
+          e(S.StatTile, { label: "Aktivních smluv", value: "11" }),
+          e(S.StatTile, { label: "Vyprší do 30 dnů", value: "4", accent: "warning" }),
+          e(S.StatTile, { label: "Nepodepsané", value: "2", accent: "danger" }),
+          e(S.StatTile, { label: "Dokumentů v DMS", value: "1247" })
+        ),
+
+        // ── 2-col hlavní blok: Výročí + ÁJA fronta ──────────────
+        e("div", { className: "s21-grid-main-aside", style: { marginTop: "var(--space-5)" } },
+
+          // Levý: Blížící se výročí smluv TOP 5
+          e(S.Section, { title: "Blížící se výročí smluv" },
+            e("ul", { className: "anniv-list" },
+              ...UPCOMING.map((item) => e(AnnivRow, { item }))
+            ),
+            e("div", { style: { marginTop: "var(--space-3)", paddingTop: "var(--space-3)", borderTop: "1px solid var(--border-subtle)" } },
+              e("a", {
+                href: "./dms-smlouvy.html",
+                className: "footer-btn",
+                style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "var(--space-2)", background: "transparent", border: "none" }
+              },
+                e("span", { style: { font: "500 13px/18px var(--font-body)" } }, "→ Všechny smlouvy"),
+                e(S.Icon, { name: "arrow-right", size: 16 })
+              )
+            )
+          ),
+
+          // Pravý: ÁJA fronta TOP 5
+          e(S.Section, { title: "ÁJA fronta" },
+            e("ul", { className: "aja-list" },
+              ...AJA.map((item) => e(AJARow, { item }))
+            ),
+            e("div", { style: { marginTop: "var(--space-3)", paddingTop: "var(--space-3)", borderTop: "1px solid var(--border-subtle)" } },
+              e("a", {
+                href: "./dms-automatizace.html",
+                className: "footer-btn",
+                style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "var(--space-2)", background: "transparent", border: "none" }
+              },
+                e("span", { style: { font: "500 13px/18px var(--font-body)" } }, "→ Automatizace / AI"),
+                e(S.Icon, { name: "arrow-right", size: 16 })
+              )
+            )
+          )
+        ),
+
+        // ── Spodní operativa — 3 tlačítka ───────────────────────
+        e("div", { className: "footer-buttons", style: { marginTop: "var(--space-5)" } },
+          e("a", {
+            href: "./dms-smlouvy.html",
+            className: "footer-btn"
+          },
+            e("span", { className: "footer-btn__label" }, "→ Všechny smlouvy"),
+            e(S.Icon, { name: "arrow-right", size: 16, className: "footer-btn__arrow" })
+          ),
+          e("a", {
+            href: "./dms-dokumenty.html",
+            className: "footer-btn"
+          },
+            e("span", { className: "footer-btn__label" }, "→ Dokumenty"),
+            e(S.Icon, { name: "arrow-right", size: 16, className: "footer-btn__arrow" })
+          ),
+          e("a", {
+            href: "./dms-automatizace.html",
+            className: "footer-btn"
+          },
+            e("span", { className: "footer-btn__label" }, "→ Automatizace / AI"),
+            e(S.Icon, { name: "arrow-right", size: 16, className: "footer-btn__arrow" })
+          )
+        )
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>

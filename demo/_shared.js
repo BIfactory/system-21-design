@@ -36,6 +36,7 @@
     "/obchod/klienti": "./crm-klienti.html",
     "/obchod/osoby": "./crm-osoby.html",
     "/obchod/pripady": "./crm-pripady.html",
+    "/dms": "./dms.html",
     "/dms/smlouvy": "./dms-smlouvy.html",
     "/dms/dokumenty": "./dms-dokumenty.html",
     "/dms/automatizace": "./dms-automatizace.html",
