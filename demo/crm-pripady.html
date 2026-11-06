@@ -12,6 +12,7 @@
 <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="../dist/system21.js"></script>
 <script src="./_shared.js"></script>
+<script src="./_shared-data.js"></script>
 </head>
 <body>
 <div id="root"></div>
@@ -23,20 +24,20 @@
   // 1. Poptávka od zák. → 2. Poptávka k dodavateli → 3. Vyhodnocení (naše strana)
   // → 4. Vyhodnocení (klient) → 5. Smlouva k podpisu → 6. Podepsáno / Zrušeno
   const CASES = [
-    { id: 1, code: "OP-2026-0045", title: "Rozšíření úrazovky pro děti", client: "Novákovi", clientKind: "family", value: 7200, owner: "Pavel O.", stage: "negotiation", stageLabel: "Vyhodnocení (naše)", deadline: "20. 11. 2026", type: "insurance", mails: 3, offers: 2 },
-    { id: 2, code: "OP-2026-0043", title: "Firemní pojištění pro Moravia Steel", client: "Moravia Steel a.s.", clientKind: "company", value: 124000, owner: "Pavel O.", stage: "customer_eval", stageLabel: "Vyhodnocení (klient)", deadline: "25. 11. 2026", type: "insurance", mails: 7, offers: 4 },
-    { id: 3, code: "OP-2026-0041", title: "Pojištění vozového parku", client: "Agro Slovácko", clientKind: "company", value: 86500, owner: "Alena D.", stage: "offer", stageLabel: "Nabídka poslána", deadline: "30. 11. 2026", type: "insurance", mails: 5, offers: 3 },
-    { id: 4, code: "OP-2026-0038", title: "Pojištění budovy Hradecká str.", client: "Hradecká strojírna", clientKind: "company", value: 48000, owner: "Tomáš N.", stage: "supplier_rfq", stageLabel: "Poptávka k dodavateli", deadline: "10. 12. 2026", type: "insurance", mails: 2, offers: 0 },
-    { id: 5, code: "OP-2026-0036", title: "Doplňkové pojištění pro rodinu", client: "Dvořákovi", clientKind: "family", value: 3400, owner: "Pavel O.", stage: "new", stageLabel: "Poptávka od zákazníka", deadline: "28. 11. 2026", type: "insurance", mails: 1, offers: 0 },
+    { id: 1, code: "OP-2026-0045", title: "Fotovoltaika pro RD Lipová", client: "Novákovi", clientKind: "family", value: 220000, owner: "Pavel O.", stage: "won", stageLabel: "Podepsáno", deadline: "—", type: "fve", mails: 3, offers: 2 },
+    { id: 2, code: "OP-2026-0043", title: "AI reporting pilot", client: "Moravia Steel a.s.", clientKind: "company", value: 180000, owner: "Alena D.", stage: "customer_eval", stageLabel: "Vyhodnocení (klient)", deadline: "25. 11. 2026", type: "ai-pilot", mails: 7, offers: 4 },
+    { id: 3, code: "OP-2026-0041", title: "ERP→CRM integrace", client: "Agro Slovácko s.r.o.", clientKind: "company", value: 312000, owner: "Pavel O.", stage: "won", stageLabel: "Podepsáno", deadline: "—", type: "integration", mails: 5, offers: 3 },
+    { id: 4, code: "OP-2026-0039", title: "Automatizace výkazů", client: "Hradecká strojírna s.r.o.", clientKind: "company", value: 96500, owner: "Alena D.", stage: "won", stageLabel: "Podepsáno", deadline: "—", type: "automation", mails: 2, offers: 0 },
+    { id: 5, code: "OP-2026-0037", title: "Rekonstrukce koupelny", client: "Dvořákovi", clientKind: "family", value: 180000, owner: "Pavel O.", stage: "nabidka", stageLabel: "Nabídka poslána", deadline: "20. 11. 2026", type: "construction", mails: 1, offers: 0 },
     { id: 6, code: "OP-2026-0032", title: "Firemní pojištění Procházkovi s.r.o.", client: "Procházkovi s.r.o.", clientKind: "company", value: 32400, owner: "Alena D.", stage: "lost", stageLabel: "Prohra", deadline: "—", type: "insurance", mails: 8, offers: 2 },
-    { id: 7, code: "OP-2026-0030", title: "Autopojištění Škoda Octavia", client: "Novákovi", clientKind: "family", value: 18600, owner: "Pavel O.", stage: "won", stageLabel: "Podepsáno · SM-2026-0089", deadline: "—", type: "insurance", mails: 4, offers: 1 },
+    { id: 7, code: "OP-2026-0030", title: "Autopojištění Škoda Octavia", client: "Novákovi", clientKind: "family", value: 18600, owner: "Pavel O.", stage: "negotiation", stageLabel: "Vyhodnocení (naše)", deadline: "28. 11. 2026", type: "insurance", mails: 4, offers: 1 },
   ];
 
   const fmt = (n) => n.toLocaleString("cs-CZ").replace(/,/g, " ");
   function stageTone(s) {
     if (s === "won") return "success";
     if (s === "lost") return "danger";
-    if (s === "negotiation" || s === "customer_eval") return "warning";
+    if (s === "negotiation" || s === "customer_eval" || s === "vyhodnoceni-klient") return "warning";
     return "primary";
   }
 
@@ -50,9 +51,16 @@
         e("div", { className: "s21-cell-meta" }, e("span", { className: "s21-cell-code" }, c.code), " · ", c.client, " · ", c.owner)
       )
     },
-    { key: "stage", label: "Fáze", width: "20%", render: (c) =>
-      e(S.Badge, { tone: stageTone(c.stage), fitCell: true }, c.stageLabel)
-    },
+    { key: "stage", label: "Fáze", width: "20%", render: (c) => {
+      const linkedOrder = c.stage === "won" && window.S21Data && window.S21Data.getOrderByCase(c.code) || null;
+      return e("div", { style: { display: "flex", alignItems: "center", gap: "var(--space-2)" } },
+        e(S.Badge, { tone: stageTone(c.stage), fitCell: true }, c.stageLabel),
+        linkedOrder && e("a", {
+          href: "./zakazka-detail.html",
+          style: { marginLeft: 4, display: "inline-flex", alignItems: "center", gap: 4, padding: "2px 6px", background: "var(--primary-soft)", color: "var(--primary-text)", borderRadius: "var(--radius-md)", font: "500 11px/14px var(--font-mono)", textDecoration: "none" },
+        }, "→ ", linkedOrder.code)
+      );
+    }},
     { key: "deadline", label: "Deadline", width: "12%", render: (c) =>
       c.deadline === "—" ? e("span", { className: "s21-cell-meta" }, "—") : e("span", null, c.deadline)
     },

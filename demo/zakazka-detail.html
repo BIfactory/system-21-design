@@ -12,6 +12,7 @@
 <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="../dist/system21.js"></script>
 <script src="./_shared.js"></script>
+<script src="./_shared-data.js"></script>
 <style>
   .version-picker { display: inline-flex; align-items: center; gap: var(--space-1); padding: 4px; background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-full); }
   .ver-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: var(--radius-full); font: 500 11px/16px var(--font-mono); letter-spacing: .04em; cursor: pointer; background: transparent; border: 0; color: var(--ink-muted); }
@@ -133,6 +134,9 @@
     const [ops, setOps] = React.useState(OPS_V1);
     const updateOpPlanned = (id) => (v) => setOps(ops.map((o) => o.id === id ? { ...o, planned: parseFloat(v) || o.planned } : o));
 
+    // Get linked case (Obchodní případ)
+    const linkedCase = window.S21Data && window.S21Data.getCaseByProductionOrder(ORDER.code);
+
     return e(S.AppShell, {
       sidebar: e(D.DemoSidebar, { active: "/zakazky" }),
       topbar: e(D.DemoTopBar, { crumbs: CRUMBS, onNavigate: (it, i) => { if (i === 0) window.location.href = "./zakazky.html"; } }),
@@ -179,6 +183,20 @@
           e("span", null, "Cena: ", e("strong", null, fmt(ORDER.priceOffer), " Kč")),
           e("span", null, "Reálné náklady: ", e("strong", null, fmt(costTotal), " Kč")),
           e("span", null, "Marže: ", e("strong", { className: margin >= 0 ? "m-ok" : "m-bad" }, (margin > 0 ? "+" : "") + margin + " %"))
+        ),
+
+        e(S.Section, { title: "Údaje" },
+          e("dl", { className: "s21-entity__meta", style: { display: "grid", gridTemplateColumns: "max-content 1fr", gap: "6px 24px" } },
+            e("dt", null, "Vlastník"), e("dd", null, ORDER.owner),
+            e("dt", null, "Deadline"), e("dd", null, ORDER.deadline),
+            linkedCase && e(React.Fragment, null,
+              e("dt", null, "Vznikla z"),
+              e("dd", null,
+                e("a", { href: "./crm-pripady.html#" + linkedCase.id, className: "s21-cell-code", style: { color: "var(--primary-text)", textDecoration: "underline" } }, linkedCase.code),
+                e("span", { style: { marginLeft: 8, color: "var(--ink-muted)" } }, linkedCase.name)
+              )
+            )
+          )
         ),
 
         tab === "plan" && e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-4)", marginTop: "var(--space-4)" } },
