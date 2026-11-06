@@ -23,15 +23,29 @@
   // Poema features.md Scénář 3 pipeline (6 stavů):
   // 1. Poptávka od zák. → 2. Poptávka k dodavateli → 3. Vyhodnocení (naše strana)
   // → 4. Vyhodnocení (klient) → 5. Smlouva k podpisu → 6. Podepsáno / Zrušeno
-  const CASES = [
-    { id: 1, code: "OP-2026-0045", title: "Fotovoltaika pro RD Lipová", client: "Novákovi", clientKind: "family", value: 220000, owner: "Pavel O.", stage: "won", stageLabel: "Podepsáno", deadline: "—", type: "fve", mails: 3, offers: 2 },
-    { id: 2, code: "OP-2026-0043", title: "AI reporting pilot", client: "Moravia Steel a.s.", clientKind: "company", value: 180000, owner: "Alena D.", stage: "customer_eval", stageLabel: "Vyhodnocení (klient)", deadline: "25. 11. 2026", type: "ai-pilot", mails: 7, offers: 4 },
-    { id: 3, code: "OP-2026-0041", title: "ERP→CRM integrace", client: "Agro Slovácko s.r.o.", clientKind: "company", value: 312000, owner: "Pavel O.", stage: "won", stageLabel: "Podepsáno", deadline: "—", type: "integration", mails: 5, offers: 3 },
-    { id: 4, code: "OP-2026-0039", title: "Automatizace výkazů", client: "Hradecká strojírna s.r.o.", clientKind: "company", value: 96500, owner: "Alena D.", stage: "won", stageLabel: "Podepsáno", deadline: "—", type: "automation", mails: 2, offers: 0 },
-    { id: 5, code: "OP-2026-0037", title: "Rekonstrukce koupelny", client: "Dvořákovi", clientKind: "family", value: 180000, owner: "Pavel O.", stage: "nabidka", stageLabel: "Nabídka poslána", deadline: "20. 11. 2026", type: "construction", mails: 1, offers: 0 },
-    { id: 6, code: "OP-2026-0032", title: "Firemní pojištění Procházkovi s.r.o.", client: "Procházkovi s.r.o.", clientKind: "company", value: 32400, owner: "Alena D.", stage: "lost", stageLabel: "Prohra", deadline: "—", type: "insurance", mails: 8, offers: 2 },
-    { id: 7, code: "OP-2026-0030", title: "Autopojištění Škoda Octavia", client: "Novákovi", clientKind: "family", value: 18600, owner: "Pavel O.", stage: "negotiation", stageLabel: "Vyhodnocení (naše)", deadline: "28. 11. 2026", type: "insurance", mails: 4, offers: 1 },
-  ];
+  const STAGE_LABELS = {
+    poptavka: "Poptávka", "k-dodavateli": "K dodavateli", nabidka: "Nabídka poslána",
+    "vyhodnoceni-nase": "Vyhodnocení (naše)", "vyhodnoceni-klient": "Vyhodnocení (klient)",
+    "k-podpisu": "K podpisu", won: "Podepsáno", lost: "Prohra",
+    // legacy aliases used in S21Data
+    customer_eval: "Vyhodnocení (klient)", negotiation: "Vyhodnocení (naše)",
+  };
+  // mock mails/offers per case code (augmentation layer)
+  const CASE_AUG = {
+    "OP-2026-0045": { mails: 3, offers: 2 },
+    "OP-2026-0043": { mails: 7, offers: 4 },
+    "OP-2026-0041": { mails: 5, offers: 3 },
+    "OP-2026-0039": { mails: 2, offers: 0 },
+    "OP-2026-0037": { mails: 1, offers: 0 },
+  };
+  const CASES = window.S21Data.CASES.map((c) => ({
+    ...c,
+    title: c.name,
+    stageLabel: STAGE_LABELS[c.stage] || c.stage,
+    deadline: c.deadline || "—",
+    mails: (CASE_AUG[c.code] || {}).mails || 0,
+    offers: (CASE_AUG[c.code] || {}).offers || 0,
+  }));
 
   const fmt = (n) => n.toLocaleString("cs-CZ").replace(/,/g, " ");
   function stageTone(s) {
