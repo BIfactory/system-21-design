@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · Inbox</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, e = React.createElement;
+
+  /* ── Email mock data ──────────────────────────────────────────── */
+  const MAILS = [
+    { id: 1, from: "Jan Novák", email: "jan@novak.cz", subject: "Dotaz na pojištění nemovitosti", preview: "Dobrý den, zdravím a chtěl bych se zeptat na možnosti pojištění naší chalupy…", time: "9:42", read: false, star: false, attachments: 0, tag: "Klient" },
+    { id: 2, from: "Alena Dvořáková", email: "alena@bifactory.cz", subject: "Re: Podpis smlouvy Moravia", preview: "Super, podpis plánujeme na 20. 11. v kanceláři. Můžu připravit i tu doplňkovou nabídku…", time: "8:23", read: false, star: true, attachments: 1, tag: "Interní" },
+    { id: 3, from: "Allianz pojišťovna", email: "info@allianz.cz", subject: "Potvrzení přijetí žádosti", preview: "Potvrzujeme přijetí vaší žádosti o pojištění pod číslem ALZ-2026-12847…", time: "včera", read: true, star: false, attachments: 2, tag: "Pojistitel" },
+    { id: 4, from: "ing. Vlastimil Kříž", email: "v.kriz@agroslovacko.cz", subject: "Re: Nabídka pojištění vozového parku", preview: "Dobrý den, děkuji za nabídku. Rádi bychom se k tomu vyjádřili do konce týdne…", time: "včera", read: true, star: false, attachments: 0, tag: "Klient" },
+    { id: 5, from: "UNIQA", email: "noreply@uniqa.cz", subject: "Nový sazebník od 1. 1. 2027", preview: "Vážení partneři, zasíláme aktualizovaný sazebník pojistných produktů…", time: "2 d", read: true, star: false, attachments: 1, tag: "Pojistitel" },
+    { id: 6, from: "Marie Nováková", email: "marie@novak.cz", subject: "Dotaz na úrazové pojištění pro děti", preview: "Zdravím, zajímalo by nás rozšíření úrazového pojištění i na naše děti…", time: "2 d", read: true, star: true, attachments: 0, tag: "Klient" },
+    { id: 7, from: "ČPP pojišťovna", email: "partner@cpp.cz", subject: "Školení nových produktů 15. 11.", preview: "Dobrý den, zveme Vás na školení k novým produktům…", time: "3 d", read: true, star: false, attachments: 0, tag: "Vzdělávání" },
+    { id: 8, from: "Petr Král", email: "p.kral@moraviasteel.cz", subject: "Re: Firemní pojištění — dodatek", preview: "Dobrý den Pavle, prosím o kontrolu přiloženého dodatku…", time: "4 d", read: true, star: false, attachments: 3, tag: "Klient" },
+  ];
+  const EMAIL_UNREAD = MAILS.filter((m) => !m.read).length;
+
+  /* ── SMS mock data ───────────────────────────────────────────── */
+  const MESSAGES = [
+    { id: 1, to: "Jan Novák", phone: "+420 602 123 456", body: "Dobrý den, připomínám schůzku zítra v 9:00 v kanceláři. Pavel", sent: "Dnes 10:42", state: "done" },
+    { id: 2, to: "Marie Nováková", phone: "+420 602 987 654", body: "Dobrý den, vaše pojistka čeká na podpis. Můžeme se domluvit na termínu? Pavel", sent: "Dnes 09:15", state: "done" },
+    { id: 3, to: "Petr Dvořák", phone: "+420 608 234 567", body: "Dobrý den, pojistná událost 03/2026 byla zpracována. Likvidace přijde do 7 dnů.", sent: "Včera 16:24", state: "done" },
+    { id: 4, to: "Agro Slovácko", phone: "+420 724 555 777", body: "Dobrý den, zasíláme nabídku pojištění vozového parku na uvedený email.", sent: "Včera 14:03", state: "in-progress" },
+    { id: 5, to: "Procházkovi", phone: "+420 605 333 444", body: "Upozornění: vaše smlouva SM-2026-0151 expiruje za 14 dnů. Kontaktuji vás tento týden.", sent: "2 dny zpět", state: "done" },
+    { id: 6, to: "Hradecká str.", phone: "+420 775 123 999", body: "Nabídka pojištění byla odeslána mailem. Pokud nedorazila, napište.", sent: "3 dny zpět", state: "overdue", err: "Doručení selhalo" },
+  ];
+
+  const SMS_COLUMNS = [
+    { key: "to", label: "Příjemce", sortable: true, width: "20%", render: (m) =>
+      e("div", null,
+        e("div", { className: "s21-cell-title" }, m.to),
+        e("div", { className: "s21-cell-meta" }, m.phone)
+      )
+    },
+    { key: "body", label: "Zpráva", width: "44%", render: (m) =>
+      e("div", { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 440 } }, m.body)
+    },
+    { key: "sent", label: "Odesláno", align: "right", width: "18%" },
+    { key: "state", label: "Stav", width: "14%", render: (m) =>
+      m.state === "overdue"
+        ? e(S.Badge, { tone: "danger", fitCell: true }, m.err || "Chyba")
+        : e(S.WorkflowBadge, { state: m.state, fitCell: true, label: m.state === "done" ? "Doručeno" : "Odesílá se" })
+    },
+    { key: "actions", label: "", align: "center", width: "8%", render: () =>
+      e("span", { className: "s21-row-actions", "data-no-row-click": true },
+        e(S.Button, { size: "sm", iconOnly: true, icon: "refresh", variant: "ghost", "aria-label": "Znovu odeslat", title: "Znovu odeslat" }),
+        e(S.Button, { size: "sm", iconOnly: true, icon: "more", variant: "ghost", "aria-label": "Víc", title: "Víc" })
+      )
+    }
+  ];
+
+  /* ── Chat mock data ──────────────────────────────────────────── */
+  const CHATS = [
+    {
+      id: "chat-1",
+      type: "dm",
+      name: "Alena Dvořáková",
+      lastMsg: "Můžeš se mrknout na ERP integraci před callem?",
+      time: "5 min",
+      unread: 0,
+      messages: [
+        { id: 1, author: "Pavel Ondra", time: "9:30", text: "Ahoj, jak jde příprava na call se zákazníkem?" },
+        { id: 2, author: "Alena Dvořáková", time: "9:35", text: "Daří se, smlouvu máme skoro hotovou." },
+        { id: 3, author: "Alena Dvořáková", time: "9:41", text: "Můžeš se mrknout na ERP integraci před callem?" },
+      ]
+    },
+    {
+      id: "chat-2",
+      type: "channel",
+      name: "Team Obchod",
+      members: 4,
+      lastMsg: "Přidal jsem nové kontakty do CRM.",
+      time: "12 min",
+      unread: 3,
+      messages: [
+        { id: 1, author: "Tomáš Veselý", time: "9:15", text: "Dobré ráno všem!" },
+        { id: 2, author: "Alena Dvořáková", time: "9:22", text: "Přidal jsem nové kontakty do CRM." },
+        { id: 3, author: "Pavel Ondra", time: "9:28", text: "Super, díky." },
+      ]
+    },
+    {
+      id: "chat-3",
+      type: "channel",
+      name: "Team Výroba",
+      members: 5,
+      lastMsg: "Servisní protokol za říjen je v DMS.",
+      time: "1 h",
+      unread: 1,
+      messages: [
+        { id: 1, author: "Mirek Havel", time: "8:40", text: "Servisní protokol za říjen je v DMS." },
+        { id: 2, author: "Jana Procházková", time: "9:05", text: "Děkuji, podívám se." },
+      ]
+    },
+  ];
+  const CHAT_UNREAD = CHATS.reduce((s, c) => s + c.unread, 0);
+
+  /* ── Breadcrumbs ─────────────────────────────────────────────── */
+  const CRUMBS = [{ label: "Inbox", href: "/inbox" }];
+
+  /* ── Pane card style helper ──────────────────────────────────── */
+  const paneCard = { background: "var(--surface-raised)", border: "1px solid var(--border)", borderRadius: "var(--radius-xl)", overflow: "hidden", display: "flex", flexDirection: "column" };
+
+  /* ── Email segment ───────────────────────────────────────────── */
+  function EmailPane() {
+    const [active, setActive] = React.useState(MAILS[0]);
+    const [q, setQ] = React.useState("");
+    const filtered = q ? MAILS.filter((m) => m.from.toLowerCase().includes(q.toLowerCase()) || m.subject.toLowerCase().includes(q.toLowerCase())) : MAILS;
+    return e("div", { className: "s21-grid-main-aside" },
+      /* List */
+      e("div", { style: paneCard },
+        e("div", { style: { padding: "var(--space-2)", borderBottom: "1px solid var(--border-subtle)" } },
+          e(S.SearchInput, { value: q, onChange: setQ, placeholder: "Hledat v mailech…" })
+        ),
+        e("ul", { style: { listStyle: "none", margin: 0, padding: 0, overflowY: "auto" } },
+          filtered.map((m) => e("li", { key: m.id },
+            e("button", {
+              type: "button",
+              onClick: () => setActive(m),
+              style: {
+                display: "flex", flexDirection: "column", gap: 4,
+                width: "100%", padding: "var(--space-2) var(--space-3)",
+                background: active.id === m.id ? "var(--primary-soft)" : m.read ? "transparent" : "color-mix(in srgb, var(--primary-soft) 40%, transparent)",
+                border: 0, borderLeft: "3px solid " + (active.id === m.id ? "var(--primary)" : "transparent"),
+                borderBottom: "1px solid var(--border-subtle)",
+                cursor: "pointer", textAlign: "left", font: "inherit", color: "inherit"
+              }
+            },
+              e("div", { style: { display: "flex", alignItems: "baseline", gap: "var(--space-2)" } },
+                e("span", { style: { font: m.read ? "500 13px/18px var(--font-body)" : "700 13px/18px var(--font-body)", color: "var(--ink)", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, m.from),
+                m.star && e(S.Icon, { name: "star", size: 12 }),
+                m.attachments > 0 && e(S.Icon, { name: "paperclip", size: 12 }),
+                e("span", { style: { font: "400 11px/16px var(--font-body)", color: "var(--ink-muted)" } }, m.time)
+              ),
+              e("div", { style: { font: m.read ? "400 13px/18px var(--font-body)" : "600 13px/18px var(--font-body)", color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, m.subject),
+              e("div", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, m.preview)
+            )
+          ))
+        )
+      ),
+      /* Preview */
+      e("div", { style: { ...paneCard, padding: "var(--space-4)", gap: "var(--space-3)" } },
+        e("div", { style: { display: "flex", alignItems: "flex-start", gap: "var(--space-3)", paddingBottom: "var(--space-3)", borderBottom: "1px solid var(--border-subtle)" } },
+          e(S.Avatar, { name: active.from, size: 40 }),
+          e("div", { style: { flex: 1, minWidth: 0 } },
+            e("div", { style: { font: "600 14px/20px var(--font-body)" } }, active.from),
+            e("div", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)" } }, active.email),
+            e("div", { style: { font: "400 11px/14px var(--font-body)", color: "var(--ink-subtle)", marginTop: 2 } }, active.time)
+          ),
+          e(S.Tag, { tone: "neutral" }, active.tag)
+        ),
+        e("h2", { style: { margin: 0, font: "700 18px/24px var(--font-display)" } }, active.subject),
+        e("div", { style: { font: "400 14px/22px var(--font-body)", color: "var(--ink)", minHeight: 120, whiteSpace: "pre-wrap" } },
+          active.preview + "\n\nS pozdravem,\n" + active.from
+        ),
+        active.attachments > 0 && e(S.AttachmentList, {
+          items: Array.from({ length: active.attachments }, (_, i) => ({ id: i, name: "Priloha_" + (i + 1) + ".pdf", mimeType: "application/pdf", size: 180000 + i * 40000 })),
+          compact: true, onDownload: () => {}
+        }),
+        e("div", { style: { display: "flex", gap: "var(--space-2)", paddingTop: "var(--space-3)", borderTop: "1px solid var(--border-subtle)" } },
+          e(S.Button, { icon: "send" }, "Odpovědět"),
+          e(S.Button, { variant: "secondary", icon: "share" }, "Přeposlat"),
+          e(S.Button, { variant: "ghost", icon: "folder" }, "Archivovat")
+        )
+      )
+    );
+  }
+
+  /* ── Zprávy segment ──────────────────────────────────────────── */
+  function ZpravyPane() {
+    const [q, setQ] = React.useState("");
+    return e(React.Fragment, null,
+      e(S.FilterBar, null,
+        e(S.SearchInput, { className: "s21-grow", value: q, onChange: setQ, placeholder: "Hledat příjemce, text…" }),
+        e(S.Select, { placeholder: "Všechny stavy", options: [
+          { value: "done", label: "Doručeno" },
+          { value: "pending", label: "Odesílá se" },
+          { value: "failed", label: "Chyba" },
+        ] })
+      ),
+      e(S.DataTable, { columns: SMS_COLUMNS, rows: MESSAGES, minWidth: 980 })
+    );
+  }
+
+  /* ── Chat segment ────────────────────────────────────────────── */
+  function ChatPane() {
+    const [active, setActive] = React.useState(CHATS[0]);
+    return e("div", { className: "s21-grid-main-aside" },
+      /* Conversation list */
+      e("div", { style: paneCard },
+        e("ul", { style: { listStyle: "none", margin: 0, padding: 0 } },
+          CHATS.map((c) => e("li", { key: c.id },
+            e("button", {
+              type: "button",
+              onClick: () => setActive(c),
+              style: {
+                display: "flex", alignItems: "center", gap: "var(--space-3)",
+                width: "100%", padding: "var(--space-3)",
+                background: active.id === c.id ? "var(--primary-soft)" : "transparent",
+                border: 0, borderLeft: "3px solid " + (active.id === c.id ? "var(--primary)" : "transparent"),
+                borderBottom: "1px solid var(--border-subtle)",
+                cursor: "pointer", textAlign: "left", font: "inherit", color: "inherit"
+              }
+            },
+              c.type === "dm"
+                ? e(S.Avatar, { name: c.name, size: 36 })
+                : e("div", { style: { width: 36, height: 36, flexShrink: 0, borderRadius: "var(--radius-md)", background: "var(--primary-soft)", color: "var(--primary-text)", display: "flex", alignItems: "center", justifyContent: "center" } },
+                    e(S.Icon, { name: "users", size: 18 })
+                  ),
+              e("div", { style: { flex: 1, minWidth: 0 } },
+                e("div", { style: { display: "flex", alignItems: "baseline", gap: "var(--space-2)" } },
+                  e("span", { style: { font: "600 13px/18px var(--font-body)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, c.name),
+                  e("span", { style: { font: "400 11px/16px var(--font-body)", color: "var(--ink-muted)", flexShrink: 0 } }, c.time)
+                ),
+                e("div", { style: { display: "flex", alignItems: "center", gap: "var(--space-2)", marginTop: 2 } },
+                  e("span", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, c.lastMsg),
+                  c.unread > 0 && e("span", { style: { background: "var(--primary)", color: "var(--on-primary)", padding: "0 6px", borderRadius: "var(--radius-full)", font: "700 10px/18px var(--font-mono)", minWidth: 18, textAlign: "center", flexShrink: 0 } }, c.unread)
+                ),
+                c.type === "channel" && e("div", { style: { font: "400 11px/14px var(--font-body)", color: "var(--ink-subtle)", marginTop: 2 } }, c.members + " členů")
+              )
+            )
+          ))
+        )
+      ),
+      /* Message preview */
+      e("div", { style: { ...paneCard, padding: "var(--space-3)" } },
+        e("div", { style: { paddingBottom: "var(--space-3)", borderBottom: "1px solid var(--border-subtle)", display: "flex", alignItems: "center", gap: "var(--space-3)" } },
+          active.type === "dm"
+            ? e(S.Avatar, { name: active.name, size: 32 })
+            : e("div", { style: { width: 32, height: 32, flexShrink: 0, borderRadius: "var(--radius-md)", background: "var(--primary-soft)", color: "var(--primary-text)", display: "flex", alignItems: "center", justifyContent: "center" } },
+                e(S.Icon, { name: "users", size: 16 })
+              ),
+          e("div", null,
+            e("div", { style: { font: "600 14px/20px var(--font-body)" } }, active.name),
+            active.type === "channel" && e("div", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)" } }, active.members + " členů")
+          )
+        ),
+        e("div", { style: { paddingTop: "var(--space-3)", display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+          active.messages.map((msg) => e("div", { key: msg.id, style: { display: "flex", alignItems: "flex-start", gap: "var(--space-2)" } },
+            e(S.Avatar, { name: msg.author, size: 28 }),
+            e("div", null,
+              e("div", { style: { display: "flex", alignItems: "baseline", gap: "var(--space-2)" } },
+                e("span", { style: { font: "600 12px/16px var(--font-body)", color: "var(--ink)" } }, msg.author),
+                e("span", { style: { font: "400 11px/14px var(--font-body)", color: "var(--ink-subtle)" } }, msg.time)
+              ),
+              e("div", { style: { font: "400 13px/20px var(--font-body)", color: "var(--ink)", marginTop: 2 } }, msg.text)
+            )
+          ))
+        )
+      )
+    );
+  }
+
+  /* ── Page ────────────────────────────────────────────────────── */
+  function Page() {
+    const [seg, setSeg] = React.useState(() => window.location.hash.replace('#', '') || 'email');
+    React.useEffect(() => { window.location.hash = seg; }, [seg]);
+
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/inbox" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
+    },
+      e(S.PageHeader, {
+        title: "Inbox",
+        description: EMAIL_UNREAD + " nepřečtených · " + CHAT_UNREAD + " nových zpráv",
+        actions: e(React.Fragment, null,
+          e(S.Button, { variant: "secondary", icon: "refresh" }, "Aktualizovat"),
+          e(S.Button, { icon: "send" }, "Nová zpráva")
+        )
+      }),
+      e(S.PageBody, null,
+        e("div", { style: { marginBottom: "var(--space-4)" } },
+          e(S.SegmentedControl, {
+            value: seg, onChange: setSeg,
+            items: [
+              { value: "email", label: "Email", count: EMAIL_UNREAD },
+              { value: "zpravy", label: "Zprávy", count: MESSAGES.length },
+              { value: "chat", label: "Interní chat", count: CHAT_UNREAD },
+            ]
+          })
+        ),
+        seg === "email" && e(EmailPane),
+        seg === "zpravy" && e(ZpravyPane),
+        seg === "chat" && e(ChatPane)
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>
