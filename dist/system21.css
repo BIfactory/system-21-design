@@ -4,9 +4,9 @@
 .s21-root, .s21-shell, .s21-pagebody { font-family: var(--font-body); color: var(--ink); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; font-feature-settings: "kern", "liga", "calt"; }
 body { font-family: var(--font-body); color: var(--ink); margin: 0; font-feature-settings: "kern", "liga", "calt"; }
 :where(.s21-stat__value, .s21-table td.is-num, .s21-pager, .s21-actionbar__value, .s21-cell-code, .s21-lcard__stats, .s21-badge, .s21-navitem__badge) { font-variant-numeric: tabular-nums; }
-.s21-mono, .s21-navsec__label, .s21-navsec__head, .s21-sidebar__sub, .s21-stat__label, .s21-field__label, .s21-actionbar__label, .s21-powered__label, .s21-dd__label { font-feature-settings: "ss01", "kern"; }
+.s21-mono, .s21-navsec__label, .s21-navsec__title, .s21-sidebar__sub, .s21-stat__label, .s21-field__label, .s21-actionbar__label, .s21-powered__label, .s21-dd__label { font-feature-settings: "ss01", "kern"; }
 .s21-icon { flex-shrink: 0; display: block; }
-:where(.s21-btn, .s21-chip, .s21-seg__item, .s21-tab, .s21-navitem, .s21-navsec__head, .s21-crumb, .s21-pg, .s21-step, .s21-input, .s21-modal__close, .s21-sidebar__quick, .s21-th-btn, .s21-crumbs__back):focus-visible {
+:where(.s21-btn, .s21-chip, .s21-seg__item, .s21-tab, .s21-navitem, .s21-navsec__chev, .s21-navsec__title, .s21-crumb, .s21-pg, .s21-step, .s21-input, .s21-modal__close, .s21-sidebar__quick, .s21-th-btn, .s21-crumbs__back):focus-visible {
   outline: 2px solid var(--focus-ring); outline-offset: 2px; box-shadow: var(--elev-focus-glow);
 }
 .s21-input:focus-visible { box-shadow: 0 0 0 1px var(--focus-ring), var(--elev-focus-glow); }
@@ -423,11 +423,12 @@ body { font-family: var(--font-body); color: var(--ink); margin: 0; font-feature
 .s21-sidebar .s21-search__icon { color: var(--sidebar-text-muted); }
 .s21-sidebar__nav { flex: 1; padding: var(--space-3); overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.15) transparent; scrollbar-gutter: stable; }
 .s21-navsec--gap { margin-top: var(--space-3); }
-.s21-navsec__head { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: var(--space-2) var(--space-3); margin-bottom: var(--space-1); border: 1px solid transparent; border-radius: var(--radius-lg); background: none; color: var(--sidebar-text-muted); font: 500 11px/16px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; cursor: pointer; transition: color .15s, background-color .15s; }
-.s21-navsec__head:hover { color: var(--white); }
-.s21-navsec__title { display: flex; align-items: center; gap: var(--space-2); }
-.s21-navsec__chev { transition: transform .15s; }
-.s21-navsec__chev.is-open { transform: rotate(180deg); }
+.s21-navsec__headrow { display: flex; align-items: center; justify-content: space-between; padding: var(--space-1) var(--space-2) var(--space-1) var(--space-3); margin-bottom: var(--space-1); gap: var(--space-1); }
+.s21-navsec__title { flex: 1; min-width: 0; font: 500 11px/16px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--sidebar-text-muted); text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color .15s; }
+a.s21-navsec__title:hover { color: var(--white); }
+.s21-navsec__chev { flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; border: 1px solid transparent; border-radius: var(--radius-md); background: none; color: var(--sidebar-text-muted); cursor: pointer; padding: 0; transition: color .15s, background-color .15s, transform .15s; }
+.s21-navsec__chev:hover { color: var(--white); background: var(--sidebar-hover); }
+.s21-navsec__chev[aria-expanded="true"] { transform: rotate(180deg); }
 .s21-navsec__label { padding: 0 var(--space-3); margin-bottom: var(--space-1); font: 500 10px/14px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--sidebar-text-muted); }
 .s21-navsec__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-0-5); }
 .s21-navitem { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding: var(--space-1-5) var(--space-3); border-radius: var(--radius-lg); color: var(--sidebar-text); text-decoration: none; font: 400 14px/20px var(--font-body); transition: background-color var(--motion-duration-fast) var(--motion-ease-out), color var(--motion-duration-fast) var(--motion-ease-out); }

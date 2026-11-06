@@ -658,14 +658,25 @@ function Sidebar({ brand, sections, activeHref, onNavigate, quickAction, search,
           return (
             <div key={si} className={cx("s21-navsec", si > 0 && "s21-navsec--gap")}>
               {s.title && (s.collapsible ? (
-                <button type="button" className="s21-navsec__head" aria-expanded={!isCol}
-                  onClick={() => setCollapsed((p) => ({ ...p, [s.title || si]: !isCol }))}>
-                  <span className="s21-navsec__title">{s.title}</span>
-                  <Icon name="chevron-down" size={16} strokeWidth={2.5} className={cx("s21-navsec__chev", !isCol && "is-open")} />
-                </button>
+                <div className="s21-navsec__headrow">
+                  {s.sectionHref ? (
+                    <a className="s21-navsec__title" href={s.sectionHref}
+                      onClick={(e) => { e.preventDefault(); onNavigate && onNavigate({ href: s.sectionHref, label: s.title }); }}>
+                      {s.title}
+                    </a>
+                  ) : (
+                    <span className="s21-navsec__title">{s.title}</span>
+                  )}
+                  <button className="s21-navsec__chev" type="button"
+                    aria-expanded={!isCol}
+                    aria-controls={`navsec-${si}`}
+                    onClick={() => setCollapsed((p) => ({ ...p, [s.title || si]: !isCol }))}>
+                    <Icon name="chevron-down" size={16} strokeWidth={2.5} />
+                  </button>
+                </div>
               ) : <div className="s21-navsec__label">{s.title}</div>)}
               {!isCol && (
-                <ul className="s21-navsec__list">
+                <ul className="s21-navsec__list" id={`navsec-${si}`}>
                   {s.items.map((it) => (
                     <li key={it.href}>
                       <a href={it.href} onClick={(e) => nav(e, it)} aria-current={isActive(it.href) ? "page" : undefined}
@@ -1355,16 +1366,20 @@ const moduleNavSections = [
   },
   {
     title: "Výroba",
+    sectionHref: "/vyroba",
     collapsible: true,
     items: [
+      { href: "/vyroba", label: "Přehled", icon: "layout-dashboard" },
       { href: "/zakazky", label: "Zakázky" },
       { href: "/vykazovani", label: "Vykazování" },
     ],
   },
   {
     title: "Obchod",
+    sectionHref: "/obchod",
     collapsible: true,
     items: [
+      { href: "/obchod", label: "Přehled", icon: "layout-dashboard" },
       { href: "/obchod/klienti", label: "Klienti" },
       { href: "/obchod/osoby", label: "Osoby" },
       { href: "/obchod/pripady", label: "Obchodní případy" },
@@ -1372,8 +1387,10 @@ const moduleNavSections = [
   },
   {
     title: "DMS",
+    sectionHref: "/dms",
     collapsible: true,
     items: [
+      { href: "/dms", label: "Přehled", icon: "layout-dashboard" },
       { href: "/dms/smlouvy", label: "Smlouvy" },
       { href: "/dms/dokumenty", label: "Dokumenty" },
       { href: "/dms/automatizace", label: "Automatizace / AI" },
@@ -1381,26 +1398,12 @@ const moduleNavSections = [
   },
   {
     title: "Lidé",
+    sectionHref: "/lide",
     collapsible: true,
     items: [
+      { href: "/lide", label: "Přehled", icon: "layout-dashboard" },
       { href: "/lide/pracovnici", label: "Pracovníci" },
       { href: "/lide/dochazka", label: "Docházka" },
-    ],
-  },
-  {
-    title: "Komunikace",
-    collapsible: true,
-    items: [
-      { href: "/email", label: "Email" },
-      { href: "/zpravy", label: "Zprávy" },
-    ],
-  },
-  {
-    title: "Intranet",
-    collapsible: true,
-    items: [
-      { href: "/nastenka", label: "Nástěnka" },
-      { href: "/kb", label: "Knowledge base" },
     ],
   },
 ];
