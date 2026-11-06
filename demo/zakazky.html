@@ -40,25 +40,18 @@
   // ─── mock data — bohaté detaily z polepim ─────────────────────────
   // internal_status: new | quoted | ready | in_progress | done | delivered | cancelled
   const ORDERS = [
-    { id: 1, code: "ZAK-2026-0142", name: "Reporting obchodu — pilot", client: "Moravia Steel a.s.", type: "AI", status: "quoted", stateLabel: "Nabídka", stateTone: "primary", created: "12. 05. 2026", deadline: "28. 11. 2026", priceOffer: 184000, priceReal: null, margin: 32, marginPos: true, progress: 68, raynet: "RN-4821", missingDocs: false, pipeline: true },
-    { id: 2, code: "ZAK-2026-0139", name: "Automatizace výkazů práce", client: "Hradecká strojírna", type: "Vývoj", status: "in_progress", stateLabel: "Realizace", stateTone: "primary", created: "03. 05. 2026", deadline: "15. 12. 2026", priceOffer: 96500, priceReal: 42000, margin: 24, marginPos: true, progress: 42, raynet: "RN-4810", missingDocs: false },
-    { id: 3, code: "ZAK-2026-0131", name: "Napojení ERP → CRM", client: "Agro Slovácko", type: "Integrace", status: "in_progress", stateLabel: "Realizace", stateTone: "primary", created: "22. 04. 2026", deadline: "10. 11. 2026", priceOffer: 312000, priceReal: 288000, margin: -4, marginPos: false, progress: 92, raynet: "RN-4795", missingDocs: false, overdue: true },
-    { id: 4, code: "ZAK-2026-0127", name: "AI asistent pro zápisy", client: "Obec Staré Město", type: "AI", status: "done", stateLabel: "Hotovo", stateTone: "success", created: "15. 04. 2026", deadline: "15. 11. 2026", priceOffer: 48000, priceReal: 48000, margin: 41, marginPos: true, progress: 100, raynet: "RN-4782", missingDocs: true },
-    { id: 5, code: "ZAK-2026-0126", name: "Audit CRM dat", client: "Moravia Steel a.s.", type: "Konzultace", status: "done", stateLabel: "Hotovo", stateTone: "success", created: "10. 04. 2026", deadline: "—", priceOffer: 27500, priceReal: 27500, margin: 28, marginPos: true, progress: 100, raynet: "RN-4778", missingDocs: false },
-    { id: 6, code: "ZAK-2026-0122", name: "Školení týmu v Notion", client: "Hradecká strojírna", type: "Školení", status: "done", stateLabel: "Hotovo", stateTone: "success", created: "02. 04. 2026", deadline: "—", priceOffer: 16000, priceReal: 16000, margin: 52, marginPos: true, progress: 100, raynet: null, missingDocs: false },
-    { id: 7, code: "ZAK-2026-0118", name: "Import historie z Raynet", client: "Agro Slovácko", type: "Integrace", status: "in_progress", stateLabel: "Realizace", stateTone: "primary", created: "28. 03. 2026", deadline: "25. 11. 2026", priceOffer: 36000, priceReal: 24000, margin: 12, marginPos: true, progress: 80, raynet: "RN-4761", missingDocs: false },
-    { id: 8, code: "ZAK-2026-0115", name: "Portál pro klienty — poptávka", client: "Procházkovi s.r.o.", type: "Vývoj", status: "new", stateLabel: "Nová", stateTone: "neutral", created: "20. 03. 2026", deadline: "—", priceOffer: null, priceReal: null, margin: null, marginPos: true, progress: 0, raynet: null, missingDocs: true, pipeline: true },
-    { id: 9, code: "ZAK-2026-0109", name: "Dashboard pro management", client: "Moravia Steel a.s.", type: "Vývoj", status: "delivered", stateLabel: "Fakturováno", stateTone: "success", created: "10. 03. 2026", deadline: "—", priceOffer: 63000, priceReal: 63000, margin: 36, marginPos: true, progress: 100, raynet: "RN-4720", missingDocs: false },
-    { id: 10, code: "ZAK-2026-0098", name: "Konzultace migrace", client: "Procházkovi s.r.o.", type: "Konzultace", status: "cancelled", stateLabel: "Zrušeno", stateTone: "danger", created: "25. 02. 2026", deadline: "—", priceOffer: 13000, priceReal: 0, margin: null, marginPos: true, progress: 40, raynet: null, missingDocs: false },
+    { id: 1, code: "ZAK-2026-0142", name: "Reporting obchodu — pilot", client: "Moravia Steel a.s.", type: "AI", status: "quoted", stateLabel: "Nabídka", stateTone: "primary", created: "12. 05. 2026", deadline: "28. 11. 2026", priceOffer: 184000, priceReal: null, margin: 32, marginPos: true, progress: 68, raynet: "RN-4821", missingDocs: false, pipeline: true, plannedHours: 40, realHours: 27 },
+    { id: 2, code: "ZAK-2026-0139", name: "Automatizace výkazů práce", client: "Hradecká strojírna", type: "Vývoj", status: "in_progress", stateLabel: "Realizace", stateTone: "primary", created: "03. 05. 2026", deadline: "15. 12. 2026", priceOffer: 96500, priceReal: 42000, margin: 24, marginPos: true, progress: 42, raynet: "RN-4810", missingDocs: false, plannedHours: 50, realHours: 60 },
+    { id: 3, code: "ZAK-2026-0131", name: "Napojení ERP → CRM", client: "Agro Slovácko", type: "Integrace", status: "in_progress", stateLabel: "Realizace", stateTone: "primary", created: "22. 04. 2026", deadline: "10. 11. 2026", priceOffer: 312000, priceReal: 288000, margin: -4, marginPos: false, progress: 92, raynet: "RN-4795", missingDocs: false, overdue: true, plannedHours: 80, realHours: 73 },
+    { id: 4, code: "ZAK-2026-0127", name: "AI asistent pro zápisy", client: "Obec Staré Město", type: "AI", status: "done", stateLabel: "Hotovo", stateTone: "success", created: "15. 04. 2026", deadline: "15. 11. 2026", priceOffer: 48000, priceReal: 48000, margin: 41, marginPos: true, progress: 100, raynet: "RN-4782", missingDocs: true, plannedHours: 30, realHours: 30 },
+    { id: 5, code: "ZAK-2026-0126", name: "Audit CRM dat", client: "Moravia Steel a.s.", type: "Konzultace", status: "done", stateLabel: "Hotovo", stateTone: "success", created: "10. 04. 2026", deadline: "—", priceOffer: 27500, priceReal: 27500, margin: 28, marginPos: true, progress: 100, raynet: "RN-4778", missingDocs: false, plannedHours: 16, realHours: 14 },
+    { id: 6, code: "ZAK-2026-0122", name: "Školení týmu v Notion", client: "Hradecká strojírna", type: "Školení", status: "done", stateLabel: "Hotovo", stateTone: "success", created: "02. 04. 2026", deadline: "—", priceOffer: 16000, priceReal: 16000, margin: 52, marginPos: true, progress: 100, raynet: null, missingDocs: false, plannedHours: 8, realHours: 8 },
+    { id: 7, code: "ZAK-2026-0118", name: "Import historie z Raynet", client: "Agro Slovácko", type: "Integrace", status: "in_progress", stateLabel: "Realizace", stateTone: "primary", created: "28. 03. 2026", deadline: "25. 11. 2026", priceOffer: 36000, priceReal: 24000, margin: 12, marginPos: true, progress: 80, raynet: "RN-4761", missingDocs: false, plannedHours: 25, realHours: 20 },
+    { id: 8, code: "ZAK-2026-0115", name: "Portál pro klienty — poptávka", client: "Procházkovi s.r.o.", type: "Vývoj", status: "new", stateLabel: "Nová", stateTone: "neutral", created: "20. 03. 2026", deadline: "—", priceOffer: null, priceReal: null, margin: null, marginPos: true, progress: 0, raynet: null, missingDocs: true, pipeline: true, plannedHours: 40, realHours: 0 },
+    { id: 9, code: "ZAK-2026-0109", name: "Dashboard pro management", client: "Moravia Steel a.s.", type: "Vývoj", status: "delivered", stateLabel: "Fakturováno", stateTone: "success", created: "10. 03. 2026", deadline: "—", priceOffer: 63000, priceReal: 63000, margin: 36, marginPos: true, progress: 100, raynet: "RN-4720", missingDocs: false, plannedHours: 45, realHours: 45 },
+    { id: 10, code: "ZAK-2026-0098", name: "Konzultace migrace", client: "Procházkovi s.r.o.", type: "Konzultace", status: "cancelled", stateLabel: "Zrušeno", stateTone: "danger", created: "25. 02. 2026", deadline: "—", priceOffer: 13000, priceReal: 0, margin: null, marginPos: true, progress: 40, raynet: null, missingDocs: false, plannedHours: 8, realHours: 3 },
   ];
 
-  const FUNNEL = [
-    { id: "new", label: "Nové", count: ORDERS.filter((o) => o.status === "new").length, color: "var(--ink-muted)" },
-    { id: "quoted", label: "Nabídka", count: ORDERS.filter((o) => o.status === "quoted").length, color: "var(--primary)" },
-    { id: "in_progress", label: "Realizace", count: ORDERS.filter((o) => o.status === "in_progress").length, color: "#d97706" },
-    { id: "done", label: "Hotovo", count: ORDERS.filter((o) => o.status === "done").length, color: "var(--success-solid)" },
-    { id: "delivered", label: "Fakturováno", count: ORDERS.filter((o) => o.status === "delivered").length, color: "var(--primary-text)" },
-  ];
 
   const fmt = (n) => n == null ? "—" : n.toLocaleString("cs-CZ").replace(/,/g, " ");
   const pctCls = (p) => p > 100 ? "over" : p >= 95 ? "mid" : p >= 80 ? "mid" : "low";
@@ -174,7 +167,6 @@
   function Page() {
     const [tab, setTab] = React.useState("aktivni");
     const [chip, setChip] = React.useState("all");
-    const [stage, setStage] = React.useState(null);
     const [q, setQ] = React.useState("");
 
     const activeOrders = ORDERS.filter((o) => o.status !== "delivered" && o.status !== "cancelled");
@@ -182,16 +174,21 @@
 
     let rows = tab === "aktivni" ? activeOrders : tab === "fakturaci" ? invoiceReady : ORDERS;
 
-    if (chip === "pipeline") rows = rows.filter((o) => o.pipeline || o.status === "new" || o.status === "quoted");
-    else if (chip === "vyroba") rows = rows.filter((o) => o.status === "in_progress");
-    else if (chip === "overdue") rows = rows.filter((o) => o.overdue);
-    else if (chip === "missing") rows = rows.filter((o) => o.missingDocs);
-    if (stage) rows = rows.filter((o) => o.status === stage);
+    // "Co pálí" — new chip filters
+    const overdueCount = ORDERS.filter(o => o.overdue).length;
+    const overhoursCount = ORDERS.filter(o => o.plannedHours && o.realHours > o.plannedHours * 1.1).length;
+    const lowmarginCount = ORDERS.filter(o => o.margin != null && o.margin < 15).length;
+    const nologIds = [2, 7]; // mock IDs for "no log > 7 days"
+    const nologCount = ORDERS.filter(o => nologIds.includes(o.id)).length;
+
+    if (chip === "overdue") rows = rows.filter((o) => o.overdue);
+    else if (chip === "overhours") rows = rows.filter((o) => o.plannedHours && o.realHours > o.plannedHours * 1.1);
+    else if (chip === "lowmargin") rows = rows.filter((o) => o.margin != null && o.margin < 15);
+    else if (chip === "nolog") rows = rows.filter((o) => nologIds.includes(o.id));
+
     if (q) rows = rows.filter((o) => (o.name + " " + o.client + " " + o.code + " " + (o.raynet || "")).toLowerCase().includes(q.toLowerCase()));
 
     const totalValue = activeOrders.reduce((sum, o) => sum + (o.priceOffer || 0), 0);
-    const overdueCount = ORDERS.filter(o => o.overdue).length;
-    const missingCount = ORDERS.filter(o => o.missingDocs).length;
 
     return e(S.AppShell, {
       sidebar: e(D.DemoSidebar, { active: "/zakazky" }),
@@ -213,19 +210,17 @@
       e(S.PageBody, null,
         e(S.KpiRow, { cols: 4 },
           e(S.StatTile, { label: "Aktivních", value: String(activeOrders.length) }),
-          e(S.StatTile, { label: "V realizaci", value: String(ORDERS.filter(o => o.status === "in_progress").length) }),
+          e(S.StatTile, { label: "V běhu", value: String(ORDERS.filter(o => o.status === "in_progress").length) }),
           e(S.StatTile, { label: "Po termínu", value: String(overdueCount), accent: overdueCount > 0 ? "danger" : undefined }),
           e(S.StatTile, { label: "Hodnota aktivních", value: fmt(totalValue), unit: "Kč", big: true })
         ),
 
-        e(S.SalesFunnel, { title: "Pipeline — zakázky dle stavu", stages: FUNNEL, value: stage, onChange: setStage }),
-
         e(S.ChipGroup, { value: chip, onChange: setChip, items: [
           { value: "all", label: "Vše" },
-          { value: "pipeline", label: "Sales pipeline" },
-          { value: "vyroba", label: "Výhra ve výrobě" },
           { value: "overdue", label: "Po termínu", count: overdueCount },
-          { value: "missing", label: "Chybí podklady", count: missingCount },
+          { value: "overhours", label: "Přetažené hodinami", count: overhoursCount },
+          { value: "lowmargin", label: "Nízká marže", count: lowmarginCount },
+          { value: "nolog", label: "Bez výkazu > 7 dní", count: nologCount },
         ] }),
 
         e(S.FilterBar, null,
