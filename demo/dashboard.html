@@ -309,8 +309,8 @@
           e("span", { className: "lc-arrow-char" }, "→"),
           e("a", { className: "lc-step", href: "./zakazky.html" },
             e("h3", null, "Dokončeno YTD"),
-            e("div", { className: "lc-num" }, "3"),
-            e("div", { className: "lc-sub" }, "187 000 Kč fakturováno")
+            e("div", { className: "lc-num" }, String(SD.ORDERS.filter(o => o.status === "done" || o.status === "delivered").length)),
+            e("div", { className: "lc-sub" }, fmt(SD.ORDERS.filter(o => o.status === "done" || o.status === "delivered").reduce((s, o) => s + (o.priceOffer || 0), 0)) + " Kč fakturováno")
           )
         ),
 
