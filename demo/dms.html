@@ -25,7 +25,7 @@
   .anniv-row__badge.soon { background: var(--warning-bg); color: var(--warning-text); }
   .anniv-row__badge.ok { background: var(--surface-muted); color: var(--ink-muted); }
 
-  /* ── ÁJA fronta ───────────────────────────────────────────── */
+  /* ── Fronta AI asistentky ───────────────────────────────────────────── */
   .aja-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
   .aja-row { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3); background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); }
   .aja-row__main { flex: 1; min-width: 0; }
@@ -65,7 +65,7 @@
     { code: "SM-2025-0233", product: "Úrazové pojištění (rodinné)", client: "Novákovi", days: 118, anniv: "03. 03." },
   ];
 
-  // Top 5 ÁJA email items with confidence
+  // Top 5 AI-asistentka email items with confidence
   const AJA = [
     { from: "info@cez.cz", subject: "Změna ceníku MůjProud 2027", confidence: 68, status: "review" },
     { from: "podpora@cpp.cz", subject: "Faktura — autopojištění", confidence: 71, status: "review" },
@@ -143,7 +143,7 @@
           e(S.StatTile, { label: "Dokumentů v DMS", value: "1247" })
         ),
 
-        // ── 2-col hlavní blok: Výročí + ÁJA fronta ──────────────
+        // ── 2-col hlavní blok: Výročí + Fronta AI asistentky ──────────────
         e("div", { className: "s21-grid-main-aside", style: { marginTop: "var(--space-5)" } },
 
           // Levý: Blížící se výročí smluv TOP 5
@@ -163,8 +163,8 @@
             )
           ),
 
-          // Pravý: ÁJA fronta TOP 5
-          e(S.Section, { title: "ÁJA fronta" },
+          // Pravý: Fronta AI asistentky TOP 5
+          e(S.Section, { title: "Fronta AI asistentky" },
             e("ul", { className: "aja-list" },
               ...AJA.map((item) => e(AJARow, { item }))
             ),

@@ -120,7 +120,7 @@
   const pipelineValue = openCases.reduce((s, c) => s + (c.value || 0), 0);
   const rozpracovanostKc = active.reduce((s, o) => s + (o.realHours * 1500), 0);
   const riskCount = active.filter(o => SD.getRiskScore(o) >= 5).length;
-  const healthScore = 4 + 3; // mock: 4 smluv vyprší + 3 ÁJA pending
+  const healthScore = 4 + 3; // mock: 4 smluv vyprší + 3 AI asistentka pending
 
   const fmt = (n) => n.toLocaleString("cs-CZ").replace(/,/g, " ");
 
@@ -150,7 +150,7 @@
     { icon: "info", tone: "warning", section: "VÝROBA", title: "ZAK-2026-0131 Napojení ERP → CRM — po termínu", meta: "Agro Slovácko · marže -4 %", href: "./zakazka-detail.html" },
     { icon: "users", tone: "primary", section: "OBCHOD", title: "OP-2026-0043 Moravia Steel — AI reporting", meta: "180 000 Kč pipeline · čeká na odpověď", href: "./crm-pripady.html" },
     { icon: "file", tone: "default", section: "DMS", title: "PL-2024-0067 Plyn — vyprší za 10 dnů", meta: "Hradecká strojírna · konec fixace 15. 11.", href: "./dms-smlouvy.html" },
-    { icon: "tasks", tone: "default", section: "DMS", title: "3 ÁJA emailů čeká na schválení", meta: "Nejnižší confidence 68 %", href: "./dms-automatizace.html" },
+    { icon: "tasks", tone: "default", section: "DMS", title: "3 emaily čekají na schválení (AI asistentka)", meta: "Nejnižší confidence 68 %", href: "./dms-automatizace.html" },
     { icon: "clock", tone: "primary", section: "ÚKOLY", title: "Zavolat Janu Novákovi o rozšíření úrazovky", meta: "deadline dnes", href: "./ukoly.html" },
   ];
 
@@ -159,7 +159,7 @@
     { time: "10:42", icon: "check", tone: "success", text: "Smlouva SM-2026-089 podepsána", client: "Moravia Steel" },
     { time: "09:15", icon: "folder", tone: "primary", text: "Materiál M-01 vykázán na ZAK-2026-0131", client: "Alena D." },
     { time: "08:30", icon: "mail", tone: "default", text: "Nová poptávka od ing. Kříže", client: "Agro Slovácko" },
-    { time: "včera 16:24", icon: "upload", tone: "default", text: "Nahrán cenník Allianz 2027", client: "ÁJA auto" },
+    { time: "včera 16:24", icon: "upload", tone: "default", text: "Nahrán cenník Allianz 2027", client: "AI asistentka" },
     { time: "včera 15:30", icon: "user", tone: "primary", text: "Nový pracovník Jana Svobodová nastoupí 17. 11.", client: null },
     { time: "včera 14:10", icon: "tasks", tone: "success", text: "3 úkoly dokončené", client: "Dvořákovi · Novákovi · Agro" },
   ];
@@ -238,7 +238,7 @@
             label: "Zdraví klientů",
             value: String(healthScore),
             accent: healthScore > 5 ? "warning" : undefined,
-            hint: "smlouvy + ÁJA",
+            hint: "smlouvy + AI fronta",
             href: "./dms-smlouvy.html",
           })
         ),
@@ -348,12 +348,12 @@
           e("h2", { style: { font: "700 20px/28px var(--font-display)", color: "var(--ink)", margin: "0 0 var(--space-3) 0" } }, "Deník dne"),
           e("div", { className: "diary-grid" },
 
-            // ÁJA kontrola
+            // AI asistentka — čeká na kontrolu
             e("div", { className: "diary-section" },
               e("div", { className: "diary-section__head" },
                 e("div", { className: "diary-section__title" },
                   e(S.Icon, { name: "sparkles", size: 16 }),
-                  "ÁJA — čeká na kontrolu",
+                  "AI asistentka — čeká na kontrolu",
                   e("span", { className: "diary-section__count diary-section__count--warn" }, DIARY.aja.length)
                 ),
                 e("a", { href: "./dms-automatizace.html", className: "diary-section__link" }, "Celá fronta →")
