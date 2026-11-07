@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System 21 · Kapacita</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../dist/system21.css">
+<script>(function(){try{var b=localStorage.getItem('system21-brand');if(b&&b!=='bifactory')document.documentElement.setAttribute('data-brand',b);var t=localStorage.getItem('system21-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="../dist/system21.js"></script>
+<script src="./_shared.js"></script>
+<script src="./_shared-data.js"></script>
+<style>
+  /* ── Toolbar ───────────────────────────────────────────── */
+  .cap-toolbar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) 0; }
+  .cap-toolbar__label { font: 600 14px/20px var(--font-body); color: var(--ink); }
+
+  /* ── Kapacitní tabulka ─────────────────────────────────── */
+  .cap-table-wrap { overflow-x: auto; background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: var(--space-2); }
+  .cap-table { width: 100%; border-collapse: separate; border-spacing: 2px; min-width: 720px; }
+  .cap-table th { padding: 8px 12px; font: 500 11px/16px var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-muted); text-align: left; }
+  .cap-table__name { width: 160px; }
+  .cap-table td { padding: 0; }
+  .cap-cell { padding: 10px 12px; border-radius: var(--radius-md); cursor: pointer; display: flex; flex-direction: column; gap: 2px; min-height: 56px; }
+  .cap-cell:hover { outline: 2px solid var(--primary); }
+  .cap-cell--empty { background: var(--surface-muted); color: var(--ink-subtle); }
+  .cap-cell--low { background: var(--warning-bg); color: var(--warning-text); }
+  .cap-cell--ok { background: var(--success-bg); color: var(--success-text); }
+  .cap-cell--over { background: var(--danger-bg); color: var(--danger-text); }
+  .cap-cell__hours { font: 600 14px/18px var(--font-body); font-variant-numeric: tabular-nums; }
+  .cap-cell__ops { font: 400 11px/14px var(--font-mono); opacity: 0.8; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const S = window.S21, D = window.S21Demo, SD = window.S21Data, e = React.createElement;
+
+  // ── Helper: "2026-11-09" → "Po 9. 11." ──────────────────
+  const DAY_NAMES = ["Ne", "Po", "Út", "St", "Čt", "Pá", "So"];
+  function formatDayLabel(iso) {
+    const [y, m, d] = iso.split("-").map(Number);
+    const dt = new Date(y, m - 1, d);
+    return DAY_NAMES[dt.getDay()] + " " + d + ". " + m + ".";
+  }
+
+  // ── Breadcrumbs ──────────────────────────────────────────
+  const CRUMBS = [
+    { label: "Výroba", href: "/vyroba" },
+    { label: "Kapacita", href: "/vyroba/kapacita" },
+  ];
+
+  function Page() {
+    const [selectedCell, setSelectedCell] = React.useState(null); // T8 adds drawer
+
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/vyroba/kapacita" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
+    },
+      e(S.PageHeader, {
+        title: "Kapacita",
+        description: "Kdo kdy dělá co · jak jsou vytížené kapacity",
+      }),
+
+      e(S.PageBody, null,
+
+        // ── Week navigation toolbar ──────────────────────
+        e("div", { className: "cap-toolbar" },
+          e(S.Button, { variant: "secondary", size: "sm", icon: "chevron-left", disabled: true }, "Předchozí týden"),
+          e("div", { className: "cap-toolbar__label" }, "Pondělí 9. 11. — Pátek 13. 11. 2026"),
+          e(S.Button, { variant: "secondary", size: "sm", icon: "chevron-right", disabled: true }, "Další týden")
+        ),
+
+        // ── 7×5 capacity table ───────────────────────────
+        e("div", { className: "cap-table-wrap" },
+          e("table", { className: "cap-table" },
+            e("thead", null,
+              e("tr", null,
+                e("th", { className: "cap-table__name" }, "Pracovník"),
+                ...SD.WORKING_DAYS.map(d => e("th", { key: d }, formatDayLabel(d)))
+              )
+            ),
+            e("tbody", null,
+              SD.WORKERS.map(w => e("tr", { key: w.id },
+                e("td", { className: "cap-table__name" },
+                  e("div", { className: "cap-cell", style: { cursor: "default", background: "transparent", minHeight: "auto", padding: "10px 12px" } },
+                    e("div", { className: "cap-cell__hours" }, w.name),
+                    e("div", { className: "cap-cell__ops" }, w.position)
+                  )
+                ),
+                ...SD.WORKING_DAYS.map(d => {
+                  const u = SD.getUtilization(w.id, d);
+                  const assigned = SD.getCapacityForWeek(w.id, d);
+                  const tone = u === 0 ? "empty" : u < 60 ? "low" : u <= 110 ? "ok" : "over";
+                  const hours = assigned.reduce((s, c) => s + c.hours, 0);
+                  return e("td", { key: d },
+                    e("div", {
+                      className: "cap-cell cap-cell--" + tone,
+                      title: hours + " h · " + u + " %",
+                      onClick: () => { setSelectedCell({ workerId: w.id, date: d }); /* drawer — T8 */ },
+                    },
+                      e("div", { className: "cap-cell__hours" }, hours ? hours + " h" : "—"),
+                      assigned.length > 0 && e("div", { className: "cap-cell__ops" }, assigned.map(a => a.operationCode).join(" · "))
+                    )
+                  );
+                })
+              ))
+            )
+          )
+        )
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(e(Page));
+})();
+</script>
+</body>
+</html>

@@ -1380,6 +1380,7 @@ const moduleNavSections = [
     items: [
       { href: "/vyroba", label: "Přehled", icon: "layout-dashboard" },
       { href: "/zakazky", label: "Zakázky" },
+      { href: "/vyroba/kapacita", label: "Kapacita", icon: "calendar" },
       { href: "/vykazovani", label: "Vykazování" },
     ],
   },

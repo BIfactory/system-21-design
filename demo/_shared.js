@@ -38,6 +38,7 @@
     "/muj-plan": "./muj-plan.html",
     "/ukoly": "./ukoly.html",
     "/vyroba": "./vyroba.html",
+    "/vyroba/kapacita": "./vyroba-kapacita.html",
     "/zakazky": "./zakazky.html",
     "/zakazky/nova": "./zakazka-nova.html",
     "/zakazky/131": "./zakazka-detail.html",
