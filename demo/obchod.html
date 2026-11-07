@@ -153,15 +153,19 @@
                       onClick: () => window.location.href = "./crm-pripady.html"
                     },
                       e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "var(--space-2)" } },
-                        e("div", { style: { minWidth: 0 } },
-                          e("div", { style: { font: "500 14px/20px var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, c.name),
-                          e("div", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)", marginTop: 2 } },
-                            e("span", { className: "s21-cell-code" }, c.code), " · ", c.client, " · ", c.owner
+                        e("div", { style: { flex: 1, minWidth: 0 } },
+                          e("div", { style: { font: "500 14px/20px var(--font-body)", display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2, overflow: "hidden" } }, c.name),
+                          e("div", { style: { font: "400 12px/16px var(--font-body)", color: "var(--ink-muted)", marginTop: 2, display: "flex", flexWrap: "wrap", gap: 4, alignItems: "center" } },
+                            e("span", { className: "s21-cell-code" }, c.code),
+                            e("span", null, "·"),
+                            e("span", { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 120 } }, c.client),
+                            e("span", null, "·"),
+                            e("span", null, c.owner)
                           ),
                           e(AttentionFlags, { c })
                         ),
                         e("div", { style: { flexShrink: 0, textAlign: "right" } },
-                          e("div", { style: { font: "600 14px/20px var(--font-body)", fontVariantNumeric: "tabular-nums", color: "var(--ink)" } }, fmt(c.value), " Kč"),
+                          e("div", { style: { font: "600 14px/20px var(--font-body)", fontVariantNumeric: "tabular-nums", color: "var(--ink)", whiteSpace: "nowrap" } }, fmt(c.value), " Kč"),
                           e(S.Badge, { tone: stageToneFor(c.stage), style: { marginTop: 4, display: "block" } }, stageLabel(c.stage))
                         )
                       )

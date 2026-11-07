@@ -105,7 +105,12 @@
   }
 
   // ─── Heatmapa — plán vs. realita ────────────────────────────────────
-  const heatOrders = active.slice(0, 10);
+  // Top 5 by % completion descending — prioritize "almost done" orders for at-a-glance
+  const heatOrders = active
+    .map(o => ({ o, pct: o.plannedHours ? (o.realHours / o.plannedHours * 100) : 0 }))
+    .sort((a, b) => b.pct - a.pct)
+    .slice(0, 5)
+    .map(x => x.o);
 
   // ─── Spodní operativa — nejhorší po termínu ─────────────────────────
   const overdueOrders = active
