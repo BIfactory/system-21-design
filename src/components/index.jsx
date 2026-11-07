@@ -2581,6 +2581,40 @@ function BrandToggle({ className }) {
   );
 }
 
+/* ───────────── PersonaSwitcher ───────────── */
+const PERSONA_ROLES = [
+  { id: "ceo", label: "CEO / Majitel", icon: "user" },
+  { id: "obchodnik", label: "Obchodník", icon: "users" },
+  { id: "vedouci-vyroby", label: "Vedoucí výroby", icon: "settings" },
+  { id: "asistentka", label: "Asistentka", icon: "mail" },
+  { id: "pracovnik", label: "Pracovník", icon: "tasks" },
+];
+
+function PersonaSwitcher({ role, roles = PERSONA_ROLES, onChange, hidden }) {
+  if (hidden) return null;
+  const [open, setOpen] = React.useState(false);
+  const current = roles.find(r => r.id === role) || roles[0];
+  return (
+    <div className="s21-persona-switcher">
+      <button type="button" className="s21-persona-switcher__trigger" onClick={() => setOpen(v => !v)} aria-haspopup="menu" aria-expanded={open}>
+        {current.icon && <Icon name={current.icon} size={14} />}
+        <span>{current.label}</span>
+        <Icon name="chevron-down" size={12} />
+      </button>
+      {open && (
+        <div className="s21-persona-switcher__dropdown" role="menu">
+          {roles.map(r => (
+            <button key={r.id} role="menuitem" type="button" className={cx("s21-persona-switcher__item", r.id === role && "is-active")} onClick={() => { onChange?.(r.id); setOpen(false); }}>
+              {r.icon && <Icon name={r.icon} size={14} />}
+              <span>{r.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ───────────── Page ───────────── */
 function PageBody({ children }) {
   return <div className="s21-pagebody">{children}</div>;
@@ -2607,6 +2641,7 @@ export {
   InputGroup, Textarea, FileDrop,
   BottomNav, useScrollDirection,
   SkipLink, Reveal,
+  PersonaSwitcher, PERSONA_ROLES,
 };
 
 if (typeof window !== "undefined") {
@@ -2631,5 +2666,6 @@ if (typeof window !== "undefined") {
   InputGroup, Textarea, FileDrop,
   BottomNav, useScrollDirection,
   SkipLink, Reveal,
+  PersonaSwitcher, PERSONA_ROLES,
 };
 }
