@@ -228,15 +228,15 @@
           label: "Co pálí",
           value: String(riskCount),
           accent: riskCount > 0 ? "warning" : undefined,
-          hint: "zakázky v riziku",
-          href: "./zakazky.html",
+          hint: riskCount === 1 ? "zakázka v riziku" : (riskCount >= 2 && riskCount <= 4 ? "zakázky v riziku" : "zakázek v riziku"),
+          href: "./vyroba.html",
         }),
         e(S.StatTile, {
           label: "Zdraví klientů",
           value: String(healthScore),
           accent: healthScore > 5 ? "warning" : undefined,
-          hint: "smlouvy + AI fronta",
-          href: "./dms-smlouvy.html",
+          hint: "smluv blízko výročí · AI fronta",
+          href: "./dms.html",
         })
       ),
 

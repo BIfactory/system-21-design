@@ -1251,7 +1251,7 @@ a.s21-stat, button.s21-stat { font: inherit; text-align: left; text-decoration: 
 /* ─── NotificationCenter (polepim/N, 2026-11-04) ─── */
 .s21-nc { position: relative; display: inline-block; }
 .s21-nc__trigger { position: relative; }
-.s21-nc__dot { position: absolute; top: 2px; right: 2px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: var(--radius-full); background: var(--danger-solid); color: var(--white); font: 700 10px/16px var(--font-mono); text-align: center; box-shadow: 0 0 0 2px var(--surface); }
+.s21-nc__dot { position: absolute; top: -4px; right: -4px; min-width: 14px; height: 14px; padding: 0 3px; border-radius: var(--radius-full); background: var(--danger-solid); color: var(--white); font: 700 9px/14px var(--font-mono); text-align: center; box-shadow: 0 0 0 2px var(--surface); }
 .s21-nc__pop { position: absolute; top: calc(100% + 8px); right: 0; z-index: 50; width: 380px; max-width: calc(100vw - 2 * var(--space-4)); max-height: 70vh; background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--elev-4); display: flex; flex-direction: column; animation: s21-fade-in var(--motion-duration-fast) var(--motion-ease-out); }
 .s21-nc__head { display: flex; align-items: center; justify-content: space-between; padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border-subtle); }
 .s21-nc__title { margin: 0; font: 600 14px/20px var(--font-display); color: var(--ink); }
@@ -1284,7 +1284,7 @@ a.s21-stat, button.s21-stat { font: inherit; text-align: left; text-decoration: 
 .s21-inboxbell { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: transparent; border: 0; border-radius: var(--radius-md); color: var(--ink-muted); cursor: pointer; transition: background-color .15s, color .15s; }
 .s21-inboxbell:hover { background: var(--surface-muted); color: var(--ink); }
 .s21-inboxbell:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
-.s21-inboxbell__badge { position: absolute; top: 4px; right: 4px; min-width: 16px; height: 16px; padding: 0 4px; background: var(--primary); color: var(--on-primary); font: 700 10px/16px var(--font-mono); border-radius: var(--radius-full); display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 0 0 2px var(--surface); }
+.s21-inboxbell__badge { position: absolute; top: -4px; right: -4px; min-width: 14px; height: 14px; padding: 0 3px; background: var(--primary); color: var(--on-primary); font: 700 9px/14px var(--font-mono); border-radius: var(--radius-full); display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 0 0 2px var(--surface); }
 
 /* ─── PersonaSwitcher (Task 2, 2026-11-07) ─── */
 .s21-persona-switcher { position: relative; }
