@@ -124,7 +124,7 @@ body { font-family: var(--font-body); color: var(--ink); margin: 0; font-feature
 .s21-table__empty { text-align: center !important; color: var(--ink-muted); padding: var(--space-8) var(--space-4) !important; }
 .s21-cell-title { font-weight: 600; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .s21-cell-meta { font: 400 12px/16px var(--font-body); color: var(--ink-muted); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
-.s21-cell-code { font: 400 12px/16px var(--font-mono); color: var(--ink-muted); }
+.s21-cell-code { font: 400 12px/16px var(--font-mono); color: var(--ink-muted); white-space: nowrap; }
 .s21-pos { color: var(--primary-text); font-weight: 600; }
 .s21-neg { color: var(--danger-text); font-weight: 600; }
 .s21-row-actions { display: inline-flex; gap: var(--space-1); }

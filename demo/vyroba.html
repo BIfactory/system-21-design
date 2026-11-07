@@ -154,11 +154,13 @@
           e(S.StatTile, { label: "Průměrná marže", value: avgMargin.toFixed(0) + " %" })
         ),
 
-        // ── 2-col hlavní blok: Rizikový list + Heatmapa ─────────────
+        // ── 2-col hlavní blok: Rizikový + Rychlé akce | Plán vs. realita ───
         e("div", { className: "s21-grid-main-aside", style: { marginTop: "var(--space-5)" } },
 
-          // Levý: Rizikový list TOP 5
-          e(S.Section, { title: "Zakázky v riziku — TOP 5" },
+          // Levý: Rizikový list + Rychlé akce (stacked)
+          e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-5)" } },
+
+          e(S.Section, { title: "Zakázky v riziku" },
             risky.length === 0
               ? e(S.EmptyState, {
                   icon: "check",
@@ -180,6 +182,25 @@
                     )
                   )
                 )
+          ),
+
+          e(S.Section, { title: "Rychlé akce" },
+            e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
+              e(S.Button, {
+                variant: "secondary",
+                icon: "clock",
+                style: { width: "100%", justifyContent: "flex-start" },
+                onClick: () => window.location.href = "./vykazovani.html"
+              }, "Vykázat hodiny"),
+              e(S.Button, {
+                variant: "secondary",
+                icon: "plus",
+                style: { width: "100%", justifyContent: "flex-start" },
+                onClick: () => window.location.href = "./zakazka-nova.html"
+              }, "Nová zakázka")
+            )
+          )
+
           ),
 
           // Pravý: Plán vs. realita heatmapa
@@ -219,10 +240,9 @@
           )
         ),
 
-        // ── Spodní operativa ────────────────────────────────────────
-        e("div", { className: "s21-grid-cards-2", style: { marginTop: "var(--space-5)" } },
+        // ── Spodní operativa: Nejhorší po termínu (plná šířka) ─────
+        e("div", { style: { marginTop: "var(--space-5)" } },
 
-          // Levá: Nejhorší po termínu
           e(S.Section, { title: "Nejhorší po termínu" },
             overdueOrders.length === 0
               ? e(S.EmptyState, {
@@ -262,23 +282,6 @@
                 )
           ),
 
-          // Pravá: Rychlé akce
-          e(S.Section, { title: "Rychlé akce" },
-            e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-3)" } },
-              e(S.Button, {
-                variant: "secondary",
-                icon: "clock",
-                style: { width: "100%", justifyContent: "flex-start" },
-                onClick: () => window.location.href = "./vykazovani.html"
-              }, "Vykázat hodiny"),
-              e(S.Button, {
-                variant: "secondary",
-                icon: "plus",
-                style: { width: "100%", justifyContent: "flex-start" },
-                onClick: () => window.location.href = "./zakazka-nova.html"
-              }, "Nová zakázka")
-            )
-          )
         )
       )
     );

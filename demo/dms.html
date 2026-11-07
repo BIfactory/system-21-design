@@ -150,16 +150,6 @@
           e(S.Section, { title: "Blížící se výročí smluv" },
             e("ul", { className: "anniv-list" },
               ...UPCOMING.map((item) => e(AnnivRow, { item }))
-            ),
-            e("div", { style: { marginTop: "var(--space-3)", paddingTop: "var(--space-3)", borderTop: "1px solid var(--border-subtle)" } },
-              e("a", {
-                href: "./dms-smlouvy.html",
-                className: "footer-btn",
-                style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "var(--space-2)", background: "transparent", border: "none" }
-              },
-                e("span", { style: { font: "500 13px/18px var(--font-body)" } }, "→ Všechny smlouvy"),
-                e(S.Icon, { name: "arrow-right", size: 16 })
-              )
             )
           ),
 
@@ -167,16 +157,6 @@
           e(S.Section, { title: "Fronta AI asistentky" },
             e("ul", { className: "aja-list" },
               ...AJA.map((item) => e(AJARow, { item }))
-            ),
-            e("div", { style: { marginTop: "var(--space-3)", paddingTop: "var(--space-3)", borderTop: "1px solid var(--border-subtle)" } },
-              e("a", {
-                href: "./dms-automatizace.html",
-                className: "footer-btn",
-                style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "var(--space-2)", background: "transparent", border: "none" }
-              },
-                e("span", { style: { font: "500 13px/18px var(--font-body)" } }, "→ Automatizace / AI"),
-                e(S.Icon, { name: "arrow-right", size: 16 })
-              )
             )
           )
         ),
