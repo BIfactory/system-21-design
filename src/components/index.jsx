@@ -1357,7 +1357,7 @@ function CommandPalette({ open, onClose, items = [], placeholder = "Hledat pří
 const moduleNavSections = [
   {
     items: [
-      { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
+      { href: "/", label: "Domů", icon: "dashboard" },
       { href: "/muj-plan", label: "Můj plán", icon: "calendar" },
       { href: "/ukoly", label: "Úkoly", icon: "tasks" },
     ],

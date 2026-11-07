@@ -22,8 +22,18 @@
 
   const INBOX_UNREAD = 5; // demo value
 
+  const DEFAULT_ROLE = "ceo";
+  function useRole() {
+    const [role, setRoleState] = R.useState(() => {
+      try { return localStorage.getItem('system21-role') || DEFAULT_ROLE; } catch (_) { return DEFAULT_ROLE; }
+    });
+    const setRole = (r) => { try { localStorage.setItem('system21-role', r); } catch (_) {} setRoleState(r); };
+    return [role, setRole];
+  }
+
   // Mapa URL → demo HTML stránka. Nedokončené moduly ukazují na _coming.html.
   const MAP = {
+    "/": "./dashboard.html",
     "/dashboard": "./dashboard.html",
     "/muj-plan": "./muj-plan.html",
     "/ukoly": "./ukoly.html",
@@ -78,11 +88,14 @@
     { id: 3, group: "Včera", icon: "tasks", title: "3 úkoly dokončené", description: "Dvořákovi · Novákovi · Agro Slovácko", time: "včera 10:12", read: true, href: "/ukoly" },
   ];
 
-  function DemoTopBar({ crumbs, onNavigate }) {
+  function DemoTopBar({ crumbs, onNavigate, onRoleChange }) {
+    const [role, setRole] = useRole();
     const [notifs, setNotifs] = R.useState(NOTIFICATIONS);
+    R.useEffect(() => { if (onRoleChange) onRoleChange(role); }, [role]);
     return h(S.TopBar, {
       breadcrumbs: h(S.Breadcrumbs, { items: crumbs, onNavigate: onNavigate || (() => {}) }),
       extra: h(R.Fragment, null,
+        h(S.PersonaSwitcher, { role, onChange: setRole }),
         h(S.InboxBell, { unread: INBOX_UNREAD, onClick: () => global.location.href = './inbox.html' }),
         h(S.NotificationCenter, {
           notifications: notifs,
@@ -100,7 +113,8 @@
   }
 
   global.S21Demo = {
-    BRAND, USER,
+    BRAND, USER, DEFAULT_ROLE,
+    useRole,
     DemoSidebar, DemoTopBar, demoHref,
   };
 })(window);

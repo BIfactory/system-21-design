@@ -201,7 +201,7 @@
     results.forEach((r) => grouped[r.type].push(r));
 
     return e(S.AppShell, {
-      sidebar: e(D.DemoSidebar, { active: "/dashboard" }),
+      sidebar: e(D.DemoSidebar, { active: "/" }),
       topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
     },
       e(S.PageBody, null,
