@@ -14,5 +14,22 @@
   assertEq('getRiskScore returns number', typeof S.getRiskScore(S.ORDERS[0]), 'number');
   assertEq('WORKERS length', S.WORKERS.length, 7);
   assertEq('getActiveWorkers excludes draft', S.getActiveWorkers().every(w => w.state === "in-progress"), true);
+  // T5: WEEKLY_PLAN + CAPACITY + WORKING_DAYS
+  assertEq('WEEKLY_PLAN target', S.WEEKLY_PLAN.target, 600000);
+  assertEq('WEEKLY_PLAN closedThisWeek', S.WEEKLY_PLAN.closedThisWeek, 420000);
+  assertEq('WEEKLY_PLAN has weekLabel', typeof S.WEEKLY_PLAN.weekLabel, 'string');
+  assertEq('CAPACITY non-empty', S.CAPACITY.length > 0, true);
+  assertEq('CAPACITY has required fields', ['workerId','date','operationCode','orderId','hours'].every(k => k in S.CAPACITY[0]), true);
+  assertEq('WORKING_DAYS count', S.WORKING_DAYS.length, 5);
+  assertEq('WORKING_DAYS first day', S.WORKING_DAYS[0], '2026-11-09');
+  assertEq('getUtilization Pavel O. 2026-11-09', S.getUtilization(2, "2026-11-09") >= 0, true);
+  assertEq('getUtilization Pavel O. 2026-11-09 value', S.getUtilization(2, "2026-11-09"), 75); // 6h/8*100
+  assertEq('getUtilization Pavel O. overload 2026-11-11', S.getUtilization(2, "2026-11-11") > 100, true); // 10h → 125%
+  assertEq('getUtilization Jana S. 2026-11-09 (no entries)', S.getUtilization(5, "2026-11-09"), 0);
+  assertEq('getCapacityForWeek returns array', Array.isArray(S.getCapacityForWeek(2, "2026-11-09")), true);
+  assertEq('getCapacityForWeek Pavel 2026-11-09 count', S.getCapacityForWeek(2, "2026-11-09").length, 1);
+  assertEq('getUnassignedOperations returns array', Array.isArray(S.getUnassignedOperations()), true);
+  assertEq('getUnassignedOperations non-empty', S.getUnassignedOperations().length > 0, true);
+  assertEq('getUnassignedOperations has remainingHours', S.getUnassignedOperations().every(x => x.remainingHours > 0), true);
   out.textContent = asserts.map(a => (a.pass ? '✓' : '✗') + ' ' + a.name + (a.pass ? '' : ' expected=' + a.expected + ' got=' + a.actual)).join('\n');
 </script></body></html>
