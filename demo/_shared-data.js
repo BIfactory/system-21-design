@@ -80,13 +80,29 @@
     return c ? ORDERS.find(o => o.code === c.productionOrderId) : null;
   }
 
+  const WORKERS = [
+    { id: 1, code: "ZAM-001", name: "Lubomír Hulín", position: "CEO / Vedoucí", dept: "Management", start: "01. 01. 2024", contract: "HPP", salary: "—", state: "in-progress" },
+    { id: 2, code: "ZAM-002", name: "Pavel Obdržálek", position: "Senior Konzultant", dept: "Konzultace", start: "01. 03. 2024", contract: "HPP", salary: "68 000 Kč", state: "in-progress" },
+    { id: 3, code: "ZAM-003", name: "Alena Dvořáková", position: "Konzultant", dept: "Konzultace", start: "15. 05. 2024", contract: "HPP", salary: "58 000 Kč", state: "in-progress" },
+    { id: 4, code: "ZAM-004", name: "Tomáš Novák", position: "Junior Konzultant", dept: "Konzultace", start: "01. 09. 2024", contract: "HPP", salary: "42 000 Kč", state: "in-progress" },
+    { id: 5, code: "ZAM-005", name: "Jana Svobodová", position: "Office manager", dept: "Backoffice", start: "17. 11. 2026", contract: "HPP", salary: "38 000 Kč", state: "draft" },
+    { id: 6, code: "ZAM-006", name: "Marek Krejčí", position: "IT Specialist", dept: "IT", start: "15. 08. 2024", contract: "DPČ", salary: "350 Kč/h", state: "in-progress" },
+    { id: 7, code: "ZAM-007", name: "Eva Horáková", position: "Účetní", dept: "Backoffice", start: "01. 06. 2025", contract: "Externě", salary: "22 000 Kč/měs", state: "in-progress" },
+  ];
+
+  function getActiveWorkers() {
+    return WORKERS.filter(w => w.state === "in-progress");
+  }
+
   global.S21Data = {
     CASES,
     ORDERS,
+    WORKERS,
     getActiveOrders,
     getOpenCases,
     getRiskScore,
     getCaseByProductionOrder,
-    getOrderByCase
+    getOrderByCase,
+    getActiveWorkers
   };
 })(window);

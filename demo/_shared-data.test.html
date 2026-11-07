@@ -12,5 +12,7 @@
   assertEq('Novakovi case links to ZAK-2026-0155', S.CASES.find(c => c.client === 'Novákovi').productionOrderId, 'ZAK-2026-0155');
   assertEq('getOrderByCase roundtrip', S.getOrderByCase('OP-2026-0041').code, 'ZAK-2026-0131');
   assertEq('getRiskScore returns number', typeof S.getRiskScore(S.ORDERS[0]), 'number');
+  assertEq('WORKERS length', S.WORKERS.length, 7);
+  assertEq('getActiveWorkers excludes draft', S.getActiveWorkers().every(w => w.state === "in-progress"), true);
   out.textContent = asserts.map(a => (a.pass ? '✓' : '✗') + ' ' + a.name + (a.pass ? '' : ' expected=' + a.expected + ' got=' + a.actual)).join('\n');
 </script></body></html>
