@@ -84,6 +84,32 @@
     .lc-step { width: 100%; }
   }
 
+  /* Hero progress bar */
+  .ceo-hero { padding: var(--space-4); background: linear-gradient(135deg, var(--primary-soft) 0%, var(--surface-raised) 60%); border: 1px solid var(--border); border-radius: var(--radius-xl); display: flex; flex-direction: column; gap: var(--space-2); margin-bottom: var(--space-4); }
+  .ceo-hero__label { font: 500 11px/16px var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-muted); }
+  .ceo-hero__bar-wrap { padding: 8px 0; }
+  .ceo-hero__bar { position: relative; height: 12px; background: var(--surface-muted); border-radius: var(--radius-full); overflow: hidden; }
+  .ceo-hero__bar-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--success-solid); }
+  .ceo-hero__bar-projected { position: absolute; top: 0; height: 100%; background: var(--success-solid); opacity: 0.35; }
+  .ceo-hero__numbers { display: flex; gap: var(--space-4); font: 400 13px/18px var(--font-body); color: var(--ink-muted); flex-wrap: wrap; }
+  .ceo-hero__numbers strong { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  /* Mini capacity widget */
+  .cap-mini { display: flex; flex-direction: column; gap: 6px; }
+  .cap-mini__row { display: grid; grid-template-columns: 160px 1fr 50px; align-items: center; gap: var(--space-3); font: 400 13px/18px var(--font-body); }
+  .cap-mini__name { color: var(--ink); }
+  .cap-mini__bar { height: 8px; background: var(--surface-muted); border-radius: var(--radius-full); overflow: hidden; }
+  .cap-mini__fill { height: 100%; }
+  .cap-mini__fill--empty { background: var(--surface-muted); }
+  .cap-mini__fill--low { background: var(--warning-solid); }
+  .cap-mini__fill--ok { background: var(--success-solid); }
+  .cap-mini__fill--over { background: var(--danger-solid); }
+  .cap-mini__pct { font-variant-numeric: tabular-nums; color: var(--ink-muted); text-align: right; }
+
+  /* Risk mini */
+  .risk-mini { padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--border-subtle); }
+  .risk-mini:last-child { border-bottom: 0; }
+
   /* Deník dne */
   .diary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-4); }
   @media (max-width: 1100px) { .diary-grid { grid-template-columns: 1fr; } }
@@ -115,6 +141,7 @@
   const SD = window.S21Data;
 
   // ── Cross-cut KPI data from S21Data ───────────────────────────────────────
+  const WP = SD.WEEKLY_PLAN;
   const openCases = SD.getOpenCases();
   const active = SD.getActiveOrders();
   const pipelineValue = openCases.reduce((s, c) => s + (c.value || 0), 0);
@@ -190,7 +217,7 @@
 
   const CRUMBS = [{ label: "Domů", href: "/" }];
 
-  // ── CEOHome — full dashboard content (T6 will extend with weekly plan hero) ──
+  // ── CEOHome — full dashboard (T6: hero + 4 KPI + mini capacity + top 3 risks) ──
   function CEOHome() {
     const [search, setSearch] = React.useState("");
     const [focused, setFocused] = React.useState(false);
@@ -203,44 +230,73 @@
 
     return e("div", null,
 
-      // ── 1. Greeting ───────────────────────────────────────────────────
-      e("div", null,
-        e("h1", { className: "greeting" }, greet + ", Lubomíre"),
-        e("p", { className: "greeting__sub" }, "Dnes je úterý 4. listopadu 2026 · tento měsíc máš " + fmt(487500) + " Kč v zakázkách")
+      // ── 1. Hero progress bar ──────────────────────────────────────────
+      e("div", { className: "ceo-hero" },
+        e("div", { className: "ceo-hero__label" }, "Týdenní plán tržeb · " + WP.weekLabel),
+        e("div", { className: "ceo-hero__bar-wrap" },
+          e("div", { className: "ceo-hero__bar" },
+            e("div", { className: "ceo-hero__bar-fill", style: { width: (WP.closedThisWeek / WP.target * 100) + "%" } }),
+            e("div", { className: "ceo-hero__bar-projected", style: { left: (WP.closedThisWeek / WP.target * 100) + "%", width: ((WP.projectedClose - WP.closedThisWeek) / WP.target * 100) + "%" } })
+          )
+        ),
+        e("div", { className: "ceo-hero__numbers" },
+          e("span", null, e("strong", null, fmt(WP.closedThisWeek) + " Kč"), " uzavřeno"),
+          e("span", null, "projekce ", e("strong", null, fmt(WP.projectedClose) + " Kč")),
+          e("span", null, "cíl ", e("strong", null, fmt(WP.target) + " Kč"), " (" + Math.round(WP.closedThisWeek / WP.target * 100) + " %)")
+        )
       ),
 
-      // ── 2. KPI pruh — 4 cross-cut tiles ──────────────────────────────
+      // ── 2. Greeting ───────────────────────────────────────────────────
+      e("div", null,
+        e("h1", { className: "greeting" }, greet + ", Lubomíre"),
+        e("p", { className: "greeting__sub" }, "Dnes je pátek 7. listopadu 2026 · tento měsíc máš " + fmt(487500) + " Kč v zakázkách")
+      ),
+
+      // ── 3. KPI pruh — 4 sales-focused tiles ──────────────────────────
       e(S.KpiRow, { cols: 4 },
         e(S.StatTile, {
-          label: "Otevřený byznys",
-          value: String(openCases.length),
-          hint: fmt(pipelineValue) + " Kč pipeline",
-          href: "./crm-pripady.html",
-        }),
-        e(S.StatTile, {
-          label: "Běžící výroba",
-          value: String(active.length),
-          hint: fmt(rozpracovanostKc) + " Kč rozpracováno",
+          label: "Uzavřeno (týden)",
+          value: fmt(WP.closedThisWeek),
+          unit: "Kč",
           big: true,
-          href: "./zakazky.html",
+          accent: "success",
         }),
         e(S.StatTile, {
-          label: "Co pálí",
-          value: String(riskCount),
-          accent: riskCount > 0 ? "warning" : undefined,
-          hint: riskCount === 1 ? "zakázka v riziku" : (riskCount >= 2 && riskCount <= 4 ? "zakázky v riziku" : "zakázek v riziku"),
-          href: "./vyroba.html",
+          label: "Rozplánováno",
+          value: fmt(WP.plannedThisWeek),
+          unit: "Kč",
+          hint: "do konce týdne",
         }),
         e(S.StatTile, {
-          label: "Zdraví klientů",
-          value: String(healthScore),
-          accent: healthScore > 5 ? "warning" : undefined,
-          hint: "smluv blízko výročí · AI fronta",
-          href: "./dms.html",
+          label: "Projekce konec týdne",
+          value: fmt(WP.projectedClose),
+          unit: "Kč",
+          hint: Math.round(WP.projectedClose / WP.target * 100) + " % cíle",
+        }),
+        e(S.StatTile, {
+          label: "Pipeline hodnota",
+          value: fmt(pipelineValue),
+          unit: "Kč",
+          hint: openCases.length + " otevřených",
         })
       ),
 
-      // ── 3. Hlavní 2-col blok ──────────────────────────────────────────
+      // ── 4. Mini capacity widget ───────────────────────────────────────
+      e(S.Section, { title: "Utilizace kapacit (tento týden)" },
+        e("div", { className: "cap-mini" },
+          SD.WORKERS.slice(0, 7).map(w => {
+            const weekUtil = Math.round(SD.WORKING_DAYS.reduce((s, d) => s + SD.getUtilization(w.id, d), 0) / SD.WORKING_DAYS.length);
+            const tone = weekUtil === 0 ? "empty" : weekUtil < 60 ? "low" : weekUtil <= 110 ? "ok" : "over";
+            return e("div", { key: w.id, className: "cap-mini__row" },
+              e("div", { className: "cap-mini__name" }, w.name),
+              e("div", { className: "cap-mini__bar" }, e("div", { className: "cap-mini__fill cap-mini__fill--" + tone, style: { width: Math.min(100, weekUtil) + "%" } })),
+              e("div", { className: "cap-mini__pct" }, weekUtil + " %")
+            );
+          })
+        )
+      ),
+
+      // ── 5. Hlavní 2-col blok ──────────────────────────────────────────
       e("div", { className: "s21-grid-main-aside" },
 
         // Levý panel — Dnes rozhoduješ
@@ -290,7 +346,20 @@
         )
       ),
 
-      // ── 4. Lifecycle banner ───────────────────────────────────────────
+      // ── 6. Top 3 zakázky v riziku ─────────────────────────────────────
+      e(S.Section, { title: "Top 3 zakázky v riziku" },
+        SD.getActiveOrders()
+          .map(o => ({ o, score: SD.getRiskScore(o) }))
+          .filter(x => x.score > 0)
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 3)
+          .map(x => e("div", { key: x.o.id, className: "risk-mini" },
+            e("div", null, e("strong", null, x.o.code), " · ", x.o.name),
+            e("div", { className: "s21-cell-meta" }, x.o.client)
+          ))
+      ),
+
+      // ── 7. Lifecycle banner ───────────────────────────────────────────
       e("div", { className: "lifecycle-banner" },
         e("a", { className: "lc-step", href: "./crm-pripady.html" },
           e("h3", null, "V jednání"),
@@ -311,7 +380,7 @@
         )
       ),
 
-      // ── 5. Global search widget ───────────────────────────────────────
+      // ── 8. Global search widget ───────────────────────────────────────
       e("div", { className: "gsearch" },
         e(S.Icon, { name: "search", size: 18, className: "gsearch__icon" }),
         e("input", {
@@ -340,7 +409,7 @@
         )
       ),
 
-      // ── 6. Deník dne — 4 bloky ────────────────────────────────────────
+      // ── 9. Deník dne — 4 bloky ────────────────────────────────────────
       e("div", null,
         e("h2", { style: { font: "700 20px/28px var(--font-display)", color: "var(--ink)", margin: "0 0 var(--space-3) 0" } }, "Deník dne"),
         e("div", { className: "diary-grid" },
