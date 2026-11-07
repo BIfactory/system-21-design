@@ -91,6 +91,28 @@
   .cap-mini__fill--over { background: var(--danger-solid); }
   .cap-mini__pct { font-variant-numeric: tabular-nums; color: var(--ink-muted); text-align: right; }
 
+  /* Obchodník: capacity-vs-pipeline callout */
+  .cap-pipe { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-xl); border: 1px solid var(--border); background: var(--surface-raised); margin-bottom: var(--space-4); }
+  .cap-pipe--warn { border-color: var(--warning-solid); background: var(--warning-bg); }
+  .cap-pipe--ok { border-color: var(--border); background: var(--surface-raised); }
+  .cap-pipe__ic { width: 36px; height: 36px; border-radius: var(--radius-full); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .cap-pipe--warn .cap-pipe__ic { background: color-mix(in oklab, var(--warning-solid) 25%, transparent); color: var(--warning-text); }
+  .cap-pipe--ok .cap-pipe__ic { background: var(--primary-soft); color: var(--primary-text); }
+  .cap-pipe__main { flex: 1; min-width: 0; }
+  .cap-pipe__title { font: 500 14px/20px var(--font-body); color: var(--ink); }
+  .cap-pipe__meta { font: 400 12px/16px var(--font-body); color: var(--ink-muted); margin-top: 2px; }
+
+  /* Obchodník: action-list (Co dnes dotáhnout + Nové poptávky) */
+  .action-list { display: flex; flex-direction: column; gap: var(--space-2); }
+  .action-row { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3); background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); cursor: pointer; transition: background 100ms; text-decoration: none; color: var(--ink); }
+  .action-row:hover { background: var(--surface-muted); }
+  .action-row__main { flex: 1; min-width: 0; }
+  .action-row__title { font: 500 14px/20px var(--font-body); color: var(--ink); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+  .action-row__meta { font: 400 12px/16px var(--font-body); color: var(--ink-muted); display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; margin-top: 2px; }
+  .action-row__meta .s21-cell-code { color: var(--ink-subtle); }
+  .action-row__val { font: 600 14px/20px var(--font-body); font-variant-numeric: tabular-nums; color: var(--ink); white-space: nowrap; flex-shrink: 0; }
+  .action-row__badge { margin-top: 4px; display: inline-block; }
+
 </style>
 </head>
 <body>
@@ -130,6 +152,66 @@
     { time: "včera 15:30", icon: "user", tone: "primary", text: "Nový pracovník Jana Svobodová nastoupí 17. 11.", client: null },
     { time: "včera 14:10", icon: "tasks", tone: "success", text: "3 úkoly dokončené", client: "Dvořákovi · Novákovi · Agro" },
   ];
+
+  // ── Sales-specific derivations (used by ObchodHome) ─────────────────────────
+  const ALL_CASES = SD.CASES;
+  const openCasesSales = SD.getOpenCases();
+  const pipelineValueSales = openCasesSales.reduce((s, c) => s + (c.value || 0), 0);
+  const wonCases = ALL_CASES.filter(c => c.stage === "won").length;
+  const lostCases = ALL_CASES.filter(c => c.stage === "lost").length;
+  const konverzeYTD = (wonCases + lostCases) > 0 ? Math.round(wonCases / (wonCases + lostCases) * 100) : 0;
+
+  const SALES_STAGE_META = {
+    "poptavka":            { label: "Poptávka" },
+    "k-dodavateli":        { label: "K dodavateli" },
+    "nabidka":             { label: "Nabídka" },
+    "vyhodnoceni-nase":    { label: "Vyhodnocení (naše)" },
+    "vyhodnoceni-klient":  { label: "Vyhodnocení (klient)" },
+    "k-podpisu":           { label: "K podpisu" },
+    "won":                 { label: "Podepsáno" },
+    "lost":                { label: "Prohra" },
+  };
+  const SALES_FUNNEL_IDS = ["poptavka", "k-dodavateli", "nabidka", "vyhodnoceni-nase", "vyhodnoceni-klient", "k-podpisu", "won", "lost"];
+  const SALES_FUNNEL = SALES_FUNNEL_IDS.map(id => {
+    const cs = ALL_CASES.filter(c => c.stage === id);
+    return { id, label: SALES_STAGE_META[id].label, count: cs.length, value: cs.reduce((s, c) => s + (c.value || 0), 0) };
+  });
+
+  // Priority score for "Co dnes dotáhnout"
+  const SALES_TODAY = new Date(2026, 10, 7); // 2026-11-07
+  function parseSalesDate(s) {
+    if (!s || s === "—") return null;
+    const p = s.replace(/\s/g, "").split(".");
+    if (p.length < 3) return null;
+    return new Date(parseInt(p[2], 10), parseInt(p[1], 10) - 1, parseInt(p[0], 10));
+  }
+  function salesPriority(c) {
+    const dl = parseSalesDate(c.deadline);
+    const dlDays = dl ? Math.round((dl - SALES_TODAY) / 86400000) : 999;
+    const lcDays = c.lastContact && c.lastContact.match(/(\d+)/) ? parseInt(c.lastContact.match(/(\d+)/)[1], 10) : 0;
+    return (dlDays < 7 ? 3 : 0) + (c.value > 150000 ? 2 : 0) + (lcDays > 5 ? 2 : 0);
+  }
+  const todayDotahnout = openCasesSales
+    .map(c => ({ ...c, _p: salesPriority(c), _dlDays: parseSalesDate(c.deadline) ? Math.round((parseSalesDate(c.deadline) - SALES_TODAY) / 86400000) : null }))
+    .sort((a, b) => b._p - a._p)
+    .slice(0, 5);
+
+  // Mock: nové poptávky bez vlastníka (would come from inbox/forms in real system)
+  const UNASSIGNED_LEADS = [
+    { id: "L1", title: "Nová poptávka od ing. Kříže", source: "e-mail · agro.slovacko@domain.cz", age: "3 h", hint: "FVE 12 kWp" },
+    { id: "L2", title: "Formulář z webu — Bouzkovi", source: "formulář · rekonstrukce koupelny", age: "1 d", hint: "orient. hodnota 180 000 Kč" },
+  ];
+
+  // Capacity-vs-pipeline chip values
+  const workersForCap = SD.WORKERS.slice(0, 7);
+  const avgWeekUtil = Math.round(
+    workersForCap.reduce((ws, w) =>
+      ws + SD.WORKING_DAYS.reduce((ds, d) => ds + SD.getUtilization(w.id, d), 0) / SD.WORKING_DAYS.length,
+      0) / workersForCap.length
+  );
+  const freeCapPct = Math.max(0, 100 - avgWeekUtil);
+  // Mock projection: when work ends without new acquisition
+  const workEndDateLabel = "24. 12. 2026";
 
   const CRUMBS = [{ label: "Domů", href: "/" }];
 
@@ -276,9 +358,118 @@
     );
   }
 
-  // ── Role body stubs (Sprint 4-5 will replace with real content) ──────────
+  // ── ObchodHome — pipeline + capacity-vs-pipeline chip + funnel + action lists ──
   function ObchodHome() {
-    return e(S.EmptyState, { title: "Obchodník home", description: "Sprint 4+ dodá sales pipeline + capacity-vs-pipeline + top 5 case action list." });
+    const warn = freeCapPct > 50;
+    return e("div", null,
+
+      // ── 1. Greeting ────────────────────────────────────────────
+      e("div", null,
+        e("h1", { className: "greeting" }, greet + ", Pavle"),
+        e("p", { className: "greeting__sub" },
+          "Pipeline ", e("strong", { style: { color: "var(--ink)", fontVariantNumeric: "tabular-nums" } }, fmt(pipelineValueSales) + " Kč"),
+          " · ", String(openCasesSales.length) + " otevřených případů",
+          " · konverze YTD ", e("strong", { style: { color: "var(--ink)" } }, konverzeYTD + " %"))
+      ),
+
+      // ── 2. KPI pruh ────────────────────────────────────────────
+      e(S.KpiRow, { cols: 4, style: { marginTop: "var(--space-4)" } },
+        e(S.StatTile, { label: "Pipeline hodnota", value: fmt(pipelineValueSales), unit: "Kč", big: true, accent: "primary" }),
+        e(S.StatTile, { label: "Otevřených případů", value: String(openCasesSales.length), hint: "čeká na akci" }),
+        e(S.StatTile, { label: "Podepsáno YTD", value: fmt(ALL_CASES.filter(c => c.stage === "won").reduce((s, c) => s + (c.value || 0), 0)), unit: "Kč", hint: wonCases + " případů" }),
+        e(S.StatTile, { label: "Konverze (YTD)", value: konverzeYTD + " %", hint: "podepsáno / uzavřených" })
+      ),
+
+      // ── 3. Capacity-vs-pipeline chip ─────────────────────────────
+      e("div", { style: { marginTop: "var(--space-4)" } },
+        e("div", { className: "cap-pipe " + (warn ? "cap-pipe--warn" : "cap-pipe--ok") },
+          e("div", { className: "cap-pipe__ic" }, e(S.Icon, { name: warn ? "info" : "check", size: 18 })),
+          e("div", { className: "cap-pipe__main" },
+            e("div", { className: "cap-pipe__title" },
+              warn
+                ? "Výroba volná " + freeCapPct + " % — pokud nic nenaberu, končí práce " + workEndDateLabel
+                : "Výroba vytížená na " + avgWeekUtil + " % — dej si pauzu s akvizicí"
+            ),
+            e("div", { className: "cap-pipe__meta" },
+              warn
+                ? "Zaměř se na uzavření pipeline nebo nové poptávky."
+                : "Riziko: nové zakázky by neuvezli — nejdřív doručit rozjeté."
+            )
+          )
+        )
+      ),
+
+      // ── 4. Sales funnel ─────────────────────────────────────────
+      e("div", { style: { marginTop: "var(--space-4)" } },
+        e(S.Section, { title: "Pipeline — fáze obchodního případu" },
+          e(S.SalesFunnel, { stages: SALES_FUNNEL })
+        )
+      ),
+
+      // ── 5. 2-col: Co dnes dotáhnout + Nové poptávky ──────────────
+      e("div", { className: "s21-grid-main-aside", style: { marginTop: "var(--space-4)" } },
+
+        // Levý: Co dnes dotáhnout (top 5)
+        e(S.Section, { title: "Co dnes dotáhnout" },
+          todayDotahnout.length === 0
+            ? e(S.EmptyState, { icon: "check", title: "Nic nehoří", description: "Žádný otevřený případ nevyžaduje okamžitou akci." })
+            : e("div", { className: "action-list" },
+                todayDotahnout.map(c =>
+                  e("a", { key: c.id, className: "action-row", href: "./crm-pripady.html" },
+                    e("div", { className: "action-row__main" },
+                      e("div", { className: "action-row__title" }, c.name),
+                      e("div", { className: "action-row__meta" },
+                        e("span", { className: "s21-cell-code" }, c.code),
+                        e("span", null, "·"),
+                        e("span", null, c.client),
+                        e("span", null, "·"),
+                        e("span", null, c._dlDays != null && c._dlDays < 7
+                          ? (c._dlDays <= 0 ? "deadline dnes / po" : "za " + c._dlDays + " dnů")
+                          : "kontakt před " + (c.lastContact || "? dny"))
+                      ),
+                      e(S.Badge, {
+                        tone: c._dlDays != null && c._dlDays < 3 ? "danger" : c.value > 150000 ? "warning" : "neutral",
+                        style: { marginTop: 6 }
+                      }, SALES_STAGE_META[c.stage] ? SALES_STAGE_META[c.stage].label : c.stage)
+                    ),
+                    e("div", { className: "action-row__val" }, fmt(c.value) + " Kč")
+                  )
+                )
+              )
+        ),
+
+        // Pravý: Nové poptávky bez vlastníka
+        e(S.Section, { title: "Nové poptávky bez vlastníka" },
+          UNASSIGNED_LEADS.length === 0
+            ? e(S.EmptyState, { icon: "check", title: "Vše přiřazeno", description: "Žádné nové poptávky nečekají." })
+            : e("div", { className: "action-list" },
+                UNASSIGNED_LEADS.map(l =>
+                  e("a", { key: l.id, className: "action-row", href: "./crm-pripady.html" },
+                    e("div", { className: "action-row__main" },
+                      e("div", { className: "action-row__title" }, l.title),
+                      e("div", { className: "action-row__meta" },
+                        e("span", null, l.source),
+                        e("span", null, "·"),
+                        e("span", null, "před " + l.age)
+                      ),
+                      e(S.Badge, { tone: "primary", style: { marginTop: 6 } }, l.hint)
+                    ),
+                    e("div", { className: "action-row__val" },
+                      e(S.Button, { size: "sm", variant: "secondary" }, "Převzít")
+                    )
+                  )
+                )
+              )
+        )
+      ),
+
+      // ── 6. Footer links ─────────────────────────────────────────
+      e("div", { style: { display: "flex", gap: "var(--space-3)", marginTop: "var(--space-4)", flexWrap: "wrap" } },
+        e(S.Button, { variant: "ghost", onClick: () => window.location.href = "./crm-pripady.html" }, "→ Všechny případy"),
+        e(S.Button, { variant: "ghost", onClick: () => window.location.href = "./crm-klienti.html" }, "→ Klienti"),
+        e(S.Button, { variant: "ghost", onClick: () => window.location.href = "./crm-osoby.html" }, "→ Osoby")
+      )
+    );
   }
   function VedouciVyrobyHome() {
     return e(S.EmptyState, { title: "Vedoucí výroby home", description: "Sprint 4+ dodá mini kapacita + rizikový list + deadliny." });
