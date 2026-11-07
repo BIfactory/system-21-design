@@ -32,6 +32,13 @@
   .cap-cell--over { background: var(--danger-bg); color: var(--danger-text); }
   .cap-cell__hours { font: 600 14px/18px var(--font-body); font-variant-numeric: tabular-nums; }
   .cap-cell__ops { font: 400 11px/14px var(--font-mono); opacity: 0.8; }
+
+  /* ── Drawer body ───────────────────────────────────────── */
+  .cap-drawer__body { display: flex; flex-direction: column; gap: var(--space-4); }
+  .cap-drawer__stats { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-3); background: var(--surface-muted); border-radius: var(--radius-md); font: 400 13px/20px var(--font-body); color: var(--ink-muted); }
+  .cap-drawer__stats strong { color: var(--ink); }
+  .cap-drawer__item { display: flex; flex-direction: column; gap: 2px; padding: var(--space-2) 0; border-bottom: 1px solid var(--border); }
+  .cap-drawer__item:last-child { border-bottom: none; }
 </style>
 </head>
 <body>
@@ -48,6 +55,86 @@
     return DAY_NAMES[dt.getDay()] + " " + d + ". " + m + ".";
   }
 
+  // ── Helper: get order name from ORDERS by id ─────────────
+  function orderCode(orderId) {
+    const o = SD.ORDERS.find(o => o.id === orderId);
+    return o ? o.code : "—";
+  }
+
+  // ── Helper: get operation name from order ────────────────
+  function operationName(orderId, opCode) {
+    const o = SD.ORDERS.find(o => o.id === orderId);
+    if (!o || !o.operations) return opCode;
+    const op = o.operations.find(op => op.code === opCode);
+    return op ? op.name : opCode;
+  }
+
+  // ── Helper: remaining hours for a single operation ───────
+  function remainingHours(orderId, opCode) {
+    const o = SD.ORDERS.find(o => o.id === orderId);
+    if (!o || !o.operations) return 0;
+    const op = o.operations.find(op => op.code === opCode);
+    if (!op) return 0;
+    const assigned = SD.CAPACITY
+      .filter(c => c.orderId === orderId && c.operationCode === opCode)
+      .reduce((s, c) => s + c.hours, 0);
+    return Math.max(0, (op.planned || 0) - assigned);
+  }
+
+  // ── AddOperationForm ─────────────────────────────────────
+  function AddOperationForm({ workerId, date, onAdd }) {
+    const [orderId, setOrderId] = React.useState("");
+    const [opCode, setOpCode] = React.useState("");
+    const [hours, setHours] = React.useState("");
+
+    const orderOptions = SD.getActiveOrders().map(o => ({
+      value: String(o.id),
+      label: o.code + " " + o.name,
+    }));
+
+    const selectedOrder = orderId ? SD.ORDERS.find(o => o.id === parseInt(orderId)) : null;
+    const opOptions = (selectedOrder && selectedOrder.operations ? selectedOrder.operations : [])
+      .map(op => ({
+        value: op.code,
+        label: op.code + " " + op.name + " (zbývá " + remainingHours(parseInt(orderId), op.code) + " h)",
+      }));
+
+    return e("div", { style: { display: "flex", flexDirection: "column", gap: "var(--space-2)" } },
+      e(S.Field, { label: "Zakázka" },
+        e(S.SearchSelect, {
+          value: orderId,
+          onChange: v => { setOrderId(v); setOpCode(""); },
+          options: orderOptions,
+          placeholder: "Vyberte zakázku…",
+        })
+      ),
+      e(S.Field, { label: "Operace" },
+        e(S.SearchSelect, {
+          value: opCode,
+          onChange: setOpCode,
+          options: opOptions,
+          placeholder: "Vyberte operaci…",
+          disabled: !orderId,
+        })
+      ),
+      e(S.Field, { label: "Hodiny" },
+        e("input", {
+          className: "s21-input",
+          type: "number",
+          min: "0.5",
+          step: "0.5",
+          value: hours,
+          onChange: ev => setHours(ev.target.value),
+          placeholder: "např. 2",
+        })
+      ),
+      e(S.Button, {
+        disabled: !orderId || !opCode || !hours,
+        onClick: () => { onAdd(); alert("Demo: operace by se přidala do plánu"); },
+      }, "Přidat")
+    );
+  }
+
   // ── Breadcrumbs ──────────────────────────────────────────
   const CRUMBS = [
     { label: "Výroba", href: "/vyroba" },
@@ -55,7 +142,27 @@
   ];
 
   function Page() {
-    const [selectedCell, setSelectedCell] = React.useState(null); // T8 adds drawer
+    const [drawerCell, setDrawerCell] = React.useState(null); // { workerId, date } | null
+
+    // Compute total hours for open drawer cell
+    function totalHoursForDrawer() {
+      if (!drawerCell) return 0;
+      return SD.getCapacityForWeek(drawerCell.workerId, drawerCell.date)
+        .reduce((s, c) => s + c.hours, 0);
+    }
+
+    // Drawer title: "Pavel Obdržálek · Út 10. 11."
+    function drawerTitle() {
+      if (!drawerCell) return "";
+      const worker = SD.WORKERS.find(w => w.id === drawerCell.workerId);
+      return (worker ? worker.name : "—") + " · " + formatDayLabel(drawerCell.date);
+    }
+
+    // Build assigned operations list for drawer
+    function drawerOperations() {
+      if (!drawerCell) return [];
+      return SD.getCapacityForWeek(drawerCell.workerId, drawerCell.date);
+    }
 
     return e(S.AppShell, {
       sidebar: e(D.DemoSidebar, { active: "/vyroba/kapacita" }),
@@ -101,7 +208,7 @@
                     e("div", {
                       className: "cap-cell cap-cell--" + tone,
                       title: hours + " h · " + u + " %",
-                      onClick: () => { setSelectedCell({ workerId: w.id, date: d }); /* drawer — T8 */ },
+                      onClick: () => setDrawerCell({ workerId: w.id, date: d }),
                     },
                       e("div", { className: "cap-cell__hours" }, hours ? hours + " h" : "—"),
                       assigned.length > 0 && e("div", { className: "cap-cell__ops" }, assigned.map(a => a.operationCode).join(" · "))
@@ -110,6 +217,53 @@
                 })
               ))
             )
+          )
+        )
+      ),
+
+      // ── Side drawer ──────────────────────────────────────
+      drawerCell && e(S.Drawer, {
+        open: true,
+        onClose: () => setDrawerCell(null),
+        title: drawerTitle(),
+        side: "right",
+        size: 420,
+      },
+        e("div", { className: "cap-drawer__body" },
+
+          // Stats block
+          e("div", { className: "cap-drawer__stats" },
+            e("div", null, "Rozplánováno: ", e("strong", null, totalHoursForDrawer() + " h / 8 h")),
+            e("div", null, "Utilizace: ", e("strong", null, SD.getUtilization(drawerCell.workerId, drawerCell.date) + " %"))
+          ),
+
+          // Assigned operations
+          e(S.Section, { title: "Přiřazené operace" },
+            drawerOperations().length === 0
+              ? e("div", { style: { color: "var(--ink-muted)", fontSize: "13px", padding: "var(--space-2) 0" } }, "Žádné operace v tento den.")
+              : e("div", null,
+                  ...drawerOperations().map((c, i) =>
+                    e("div", { key: i, className: "cap-drawer__item" },
+                      e("div", null,
+                        e("strong", null, c.operationCode),
+                        " · ",
+                        operationName(c.orderId, c.operationCode)
+                      ),
+                      e("div", { className: "s21-cell-meta" },
+                        orderCode(c.orderId) + " · " + c.hours + " h"
+                      )
+                    )
+                  )
+                )
+          ),
+
+          // Add operation form
+          e(S.Section, { title: "Přidat operaci" },
+            e(AddOperationForm, {
+              workerId: drawerCell.workerId,
+              date: drawerCell.date,
+              onAdd: () => {},
+            })
           )
         )
       )

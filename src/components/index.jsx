@@ -1871,11 +1871,12 @@ function SearchSelect({ value, onChange, options = [], placeholder = "Vyberte…
   useEffect(() => {
     if (!open) return;
     const onDoc = (e) => { if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false); };
-    const onKey = (e) => { if (e.key === "Escape") setOpen(false); };
+    // Use capture phase and stopPropagation so Escape closes dropdown without bubbling to parent dialogs/drawers
+    const onKey = (e) => { if (e.key === "Escape") { e.stopPropagation(); setOpen(false); } };
     document.addEventListener("mousedown", onDoc);
-    document.addEventListener("keydown", onKey);
+    document.addEventListener("keydown", onKey, true);
     setTimeout(() => inputRef.current && inputRef.current.focus(), 0);
-    return () => { document.removeEventListener("mousedown", onDoc); document.removeEventListener("keydown", onKey); };
+    return () => { document.removeEventListener("mousedown", onDoc); document.removeEventListener("keydown", onKey, true); };
   }, [open]);
 
   const q = query.trim().toLowerCase();
