@@ -33,6 +33,23 @@
   .cap-cell__hours { font: 600 14px/18px var(--font-body); font-variant-numeric: tabular-nums; }
   .cap-cell__ops { font: 400 11px/14px var(--font-mono); opacity: 0.8; }
 
+  /* ── Forecast widget ──────────────────────────────────── */
+  .cap-forecast { display: flex; flex-direction: column; gap: var(--space-2); }
+  .cap-forecast__item { display: grid; grid-template-columns: 120px 1fr 50px 100px; gap: var(--space-3); align-items: center; }
+  .cap-forecast__bar { height: 10px; background: var(--surface-muted); border-radius: var(--radius-full); overflow: hidden; }
+  .cap-forecast__fill { height: 100%; }
+  .cap-forecast__fill--warn { background: var(--danger-solid); }
+  .cap-forecast__fill--low { background: #ffa500; }
+  .cap-forecast__fill--ok { background: var(--success-solid); }
+  .cap-forecast__fill--over { background: var(--danger-solid); }
+  .cap-forecast__fill--empty { background: var(--surface-muted); }
+  .cap-forecast__pct { font-variant-numeric: tabular-nums; }
+  .cap-forecast__warn { font: 500 11px/14px var(--font-mono); color: var(--danger-text); text-transform: uppercase; letter-spacing: .04em; }
+  @media (max-width: 767px) {
+    .cap-forecast__item { grid-template-columns: 1fr; gap: 4px; }
+    .cap-forecast__warn { font-size: 10px; }
+  }
+
   /* ── Drawer body ───────────────────────────────────────── */
   .cap-drawer__body { display: flex; flex-direction: column; gap: var(--space-4); }
   .cap-drawer__stats { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-3); background: var(--surface-muted); border-radius: var(--radius-md); font: 400 13px/20px var(--font-body); color: var(--ink-muted); }
@@ -141,6 +158,15 @@
     { label: "Kapacita", href: "/vyroba/kapacita" },
   ];
 
+  // ── Mock forecast data ───────────────────────────────────
+  const FORECAST = [
+    { label: "Tento týden", avg: 72, startDate: "2026-11-09" },
+    { label: "Týden +1", avg: 68, startDate: "2026-11-16" },
+    { label: "Týden +2", avg: 55, startDate: "2026-11-23" },
+    { label: "Týden +3", avg: 32, startDate: "2026-11-30" },
+    { label: "Týden +4", avg: 12, startDate: "2026-12-07" },
+  ];
+
   function Page() {
     const [drawerCell, setDrawerCell] = React.useState(null); // { workerId, date } | null
 
@@ -217,6 +243,23 @@
                 })
               ))
             )
+          )
+        ),
+
+        // ── Forecast widget ─────────────────────────────
+        e(S.Section, { title: "Pokrytí dopředu" },
+          e("div", { className: "cap-forecast" },
+            FORECAST.map((f, i) => {
+              const tone = f.avg === 0 ? "empty" : f.avg < 30 ? "warn" : f.avg < 60 ? "low" : f.avg <= 110 ? "ok" : "over";
+              return e("div", { key: i, className: "cap-forecast__item" },
+                e("div", { className: "cap-forecast__label" }, f.label),
+                e("div", { className: "cap-forecast__bar" },
+                  e("div", { className: "cap-forecast__fill cap-forecast__fill--" + tone, style: { width: Math.min(100, f.avg) + "%" } })
+                ),
+                e("div", { className: "cap-forecast__pct" }, f.avg + " %"),
+                f.avg < 30 && e("div", { className: "cap-forecast__warn" }, "Málo plánu")
+              );
+            })
           )
         )
       ),
