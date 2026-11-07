@@ -17,10 +17,15 @@
   /* ── Rizikový list ─────────────────────────────────────── */
   .risk-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-3); }
   .risk-row { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); flex-wrap: wrap; }
-  .risk-row__main { flex: 1; min-width: 0; }
+  .risk-row__main { flex: 1 1 200px; min-width: 0; }
   .risk-row__name { font: 500 14px/20px var(--font-body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .risk-row__meta { font: 400 12px/16px var(--font-body); color: var(--ink-muted); margin-top: 2px; }
-  .risk-row__flags { display: flex; gap: var(--space-1); flex-wrap: wrap; align-items: center; flex-shrink: 0; }
+  .risk-row__flags { display: flex; gap: var(--space-1); flex-wrap: wrap; align-items: center; }
+  @media (max-width: 599px) {
+    .risk-row { flex-direction: column; align-items: stretch; }
+    .risk-row__main { flex: 1 1 auto; }
+    .risk-row__flags { justify-content: flex-start; }
+  }
   .risk-flag { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: var(--radius-full); font: 500 11px/16px var(--font-mono); white-space: nowrap; }
   .risk-flag--overdue { background: var(--danger-bg); color: var(--danger-text); }
   .risk-flag--hours { background: var(--warning-bg); color: var(--warning-text); }
