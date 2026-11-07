@@ -188,9 +188,10 @@
     ],
   };
 
-  const CRUMBS = [{ label: "Dashboard", href: "/dashboard" }];
+  const CRUMBS = [{ label: "Domů", href: "/" }];
 
-  function Page() {
+  // ── CEOHome — full dashboard content (T6 will extend with weekly plan hero) ──
+  function CEOHome() {
     const [search, setSearch] = React.useState("");
     const [focused, setFocused] = React.useState(false);
     const q = search.trim().toLowerCase();
@@ -200,232 +201,265 @@
     const grouped = { client: [], contract: [], order: [], case: [] };
     results.forEach((r) => grouped[r.type].push(r));
 
-    return e(S.AppShell, {
-      sidebar: e(D.DemoSidebar, { active: "/" }),
-      topbar: e(D.DemoTopBar, { crumbs: CRUMBS }),
-    },
-      e(S.PageBody, null,
+    return e("div", null,
 
-        // ── 1. Greeting ───────────────────────────────────────────────────
-        e("div", null,
-          e("h1", { className: "greeting" }, greet + ", Lubomíre"),
-          e("p", { className: "greeting__sub" }, "Dnes je úterý 4. listopadu 2026 · tento měsíc máš " + fmt(487500) + " Kč v zakázkách")
-        ),
+      // ── 1. Greeting ───────────────────────────────────────────────────
+      e("div", null,
+        e("h1", { className: "greeting" }, greet + ", Lubomíre"),
+        e("p", { className: "greeting__sub" }, "Dnes je úterý 4. listopadu 2026 · tento měsíc máš " + fmt(487500) + " Kč v zakázkách")
+      ),
 
-        // ── 2. KPI pruh — 4 cross-cut tiles ──────────────────────────────
-        e(S.KpiRow, { cols: 4 },
-          e(S.StatTile, {
-            label: "Otevřený byznys",
-            value: String(openCases.length),
-            hint: fmt(pipelineValue) + " Kč pipeline",
-            href: "./crm-pripady.html",
-          }),
-          e(S.StatTile, {
-            label: "Běžící výroba",
-            value: String(active.length),
-            hint: fmt(rozpracovanostKc) + " Kč rozpracováno",
-            big: true,
-            href: "./zakazky.html",
-          }),
-          e(S.StatTile, {
-            label: "Co pálí",
-            value: String(riskCount),
-            accent: riskCount > 0 ? "warning" : undefined,
-            hint: "zakázky v riziku",
-            href: "./zakazky.html",
-          }),
-          e(S.StatTile, {
-            label: "Zdraví klientů",
-            value: String(healthScore),
-            accent: healthScore > 5 ? "warning" : undefined,
-            hint: "smlouvy + AI fronta",
-            href: "./dms-smlouvy.html",
-          })
-        ),
+      // ── 2. KPI pruh — 4 cross-cut tiles ──────────────────────────────
+      e(S.KpiRow, { cols: 4 },
+        e(S.StatTile, {
+          label: "Otevřený byznys",
+          value: String(openCases.length),
+          hint: fmt(pipelineValue) + " Kč pipeline",
+          href: "./crm-pripady.html",
+        }),
+        e(S.StatTile, {
+          label: "Běžící výroba",
+          value: String(active.length),
+          hint: fmt(rozpracovanostKc) + " Kč rozpracováno",
+          big: true,
+          href: "./zakazky.html",
+        }),
+        e(S.StatTile, {
+          label: "Co pálí",
+          value: String(riskCount),
+          accent: riskCount > 0 ? "warning" : undefined,
+          hint: "zakázky v riziku",
+          href: "./zakazky.html",
+        }),
+        e(S.StatTile, {
+          label: "Zdraví klientů",
+          value: String(healthScore),
+          accent: healthScore > 5 ? "warning" : undefined,
+          hint: "smlouvy + AI fronta",
+          href: "./dms-smlouvy.html",
+        })
+      ),
 
-        // ── 3. Hlavní 2-col blok ──────────────────────────────────────────
-        e("div", { className: "s21-grid-main-aside" },
+      // ── 3. Hlavní 2-col blok ──────────────────────────────────────────
+      e("div", { className: "s21-grid-main-aside" },
 
-          // Levý panel — Dnes rozhoduješ
-          e("div", { className: "decide-panel" },
-            e("div", { className: "decide-panel__head" },
-              e("div", { className: "decide-panel__title" },
-                e(S.Icon, { name: "flag", size: 16 }),
-                "Dnes rozhoduješ"
-              )
-            ),
-            TODAY_DECIDE.map((item, i) =>
-              e("a", { key: i, href: item.href, className: "decide-row" },
-                e("span", { className: "decide-row__ic decide-row__ic--" + item.tone },
-                  e(S.Icon, { name: item.icon, size: 15 })
-                ),
-                e("div", { className: "decide-row__main" },
-                  e("div", { className: "decide-row__section" }, item.section),
-                  e("div", { className: "decide-row__title" }, item.title),
-                  e("div", { className: "decide-row__meta" }, item.meta)
-                )
-              )
+        // Levý panel — Dnes rozhoduješ
+        e("div", { className: "decide-panel" },
+          e("div", { className: "decide-panel__head" },
+            e("div", { className: "decide-panel__title" },
+              e(S.Icon, { name: "flag", size: 16 }),
+              "Dnes rozhoduješ"
             )
           ),
-
-          // Pravý panel — Aktivita napříč firmou
-          e("div", { className: "activity-panel" },
-            e("div", { className: "activity-panel__head" },
-              e("div", { className: "activity-panel__title" },
-                e(S.Icon, { name: "activity", size: 16 }),
-                "Aktivita napříč firmou"
-              )
-            ),
-            e("div", { className: "tl" },
-              ACTIVITY.map((item, i) =>
-                e("div", { key: i, className: "tl-item" },
-                  e("span", { className: "tl-ic tl-ic--" + item.tone },
-                    e(S.Icon, { name: item.icon, size: 14 })
-                  ),
-                  e("div", { className: "tl-main" },
-                    e("div", { className: "tl-text" }, item.text),
-                    item.client && e("div", { className: "tl-client" }, item.client)
-                  ),
-                  e("div", { className: "tl-time" }, item.time)
-                )
+          TODAY_DECIDE.map((item, i) =>
+            e("a", { key: i, href: item.href, className: "decide-row" },
+              e("span", { className: "decide-row__ic decide-row__ic--" + item.tone },
+                e(S.Icon, { name: item.icon, size: 15 })
+              ),
+              e("div", { className: "decide-row__main" },
+                e("div", { className: "decide-row__section" }, item.section),
+                e("div", { className: "decide-row__title" }, item.title),
+                e("div", { className: "decide-row__meta" }, item.meta)
               )
             )
           )
         ),
 
-        // ── 4. Lifecycle banner ───────────────────────────────────────────
-        e("div", { className: "lifecycle-banner" },
-          e("a", { className: "lc-step", href: "./crm-pripady.html" },
-            e("h3", null, "V jednání"),
-            e("div", { className: "lc-num" }, String(openCases.length)),
-            e("div", { className: "lc-sub" }, fmt(pipelineValue) + " Kč pipeline")
+        // Pravý panel — Aktivita napříč firmou
+        e("div", { className: "activity-panel" },
+          e("div", { className: "activity-panel__head" },
+            e("div", { className: "activity-panel__title" },
+              e(S.Icon, { name: "activity", size: 16 }),
+              "Aktivita napříč firmou"
+            )
           ),
-          e("span", { className: "lc-arrow-char" }, "→"),
-          e("a", { className: "lc-step", href: "./zakazky.html" },
-            e("h3", null, "V realizaci"),
-            e("div", { className: "lc-num" }, String(active.length)),
-            e("div", { className: "lc-sub" }, fmt(rozpracovanostKc) + " Kč rozpracováno")
-          ),
-          e("span", { className: "lc-arrow-char" }, "→"),
-          e("a", { className: "lc-step", href: "./zakazky.html" },
-            e("h3", null, "Dokončeno YTD"),
-            e("div", { className: "lc-num" }, String(SD.ORDERS.filter(o => o.status === "done" || o.status === "delivered").length)),
-            e("div", { className: "lc-sub" }, fmt(SD.ORDERS.filter(o => o.status === "done" || o.status === "delivered").reduce((s, o) => s + (o.priceOffer || 0), 0)) + " Kč fakturováno")
-          )
-        ),
-
-        // ── 5. Global search widget ───────────────────────────────────────
-        e("div", { className: "gsearch" },
-          e(S.Icon, { name: "search", size: 18, className: "gsearch__icon" }),
-          e("input", {
-            type: "search",
-            className: "gsearch__input",
-            placeholder: "Najdi klienta, smlouvu, zakázku… (i zkratkou pro rodinu)",
-            value: search,
-            onChange: (ev) => setSearch(ev.target.value),
-            onFocus: () => setFocused(true),
-            onBlur: () => setTimeout(() => setFocused(false), 200),
-          }),
-          focused && results.length > 0 && e("div", { className: "gsearch__results" },
-            ["client", "contract", "order", "case"].map((t) => grouped[t].length > 0 && e("div", { key: t, className: "gsearch__group" },
-              e("div", { className: "gsearch__grouplabel" }, TYPE_LABEL[t] + " (" + grouped[t].length + ")"),
-              grouped[t].slice(0, 5).map((r, i) => e("a", { key: i, href: r.href, className: "gsearch__item" },
-                e(S.Icon, { name: TYPE_ICON[t], size: 14 }),
-                e("div", { className: "gsearch__itemmain" },
-                  e("div", { className: "gsearch__itemtitle" }, r.title),
-                  e("div", { className: "gsearch__itemmeta" }, r.meta)
-                )
-              ))
-            ))
-          ),
-          focused && q.length >= 2 && results.length === 0 && e("div", { className: "gsearch__results" },
-            e("div", { style: { padding: "var(--space-4)", textAlign: "center", color: "var(--ink-muted)", font: "400 13px/18px var(--font-body)" } }, "Nic nenalezeno pro „" + search + "“")
-          )
-        ),
-
-        // ── 6. Deník dne — 4 bloky ────────────────────────────────────────
-        e("div", null,
-          e("h2", { style: { font: "700 20px/28px var(--font-display)", color: "var(--ink)", margin: "0 0 var(--space-3) 0" } }, "Deník dne"),
-          e("div", { className: "diary-grid" },
-
-            // AI asistentka — čeká na kontrolu
-            e("div", { className: "diary-section" },
-              e("div", { className: "diary-section__head" },
-                e("div", { className: "diary-section__title" },
-                  e(S.Icon, { name: "sparkles", size: 16 }),
-                  "AI asistentka — čeká na kontrolu",
-                  e("span", { className: "diary-section__count diary-section__count--warn" }, DIARY.aja.length)
+          e("div", { className: "tl" },
+            ACTIVITY.map((item, i) =>
+              e("div", { key: i, className: "tl-item" },
+                e("span", { className: "tl-ic tl-ic--" + item.tone },
+                  e(S.Icon, { name: item.icon, size: 14 })
                 ),
-                e("a", { href: "./dms-automatizace.html", className: "diary-section__link" }, "Celá fronta →")
-              ),
-              DIARY.aja.map((it, i) => e("a", { key: i, href: "./dms-automatizace.html", className: "diary-row" },
-                e("span", { className: "diary-row__ic diary-row__ic--" + (it.tone || "") }, e(S.Icon, { name: it.icon, size: 14 })),
-                e("div", { className: "diary-row__main" },
-                  e("div", { className: "diary-row__title" }, it.title),
-                  e("div", { className: "diary-row__meta" }, it.meta)
-                )
-              ))
-            ),
-
-            // Zakázky
-            e("div", { className: "diary-section" },
-              e("div", { className: "diary-section__head" },
-                e("div", { className: "diary-section__title" },
-                  e(S.Icon, { name: "folder", size: 16 }),
-                  "Zakázky, které se pohnuly",
-                  e("span", { className: "diary-section__count" }, DIARY.orders.length)
+                e("div", { className: "tl-main" },
+                  e("div", { className: "tl-text" }, item.text),
+                  item.client && e("div", { className: "tl-client" }, item.client)
                 ),
-                e("a", { href: "./zakazky.html", className: "diary-section__link" }, "Všechny zakázky →")
-              ),
-              DIARY.orders.map((it, i) => e("a", { key: i, href: "./zakazka-detail.html", className: "diary-row" },
-                e("span", { className: "diary-row__ic diary-row__ic--" + (it.tone || "") }, e(S.Icon, { name: it.icon, size: 14 })),
-                e("div", { className: "diary-row__main" },
-                  e("div", { className: "diary-row__title" }, it.title),
-                  e("div", { className: "diary-row__meta" }, it.meta)
-                )
-              ))
-            ),
-
-            // Úkoly
-            e("div", { className: "diary-section" },
-              e("div", { className: "diary-section__head" },
-                e("div", { className: "diary-section__title" },
-                  e(S.Icon, { name: "tasks", size: 16 }),
-                  "Úkoly s deadline dnes",
-                  e("span", { className: "diary-section__count" }, DIARY.tasks.length)
-                ),
-                e("a", { href: "./_coming.html#/ukoly", className: "diary-section__link" }, "Všechny úkoly →")
-              ),
-              DIARY.tasks.map((it, i) => e("div", { key: i, className: "diary-row", style: { cursor: "default" } },
-                e("span", { className: "diary-row__ic diary-row__ic--" + (it.tone || "") }, e(S.Icon, { name: it.icon, size: 14 })),
-                e("div", { className: "diary-row__main" },
-                  e("div", { className: "diary-row__title" }, it.title),
-                  e("div", { className: "diary-row__meta" }, it.meta)
-                ),
-                e(S.Button, { size: "sm", variant: "ghost", iconOnly: true, icon: "check", "aria-label": "Hotovo" })
-              ))
-            ),
-
-            // Expirace
-            e("div", { className: "diary-section" },
-              e("div", { className: "diary-section__head" },
-                e("div", { className: "diary-section__title" },
-                  e(S.Icon, { name: "clock", size: 16 }),
-                  "Expirace smluv do 180 dnů",
-                  e("span", { className: "diary-section__count diary-section__count--warn" }, DIARY.expiring.length)
-                ),
-                e("a", { href: "./dms-smlouvy.html", className: "diary-section__link" }, "Všechny smlouvy →")
-              ),
-              DIARY.expiring.map((it, i) => e("a", { key: i, href: "./dms-smlouva-detail.html", className: "diary-row" },
-                e("span", { className: "diary-row__ic diary-row__ic--" + (it.tone || "") }, e(S.Icon, { name: it.icon, size: 14 })),
-                e("div", { className: "diary-row__main" },
-                  e("div", { className: "diary-row__title" }, it.title),
-                  e("div", { className: "diary-row__meta" }, it.meta)
-                )
-              ))
+                e("div", { className: "tl-time" }, item.time)
+              )
             )
           )
         )
+      ),
+
+      // ── 4. Lifecycle banner ───────────────────────────────────────────
+      e("div", { className: "lifecycle-banner" },
+        e("a", { className: "lc-step", href: "./crm-pripady.html" },
+          e("h3", null, "V jednání"),
+          e("div", { className: "lc-num" }, String(openCases.length)),
+          e("div", { className: "lc-sub" }, fmt(pipelineValue) + " Kč pipeline")
+        ),
+        e("span", { className: "lc-arrow-char" }, "→"),
+        e("a", { className: "lc-step", href: "./zakazky.html" },
+          e("h3", null, "V realizaci"),
+          e("div", { className: "lc-num" }, String(active.length)),
+          e("div", { className: "lc-sub" }, fmt(rozpracovanostKc) + " Kč rozpracováno")
+        ),
+        e("span", { className: "lc-arrow-char" }, "→"),
+        e("a", { className: "lc-step", href: "./zakazky.html" },
+          e("h3", null, "Dokončeno YTD"),
+          e("div", { className: "lc-num" }, String(SD.ORDERS.filter(o => o.status === "done" || o.status === "delivered").length)),
+          e("div", { className: "lc-sub" }, fmt(SD.ORDERS.filter(o => o.status === "done" || o.status === "delivered").reduce((s, o) => s + (o.priceOffer || 0), 0)) + " Kč fakturováno")
+        )
+      ),
+
+      // ── 5. Global search widget ───────────────────────────────────────
+      e("div", { className: "gsearch" },
+        e(S.Icon, { name: "search", size: 18, className: "gsearch__icon" }),
+        e("input", {
+          type: "search",
+          className: "gsearch__input",
+          placeholder: "Najdi klienta, smlouvu, zakázku… (i zkratkou pro rodinu)",
+          value: search,
+          onChange: (ev) => setSearch(ev.target.value),
+          onFocus: () => setFocused(true),
+          onBlur: () => setTimeout(() => setFocused(false), 200),
+        }),
+        focused && results.length > 0 && e("div", { className: "gsearch__results" },
+          ["client", "contract", "order", "case"].map((t) => grouped[t].length > 0 && e("div", { key: t, className: "gsearch__group" },
+            e("div", { className: "gsearch__grouplabel" }, TYPE_LABEL[t] + " (" + grouped[t].length + ")"),
+            grouped[t].slice(0, 5).map((r, i) => e("a", { key: i, href: r.href, className: "gsearch__item" },
+              e(S.Icon, { name: TYPE_ICON[t], size: 14 }),
+              e("div", { className: "gsearch__itemmain" },
+                e("div", { className: "gsearch__itemtitle" }, r.title),
+                e("div", { className: "gsearch__itemmeta" }, r.meta)
+              )
+            ))
+          ))
+        ),
+        focused && q.length >= 2 && results.length === 0 && e("div", { className: "gsearch__results" },
+          e("div", { style: { padding: "var(--space-4)", textAlign: "center", color: "var(--ink-muted)", font: "400 13px/18px var(--font-body)" } }, "Nic nenalezeno pro „" + search + "“")
+        )
+      ),
+
+      // ── 6. Deník dne — 4 bloky ────────────────────────────────────────
+      e("div", null,
+        e("h2", { style: { font: "700 20px/28px var(--font-display)", color: "var(--ink)", margin: "0 0 var(--space-3) 0" } }, "Deník dne"),
+        e("div", { className: "diary-grid" },
+
+          // AI asistentka — čeká na kontrolu
+          e("div", { className: "diary-section" },
+            e("div", { className: "diary-section__head" },
+              e("div", { className: "diary-section__title" },
+                e(S.Icon, { name: "sparkles", size: 16 }),
+                "AI asistentka — čeká na kontrolu",
+                e("span", { className: "diary-section__count diary-section__count--warn" }, DIARY.aja.length)
+              ),
+              e("a", { href: "./dms-automatizace.html", className: "diary-section__link" }, "Celá fronta →")
+            ),
+            DIARY.aja.map((it, i) => e("a", { key: i, href: "./dms-automatizace.html", className: "diary-row" },
+              e("span", { className: "diary-row__ic diary-row__ic--" + (it.tone || "") }, e(S.Icon, { name: it.icon, size: 14 })),
+              e("div", { className: "diary-row__main" },
+                e("div", { className: "diary-row__title" }, it.title),
+                e("div", { className: "diary-row__meta" }, it.meta)
+              )
+            ))
+          ),
+
+          // Zakázky
+          e("div", { className: "diary-section" },
+            e("div", { className: "diary-section__head" },
+              e("div", { className: "diary-section__title" },
+                e(S.Icon, { name: "folder", size: 16 }),
+                "Zakázky, které se pohnuly",
+                e("span", { className: "diary-section__count" }, DIARY.orders.length)
+              ),
+              e("a", { href: "./zakazky.html", className: "diary-section__link" }, "Všechny zakázky →")
+            ),
+            DIARY.orders.map((it, i) => e("a", { key: i, href: "./zakazka-detail.html", className: "diary-row" },
+              e("span", { className: "diary-row__ic diary-row__ic--" + (it.tone || "") }, e(S.Icon, { name: it.icon, size: 14 })),
+              e("div", { className: "diary-row__main" },
+                e("div", { className: "diary-row__title" }, it.title),
+                e("div", { className: "diary-row__meta" }, it.meta)
+              )
+            ))
+          ),
+
+          // Úkoly
+          e("div", { className: "diary-section" },
+            e("div", { className: "diary-section__head" },
+              e("div", { className: "diary-section__title" },
+                e(S.Icon, { name: "tasks", size: 16 }),
+                "Úkoly s deadline dnes",
+                e("span", { className: "diary-section__count" }, DIARY.tasks.length)
+              ),
+              e("a", { href: "./_coming.html#/ukoly", className: "diary-section__link" }, "Všechny úkoly →")
+            ),
+            DIARY.tasks.map((it, i) => e("div", { key: i, className: "diary-row", style: { cursor: "default" } },
+              e("span", { className: "diary-row__ic diary-row__ic--" + (it.tone || "") }, e(S.Icon, { name: it.icon, size: 14 })),
+              e("div", { className: "diary-row__main" },
+                e("div", { className: "diary-row__title" }, it.title),
+                e("div", { className: "diary-row__meta" }, it.meta)
+              ),
+              e(S.Button, { size: "sm", variant: "ghost", iconOnly: true, icon: "check", "aria-label": "Hotovo" })
+            ))
+          ),
+
+          // Expirace
+          e("div", { className: "diary-section" },
+            e("div", { className: "diary-section__head" },
+              e("div", { className: "diary-section__title" },
+                e(S.Icon, { name: "clock", size: 16 }),
+                "Expirace smluv do 180 dnů",
+                e("span", { className: "diary-section__count diary-section__count--warn" }, DIARY.expiring.length)
+              ),
+              e("a", { href: "./dms-smlouvy.html", className: "diary-section__link" }, "Všechny smlouvy →")
+            ),
+            DIARY.expiring.map((it, i) => e("a", { key: i, href: "./dms-smlouva-detail.html", className: "diary-row" },
+              e("span", { className: "diary-row__ic diary-row__ic--" + (it.tone || "") }, e(S.Icon, { name: it.icon, size: 14 })),
+              e("div", { className: "diary-row__main" },
+                e("div", { className: "diary-row__title" }, it.title),
+                e("div", { className: "diary-row__meta" }, it.meta)
+              )
+            ))
+          )
+        )
+      )
+    );
+  }
+
+  // ── Role body stubs (Sprint 4-5 will replace with real content) ──────────
+  function ObchodHome() {
+    return e(S.EmptyState, { title: "Obchodník home", description: "Sprint 4+ dodá sales pipeline + capacity-vs-pipeline + top 5 case action list." });
+  }
+  function VedouciVyrobyHome() {
+    return e(S.EmptyState, { title: "Vedoucí výroby home", description: "Sprint 4+ dodá mini kapacita + rizikový list + deadliny." });
+  }
+  function AsistentkaHome() {
+    return e(S.EmptyState, { title: "Asistentka home", description: "Sprint 5+ dodá AI frontu + docházku + emaily + úkoly." });
+  }
+  function PracovnikHome() {
+    return e(S.EmptyState, { title: "Pracovník home", description: "Sprint 5+ dodá moje operace + rychlé vykázat + fond hodin." });
+  }
+
+  const ROLE_BODY = {
+    "ceo": CEOHome,
+    "obchodnik": ObchodHome,
+    "vedouci-vyroby": VedouciVyrobyHome,
+    "asistentka": AsistentkaHome,
+    "pracovnik": PracovnikHome,
+  };
+
+  // ── Shell ─────────────────────────────────────────────────────────────────
+  function Page() {
+    const [role, setRole] = React.useState(() => {
+      try { return localStorage.getItem('system21-role') || 'ceo'; } catch (_) { return 'ceo'; }
+    });
+    const Body = ROLE_BODY[role] || CEOHome;
+    return e(S.AppShell, {
+      sidebar: e(D.DemoSidebar, { active: "/" }),
+      topbar: e(D.DemoTopBar, { crumbs: CRUMBS, onRoleChange: setRole }),
+    },
+      e(S.PageBody, null,
+        e(Body)
       )
     );
   }
