@@ -102,6 +102,23 @@
   .cap-pipe__title { font: 500 14px/20px var(--font-body); color: var(--ink); }
   .cap-pipe__meta { font: 400 12px/16px var(--font-body); color: var(--ink-muted); margin-top: 2px; }
 
+  /* Vedoucí výroby: mini kapacitní náhled (same structure as /vyroba/kapacita, inline) */
+  .vv-cap-wrap { overflow-x: auto; }
+  .vv-cap { width: 100%; border-collapse: separate; border-spacing: 2px; min-width: 640px; }
+  .vv-cap th { padding: 6px 10px; font: 500 11px/16px var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-muted); text-align: left; }
+  .vv-cap__name-col { width: 140px; }
+  .vv-cap td { padding: 0; }
+  .vv-cell { padding: 8px 10px; border-radius: var(--radius-md); cursor: pointer; display: flex; flex-direction: column; gap: 2px; min-height: 44px; }
+  .vv-cell:hover { outline: 2px solid var(--primary); }
+  .vv-cell--empty { background: var(--surface-muted); color: var(--ink-subtle); }
+  .vv-cell--low { background: var(--warning-bg); color: var(--warning-text); }
+  .vv-cell--ok { background: var(--success-bg); color: var(--success-text); }
+  .vv-cell--over { background: var(--danger-bg); color: var(--danger-text); }
+  .vv-cell__hours { font: 600 13px/16px var(--font-body); font-variant-numeric: tabular-nums; }
+  .vv-cell__ops { font: 400 10px/12px var(--font-mono); opacity: 0.85; }
+  .vv-cap__name-cell { padding: 8px 10px; font: 500 13px/18px var(--font-body); color: var(--ink); }
+  .vv-cap__name-sub { font: 400 11px/14px var(--font-body); color: var(--ink-muted); }
+
   /* Obchodník: action-list (Co dnes dotáhnout + Nové poptávky) */
   .action-list { display: flex; flex-direction: column; gap: var(--space-2); }
   .action-row { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3); background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); cursor: pointer; transition: background 100ms; text-decoration: none; color: var(--ink); }
@@ -153,6 +170,12 @@
     { time: "včera 14:10", icon: "tasks", tone: "success", text: "3 úkoly dokončené", client: "Dvořákovi · Novákovi · Agro" },
   ];
 
+  // ── Czech plural helpers (shared) ────────────────────────────────────────
+  function pluralLide(n) { return n === 1 ? "člověk" : (n >= 2 && n <= 4 ? "lidé" : "lidí"); }
+  function pluralDnu(n) { return n === 1 ? "den" : (n >= 2 && n <= 4 ? "dny" : "dnů"); }
+  function pluralPripadu(n) { return n === 1 ? "případ" : (n >= 2 && n <= 4 ? "případy" : "případů"); }
+  function pluralOtevrenyPripad(n) { return n === 1 ? "otevřený případ" : (n >= 2 && n <= 4 ? "otevřené případy" : "otevřených případů"); }
+
   // ── Sales-specific derivations (used by ObchodHome) ─────────────────────────
   const ALL_CASES = SD.CASES;
   const openCasesSales = SD.getOpenCases();
@@ -195,6 +218,45 @@
     .map(c => ({ ...c, _p: salesPriority(c), _dlDays: parseSalesDate(c.deadline) ? Math.round((parseSalesDate(c.deadline) - SALES_TODAY) / 86400000) : null }))
     .sort((a, b) => b._p - a._p)
     .slice(0, 5);
+
+  // ── Production-specific derivations (used by VedouciVyrobyHome) ──────────
+  const PROD_TODAY_ISO = SD.WORKING_DAYS[0]; // mock "dnes" = 2026-11-09 (pondělí)
+  const PROD_TODAY_LABEL = "pondělí 9. listopadu";
+  const todayCapacity = SD.CAPACITY.filter(c => c.date === PROD_TODAY_ISO);
+  const todayWorkerIds = [...new Set(todayCapacity.map(c => c.workerId))];
+  const todayHoursPlanned = todayCapacity.reduce((s, c) => s + c.hours, 0);
+  const todayHoursDone = Math.round(todayHoursPlanned * 0.37); // mock 37 % hotovo do poledne
+
+  // Risk orders (reuse logic from /vyroba): top 5 by score
+  const prodActive = SD.getActiveOrders();
+  const prodRisky = prodActive
+    .map(o => ({ o, score: SD.getRiskScore(o) }))
+    .filter(x => x.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5);
+
+  // Blížící se deadliny: active orders s deadline < 10 dnů
+  const PROD_TODAY_DATE = new Date(2026, 10, 9); // 9. 11. 2026
+  function parseProdDate(s) {
+    if (!s || s === "—") return null;
+    const p = s.replace(/\s/g, "").split(".");
+    if (p.length < 3) return null;
+    return new Date(parseInt(p[2], 10), parseInt(p[1], 10) - 1, parseInt(p[0], 10));
+  }
+  const prodDeadlines = prodActive
+    .map(o => ({ o, dl: parseProdDate(o.deadline) }))
+    .filter(x => x.dl)
+    .map(x => ({ ...x, days: Math.round((x.dl - PROD_TODAY_DATE) / 86400000) }))
+    .filter(x => x.days <= 10)
+    .sort((a, b) => a.days - b.days)
+    .slice(0, 5);
+
+  // Nedokončené operace z včerejška (mock — operace bez done hodin)
+  const PROD_OVERNIGHT = [
+    { code: "OP-05", name: "Testy integrace", orderCode: "ZAK-2026-0131", worker: "Tomáš N.", planned: 8, done: 0, note: "včera 8h plán, vykázáno 0h" },
+    { code: "OP-03", name: "Instalace panelů", orderCode: "ZAK-2026-0155", worker: "Pavel O.", planned: 16, done: 4, note: "přetáhnuto, zbývá 12h" },
+    { code: "OP-06", name: "Dokumentace", orderCode: "ZAK-2026-0131", worker: "Pavel O.", planned: 4, done: 2, note: "čeká na schválení klientem" },
+  ];
 
   // Mock: nové poptávky bez vlastníka (would come from inbox/forms in real system)
   const UNASSIGNED_LEADS = [
@@ -368,7 +430,7 @@
         e("h1", { className: "greeting" }, greet + ", Pavle"),
         e("p", { className: "greeting__sub" },
           "Pipeline ", e("strong", { style: { color: "var(--ink)", fontVariantNumeric: "tabular-nums" } }, fmt(pipelineValueSales) + " Kč"),
-          " · ", String(openCasesSales.length) + " otevřených případů",
+          " · ", String(openCasesSales.length) + " " + pluralOtevrenyPripad(openCasesSales.length),
           " · konverze YTD ", e("strong", { style: { color: "var(--ink)" } }, konverzeYTD + " %"))
       ),
 
@@ -424,7 +486,7 @@
                         e("span", null, c.client),
                         e("span", null, "·"),
                         e("span", null, c._dlDays != null && c._dlDays < 7
-                          ? (c._dlDays <= 0 ? "deadline dnes / po" : "za " + c._dlDays + " dnů")
+                          ? (c._dlDays <= 0 ? "deadline dnes / po" : "za " + c._dlDays + " " + pluralDnu(c._dlDays))
                           : "kontakt před " + (c.lastContact || "? dny"))
                       ),
                       e(S.Badge, {
@@ -471,8 +533,161 @@
       )
     );
   }
+  // ── VedouciVyrobyHome — today-stat + mini kapacita + risk + deadliny ──
   function VedouciVyrobyHome() {
-    return e(S.EmptyState, { title: "Vedoucí výroby home", description: "Sprint 4+ dodá mini kapacita + rizikový list + deadliny." });
+    const DAY_NAMES = ["Ne", "Po", "Út", "St", "Čt", "Pá", "So"];
+    function dayLabel(iso) {
+      const [y, m, d] = iso.split("-").map(Number);
+      const dt = new Date(y, m - 1, d);
+      return DAY_NAMES[dt.getDay()] + " " + d + ". " + m + ".";
+    }
+    return e("div", null,
+
+      // ── 1. Greeting ────────────────────────────────────────────
+      e("div", null,
+        e("h1", { className: "greeting" }, greet + ", Pavle"),
+        e("p", { className: "greeting__sub" },
+          "Dnes ", e("strong", { style: { color: "var(--ink)" } }, PROD_TODAY_LABEL),
+          " · ", e("strong", { style: { color: "var(--ink)" } }, String(todayWorkerIds.length) + " " + pluralLide(todayWorkerIds.length) + " v práci"),
+          " · ", e("strong", { style: { color: "var(--ink)" } }, todayHoursPlanned + " h naplánováno"),
+          " · odpracováno ", e("strong", { style: { color: "var(--ink)" } }, todayHoursDone + " h"))
+      ),
+
+      // ── 2. Mini kapacitní náhled (7×5) ────────────────────────
+      e("div", { style: { marginTop: "var(--space-4)" } },
+        e(S.Section, {
+          title: "Kapacita tento týden",
+          action: e(S.Button, {
+            variant: "ghost", size: "sm", icon: "arrow-right",
+            onClick: () => window.location.href = "./vyroba-kapacita.html"
+          }, "Full plánovač")
+        },
+          e("div", { className: "vv-cap-wrap" },
+            e("table", { className: "vv-cap" },
+              e("thead", null,
+                e("tr", null,
+                  e("th", { className: "vv-cap__name-col" }, "Pracovník"),
+                  ...SD.WORKING_DAYS.map(d => e("th", { key: d }, dayLabel(d)))
+                )
+              ),
+              e("tbody", null,
+                SD.WORKERS.filter(w => w.state === "in-progress").map(w => e("tr", { key: w.id },
+                  e("td", { className: "vv-cap__name-col" },
+                    e("div", { className: "vv-cap__name-cell" }, w.name,
+                      e("div", { className: "vv-cap__name-sub" }, w.position)
+                    )
+                  ),
+                  ...SD.WORKING_DAYS.map(d => {
+                    const u = SD.getUtilization(w.id, d);
+                    const assigned = SD.getCapacityForWeek(w.id, d);
+                    const tone = u === 0 ? "empty" : u < 60 ? "low" : u <= 110 ? "ok" : "over";
+                    const hours = assigned.reduce((s, c) => s + c.hours, 0);
+                    return e("td", { key: d },
+                      e("div", {
+                        className: "vv-cell vv-cell--" + tone,
+                        title: hours + " h · " + u + " %",
+                        onClick: () => window.location.href = "./vyroba-kapacita.html"
+                      },
+                        e("div", { className: "vv-cell__hours" }, hours ? hours + " h" : "—"),
+                        assigned.length > 0 && e("div", { className: "vv-cell__ops" }, assigned.map(a => a.operationCode).join(" · "))
+                      )
+                    );
+                  })
+                ))
+              )
+            )
+          )
+        )
+      ),
+
+      // ── 3. 2-col: Zakázky v riziku + Blížící se deadliny ──────
+      e("div", { className: "s21-grid-main-aside", style: { marginTop: "var(--space-4)" } },
+
+        // Levý: Zakázky v riziku
+        e(S.Section, { title: "Zakázky v riziku" },
+          prodRisky.length === 0
+            ? e(S.EmptyState, { icon: "check", title: "Vše v normě", description: "Žádná zakázka v riziku." })
+            : e("div", { className: "action-list" },
+                prodRisky.map(({ o, score }) =>
+                  e("a", { key: o.id, className: "action-row", href: "./zakazka-detail.html" },
+                    e("div", { className: "action-row__main" },
+                      e("div", { className: "action-row__title" }, o.name),
+                      e("div", { className: "action-row__meta" },
+                        e("span", { className: "s21-cell-code" }, o.code),
+                        e("span", null, "·"),
+                        e("span", null, o.client),
+                        e("span", null, "·"),
+                        e("span", null, o.realHours + "/" + o.plannedHours + " h")
+                      ),
+                      e(S.Badge, {
+                        tone: o.overdue ? "danger" : (o.margin != null && o.margin < 15) ? "warning" : (o.missingDocs ? "warning" : "neutral"),
+                        style: { marginTop: 6 }
+                      }, o.overdue ? "po termínu" : (o.margin != null && o.margin < 15) ? "nízká marže " + o.margin + " %" : (o.missingDocs ? "chybí podklady" : "riziko +" + score))
+                    ),
+                    e("div", { className: "action-row__val" }, o.priceOffer ? fmt(o.priceOffer) + " Kč" : "—")
+                  )
+                )
+              )
+        ),
+
+        // Pravý: Blížící se deadliny
+        e(S.Section, { title: "Blížící se deadliny (< 10 dnů)" },
+          prodDeadlines.length === 0
+            ? e(S.EmptyState, { icon: "check", title: "Žádné deadliny", description: "V dalších 10 dnech nic nekončí." })
+            : e("div", { className: "action-list" },
+                prodDeadlines.map(({ o, days }) =>
+                  e("a", { key: o.id, className: "action-row", href: "./zakazka-detail.html" },
+                    e("div", { className: "action-row__main" },
+                      e("div", { className: "action-row__title" }, o.name),
+                      e("div", { className: "action-row__meta" },
+                        e("span", { className: "s21-cell-code" }, o.code),
+                        e("span", null, "·"),
+                        e("span", null, o.client),
+                        e("span", null, "·"),
+                        e("span", null, o.deadline)
+                      ),
+                      e(S.Badge, {
+                        tone: days < 0 ? "danger" : days <= 3 ? "warning" : "neutral",
+                        style: { marginTop: 6 }
+                      }, days < 0 ? Math.abs(days) + " " + pluralDnu(Math.abs(days)) + " po termínu" : days === 0 ? "dnes" : "za " + days + " " + pluralDnu(days))
+                    ),
+                    e("div", { className: "action-row__val" }, Math.round((o.realHours / o.plannedHours) * 100) + " %")
+                  )
+                )
+              )
+        )
+      ),
+
+      // ── 4. Nedokončené operace z včerejška ────────────────────
+      e("div", { style: { marginTop: "var(--space-4)" } },
+        e(S.Section, { title: "Nedokončené operace z včerejška" },
+          e("div", { className: "action-list" },
+            PROD_OVERNIGHT.map((op, i) =>
+              e("div", { key: i, className: "action-row", style: { cursor: "default" } },
+                e("div", { className: "action-row__main" },
+                  e("div", { className: "action-row__title" }, op.code + " · " + op.name),
+                  e("div", { className: "action-row__meta" },
+                    e("span", { className: "s21-cell-code" }, op.orderCode),
+                    e("span", null, "·"),
+                    e("span", null, op.worker),
+                    e("span", null, "·"),
+                    e("span", null, op.note)
+                  )
+                ),
+                e("div", { className: "action-row__val" }, op.done + " / " + op.planned + " h")
+              )
+            )
+          )
+        )
+      ),
+
+      // ── 5. Footer links ─────────────────────────────────────────
+      e("div", { style: { display: "flex", gap: "var(--space-3)", marginTop: "var(--space-4)", flexWrap: "wrap" } },
+        e(S.Button, { variant: "ghost", onClick: () => window.location.href = "./vyroba-kapacita.html" }, "→ Full plánovač"),
+        e(S.Button, { variant: "ghost", onClick: () => window.location.href = "./vykazovani.html" }, "→ Vykazování týmu"),
+        e(S.Button, { variant: "ghost", onClick: () => window.location.href = "./zakazky.html" }, "→ Všechny zakázky")
+      )
+    );
   }
   function AsistentkaHome() {
     return e(S.EmptyState, { title: "Asistentka home", description: "Sprint 5+ dodá AI frontu + docházku + emaily + úkoly." });
