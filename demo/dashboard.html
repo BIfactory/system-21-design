@@ -146,9 +146,6 @@
   const active = SD.getActiveOrders();
   const pipelineValue = openCases.reduce((s, c) => s + (c.value || 0), 0);
   const rozpracovanostKc = active.reduce((s, o) => s + (o.realHours * 1500), 0);
-  const riskCount = active.filter(o => SD.getRiskScore(o) >= 5).length;
-  const healthScore = 4 + 3; // mock: 4 smluv vyprší + 3 AI asistentka pending
-
   const fmt = (n) => n.toLocaleString("cs-CZ").replace(/,/g, " ");
 
   // ── Greeting by hour ──────────────────────────────────────────────────────
