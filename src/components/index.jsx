@@ -1354,55 +1354,62 @@ function CommandPalette({ open, onClose, items = [], placeholder = "Hledat pří
    Defaultní navigace pro Sidebar se všemi moduly System 21 backendu.
    Zákaznické GUI si převezme jen výběr; nepoužité moduly neimportuje. */
 
+/* Sidebar sekce — přejato z polepim-manager/components/layout/sidebar.tsx:139-229.
+   Top sekce bez titulu s ikonami + 3 collapsible sekce (Provoz / Intranet / Nastavení).
+   Nedokončené routy ukazují na _coming.html via MAP v _shared.js. */
 const moduleNavSections = [
   {
     items: [
-      { href: "/", label: "Domů", icon: "dashboard" },
-      { href: "/muj-plan", label: "Můj plán", icon: "calendar" },
+      { href: "/", label: "Dashboardy", icon: "dashboard" },
+      { href: "/vykazovani-denni", label: "Denní přehled výkazů", icon: "columns" },
+      { href: "/zakazky-denni", label: "Denní přehled zakázek", icon: "columns" },
       { href: "/ukoly", label: "Úkoly", icon: "tasks" },
+      { href: "/muj-plan", label: "Můj plán", icon: "calendar" },
+      { href: "/dochazka", label: "Docházka", icon: "clock" },
+      { href: "/poznamky", label: "Poznámky", icon: "notes" },
     ],
   },
   {
-    title: "Obchod",
-    sectionHref: "/obchod",
+    title: "Provoz",
     collapsible: true,
     items: [
-      { href: "/obchod", label: "Přehled", icon: "layout-dashboard" },
-      { href: "/obchod/pripady", label: "Obchodní případy" },
-      { href: "/obchod/klienti", label: "Klienti" },
-      { href: "/obchod/osoby", label: "Osoby" },
-    ],
-  },
-  {
-    title: "Výroba",
-    sectionHref: "/vyroba",
-    collapsible: true,
-    items: [
-      { href: "/vyroba", label: "Přehled", icon: "layout-dashboard" },
       { href: "/zakazky", label: "Zakázky" },
-      { href: "/vyroba/kapacita", label: "Kapacita", icon: "calendar" },
+      { href: "/planovani-vyroby", label: "Plán výroby" },
+      { href: "/planovani-financi", label: "Finanční plán" },
       { href: "/vykazovani", label: "Vykazování" },
+      { href: "/reklamace", label: "Reklamace" },
+      { href: "/zakazky-fakturace", label: "K fakturaci" },
+      { href: "/dochazka-admin", label: "Docházka (admin)" },
     ],
   },
   {
-    title: "Lidé",
-    sectionHref: "/lide",
+    title: "Intranet",
     collapsible: true,
     items: [
-      { href: "/lide", label: "Přehled", icon: "layout-dashboard" },
-      { href: "/lide/pracovnici", label: "Pracovníci" },
-      { href: "/lide/dochazka", label: "Docházka" },
+      { href: "/nastenka", label: "Nástěnka" },
+      { href: "/moje-skoleni", label: "Moje školení" },
+      { href: "/kb", label: "Knowledge base" },
+      { href: "/dokumenty", label: "Dokumenty" },
+      { href: "/skoleni-sprava", label: "Školení (správa)" },
+      { href: "/onboarding", label: "Onboarding šablony" },
     ],
   },
   {
-    title: "DMS",
-    sectionHref: "/dms",
+    title: "Nastavení",
     collapsible: true,
     items: [
-      { href: "/dms", label: "Přehled", icon: "layout-dashboard" },
-      { href: "/dms/smlouvy", label: "Smlouvy" },
-      { href: "/dms/dokumenty", label: "Dokumenty" },
-      { href: "/dms/automatizace", label: "Automatizace / AI" },
+      { href: "/uzivatele", label: "Uživatelé" },
+      { href: "/nastaveni-role", label: "Role a oprávnění" },
+      { href: "/materialy", label: "Materiály" },
+      { href: "/operace", label: "Operace" },
+      { href: "/sablony-operaci", label: "Šablony operací" },
+      { href: "/nastaveni-kat-materialu", label: "Kategorie materiálu" },
+      { href: "/nastaveni-typy-nepritomnosti", label: "Typy nepřítomností" },
+      { href: "/odchylky", label: "Důvody odchylek" },
+      { href: "/checklist-predavek", label: "Checklist předávek" },
+      { href: "/nastaveni-kategorie", label: "Kategorie KB / dokumentů / školení" },
+      { href: "/lokality-gps", label: "Lokality GPS" },
+      { href: "/nastaveni", label: "Integrace a klíče" },
     ],
   },
 ];

@@ -31,38 +31,72 @@
     return [role, setRole];
   }
 
-  // Mapa URL → demo HTML stránka. Nedokončené moduly ukazují na _coming.html.
+  // Mapa URL → demo HTML stránka. Následuje polepim-manager sidebar strukturu.
+  // Nedokončené moduly ukazují na _coming.html s hash pro správné zvýraznění v sidebaru.
   const MAP = {
+    // Top sekce (bez titulu, s ikonami)
     "/": "./dashboard.html",
     "/dashboard": "./dashboard.html",
-    "/muj-plan": "./muj-plan.html",
+    "/vykazovani-denni": "./_coming.html#/vykazovani-denni",
+    "/zakazky-denni": "./_coming.html#/zakazky-denni",
     "/ukoly": "./ukoly.html",
-    "/vyroba": "./vyroba.html",
-    "/vyroba/kapacita": "./vyroba-kapacita.html",
+    "/muj-plan": "./muj-plan.html",
+    "/dochazka": "./hr-dochazka.html",
+    "/poznamky": "./_coming.html#/poznamky",
+
+    // Provoz
     "/zakazky": "./zakazky.html",
     "/zakazky/nova": "./zakazka-nova.html",
     "/zakazky/131": "./zakazka-detail.html",
+    "/planovani-vyroby": "./vyroba-kapacita.html",
+    "/planovani-financi": "./_coming.html#/planovani-financi",
     "/vykazovani": "./vykazovani.html",
-    "/obchod": "./obchod.html",
-    "/obchod/klienti": "./crm-klienti.html",
-    "/obchod/osoby": "./crm-osoby.html",
-    "/obchod/pripady": "./crm-pripady.html",
-    "/dms": "./dms.html",
-    "/dms/smlouvy": "./dms-smlouvy.html",
-    "/dms/dokumenty": "./dms-dokumenty.html",
-    "/dms/automatizace": "./dms-automatizace.html",
-    "/lide": "./lide.html",
-    "/lide/pracovnici": "./hr-pracovnici.html",
-    "/lide/dochazka": "./hr-dochazka.html",
+    "/reklamace": "./_coming.html#/reklamace",
+    "/zakazky-fakturace": "./_coming.html#/zakazky-fakturace",
+    "/dochazka-admin": "./_coming.html#/dochazka-admin",
+
+    // Intranet
+    "/nastenka": "./nastenka.html",
+    "/moje-skoleni": "./_coming.html#/moje-skoleni",
+    "/kb": "./kb.html",
+    "/dokumenty": "./dms-dokumenty.html",
+    "/skoleni-sprava": "./_coming.html#/skoleni-sprava",
+    "/onboarding": "./_coming.html#/onboarding",
+
+    // Nastavení
+    "/uzivatele": "./hr-pracovnici.html",
+    "/nastaveni-role": "./_coming.html#/nastaveni-role",
+    "/materialy": "./_coming.html#/materialy",
+    "/operace": "./_coming.html#/operace",
+    "/sablony-operaci": "./_coming.html#/sablony-operaci",
+    "/nastaveni-kat-materialu": "./_coming.html#/nastaveni-kat-materialu",
+    "/nastaveni-typy-nepritomnosti": "./_coming.html#/nastaveni-typy-nepritomnosti",
+    "/odchylky": "./_coming.html#/odchylky",
+    "/checklist-predavek": "./_coming.html#/checklist-predavek",
+    "/nastaveni-kategorie": "./_coming.html#/nastaveni-kategorie",
+    "/lokality-gps": "./_coming.html#/lokality-gps",
+    "/nastaveni": "./nastaveni.html",
+
+    // Legacy/support routes still accessed from existing pages
     "/inbox": "./inbox.html",
     "/email": "./inbox.html#email",
     "/zpravy": "./inbox.html#zpravy",
-    "/nastenka": "./nastenka.html",
-    "/kb": "./kb.html",
-    "/nastaveni": "./nastaveni.html",
     "/oznameni": "./oznameni.html",
+    "/obchod/pripady": "./crm-pripady.html",
+    "/obchod/klienti": "./crm-klienti.html",
+    "/obchod/osoby": "./crm-osoby.html",
+    "/dms/smlouvy": "./dms-smlouvy.html",
+    "/dms/dokumenty": "./dms-dokumenty.html",
+    "/dms/automatizace": "./dms-automatizace.html",
+    "/lide/pracovnici": "./hr-pracovnici.html",
+    "/lide/dochazka": "./hr-dochazka.html",
+    "/vyroba": "./vyroba.html",
+    "/vyroba/kapacita": "./vyroba-kapacita.html",
+    "/obchod": "./obchod.html",
+    "/lide": "./lide.html",
+    "/dms": "./dms.html",
   };
-  function demoHref(path) { return MAP[path] || "./showcase.html"; }
+  function demoHref(path) { return MAP[path] || "./_coming.html#" + path; }
 
   function DemoSidebar({ active = "/dashboard" }) {
     const [a, setA] = R.useState(active);
