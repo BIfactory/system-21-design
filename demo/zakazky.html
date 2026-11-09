@@ -226,7 +226,7 @@
         ),
 
         e(S.DataTable, {
-          columns: COLUMNS, rows, minWidth: 1100,
+          columns: COLUMNS, rows, minWidth: 960,
           onRowClick: () => window.location.href = "./zakazka-detail.html",
           renderCard: (o) => e(OrderCard, { o, key: o.id })
         })

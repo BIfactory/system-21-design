@@ -145,7 +145,7 @@
   // Add computed anniv days + sort column
   const enriched = CONTRACTS.map((c) => ({ ...c, _days: daysToAnniv(c) }));
 
-  const CRUMBS = [{ label: "DMS", href: "/dms" }, { label: "Smlouvy", href: "/dms/smlouvy" }];
+  const CRUMBS = [{ label: "Smlouvy", href: "/dms/smlouvy" }];
 
   const COLUMNS = [
     { key: "code", label: "Číslo", sortable: true, width: "10%", render: (c) =>
