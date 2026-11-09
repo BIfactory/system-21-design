@@ -1,13 +1,13 @@
 /* System 21 — design tokens (generated from tokens/tokens.json by scripts/tokens-to-css.py) */
 :root {
-  --primary: #ffcc01;
-  --primary-hover: #f2c201;
-  --primary-active: #e6b800;
+  --primary: #43c466;
+  --primary-hover: #40ba61;
+  --primary-active: #3cb05c;
   --on-primary: #0a0a0a;
-  --primary-text: #0a0a0a;
-  --primary-soft: rgba(255,204,1,0.12);
-  --focus-ring: #ffcc01;
-  --accent: #ffcc01;
+  --primary-text: #1f7a3c;
+  --primary-soft: rgba(67,196,102,0.12);
+  --focus-ring: #2b8f4a;
+  --accent: #ffc719;
   --on-accent: #0a0a0a;
   --ink: #333333;
   --ink-muted: #666666;
@@ -23,8 +23,8 @@
   --border-subtle: rgba(15,23,42,0.06);
   --surface-raised: #ffffff;
   --surface-sunken: #f4f5f7;
-  --primary-glow: rgba(255,204,1,0.35);
-  --primary-glow-strong: rgba(255,204,1,0.55);
+  --primary-glow: rgba(67,196,102,0.28);
+  --primary-glow-strong: rgba(67,196,102,0.45);
   --shine: rgba(255,255,255,0.6);
   --overlay: rgba(0,0,0,0.5);
   --sidebar-bg: var(--black);

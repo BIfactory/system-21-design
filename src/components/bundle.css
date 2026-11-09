@@ -1281,14 +1281,14 @@ a.s21-stat, button.s21-stat { font: inherit; text-align: left; text-decoration: 
 .s21-nc__viewall:hover { background: var(--primary-soft); }
 
 /* ─── InboxBell (Task 3, 2026-11-06) ─── */
-.s21-inboxbell { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: transparent; border: 0; border-radius: var(--radius-md); color: var(--ink-muted); cursor: pointer; transition: background-color .15s, color .15s; }
+.s21-inboxbell { position: relative; display: inline-flex; align-items: center; justify-content: center; width: var(--control-h); height: var(--control-h); background: transparent; border: 0; border-radius: var(--radius-lg); color: var(--ink-muted); cursor: pointer; transition: background-color .15s, color .15s; }
 .s21-inboxbell:hover { background: var(--surface-muted); color: var(--ink); }
 .s21-inboxbell:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 .s21-inboxbell__badge { position: absolute; top: -4px; right: -4px; min-width: 14px; height: 14px; padding: 0 3px; background: var(--primary); color: var(--on-primary); font: 700 9px/14px var(--font-mono); border-radius: var(--radius-full); display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 0 0 2px var(--surface); }
 
 /* ─── PersonaSwitcher (Task 2, 2026-11-07) ─── */
 .s21-persona-switcher { position: relative; }
-.s21-persona-switcher__trigger { display: inline-flex; align-items: center; gap: var(--space-2); padding: 6px 10px; background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--ink); font: 500 13px/18px var(--font-body); cursor: pointer; }
+.s21-persona-switcher__trigger { display: inline-flex; align-items: center; gap: var(--space-2); height: var(--control-h); padding: 0 var(--space-3); background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--ink); font: 500 13px/18px var(--font-body); cursor: pointer; }
 .s21-persona-switcher__trigger:hover { background: var(--surface-muted); }
 .s21-persona-switcher__dropdown { position: absolute; top: calc(100% + 4px); right: 0; min-width: 200px; background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--elev-3); padding: 4px; z-index: 50; display: flex; flex-direction: column; gap: 2px; }
 .s21-persona-switcher__item { display: flex; align-items: center; gap: var(--space-2); padding: 6px 10px; background: transparent; border: 0; border-radius: var(--radius-md); color: var(--ink); font: 400 13px/18px var(--font-body); cursor: pointer; text-align: left; }
